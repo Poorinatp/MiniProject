@@ -1,0 +1,20 @@
+nav {
+    background-color: #333;
+    color: #fff;
+  }
+  
+
+.nav-active{
+  color: rgb(25, 92, 77);
+  font-weight: bold;
+}
+  a {
+    color: #fff;
+    text-decoration: none;
+    padding: 20px;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
