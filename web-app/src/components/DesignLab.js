@@ -1,114 +1,69 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "../css/DesignLab.css";
 
 const DesignLab = () => {
-  const [objects, setObjects] = useState([]);
-  const [selectedObject, setSelectedObject] = useState(null);
   const canvasRef = useRef(null);
-  const textEditorRef = useRef([]);
-  const moveIconRef = useRef([]);
+  const boxRef = useRef(null);
+
+  const isClicked = useRef(false);
+
+  const coords = useRef({
+    startX: 0,
+    startY: 0,
+    lastX: 0,
+    lastY: 0
+  });
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!boxRef.current || !canvasRef.current) return;
 
+    const box = boxRef.current;
     const canvas = canvasRef.current;
 
     const onMouseDown = (e) => {
-      const clickedMoveIcon = e.target.closest(".moveIcon");
-      if (clickedMoveIcon) {
-        const index = moveIconRef.current.indexOf(clickedMoveIcon);
-        setSelectedObject(index);
-      } else {
-        setSelectedObject(null);
-      }
+      isClicked.current = true;
+      coords.current.startX = e.clientX;
+      coords.current.startY = e.clientY;
     };
 
-    const onMouseUp = () => {
-      setSelectedObject(null);
+    const onMouseUp = (e) => {
+      isClicked.current = false;
+      coords.current.lastX = box.offsetLeft;
+      coords.current.lastY = box.offsetTop;
+      console.log(box.style.top);
     };
 
     const onMouseMove = (e) => {
-      if (selectedObject === null) return;
+      if (!isClicked.current) return;
 
-      const textEditor = textEditorRef.current[selectedObject];
-      if (!textEditor) return;
+      const nextX = e.clientX - coords.current.startX + coords.current.lastX;
+      const nextY = e.clientY - coords.current.startY + coords.current.lastY;
 
-      const newX = textEditor.offsetLeft + e.movementX;
-      const newY = textEditor.offsetTop + e.movementY;
-
-      setObjects((prevObjects) =>
-        prevObjects.map((object, index) =>
-          index === selectedObject ? { ...object, x: newX, y: newY } : object
-        )
-      );
+      box.style.top = `${nextY}px`;
+      box.style.left = `${nextX}px`;
     };
 
-    canvas.addEventListener("mousedown", onMouseDown);
-    canvas.addEventListener("mouseup", onMouseUp);
+    box.addEventListener("mousedown", onMouseDown);
+    box.addEventListener("mouseup", onMouseUp);
     canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mouseleave", onMouseUp);
 
-    return () => {
-      canvas.removeEventListener("mousedown", onMouseDown);
-      canvas.removeEventListener("mouseup", onMouseUp);
+    const cleanup = () => {
+      box.removeEventListener("mousedown", onMouseDown);
+      box.removeEventListener("mouseup", onMouseUp);
       canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mouseleave", onMouseUp);
     };
-  }, [selectedObject]);
-
-  const handleAddObject = () => {
-    const newObject = {
-      x: 100,
-      y: 100,
-      text: "New Text",
-      fontSize: "16px",
-      fontColor: "#000000",
-      fontFamily: "Arial",
-      fontWeight: "normal"
-    };
-    setObjects((prevObjects) => [...prevObjects, newObject]);
-  };
-
-  const handleChangeText = (index, newText) => {
-    setObjects((prevObjects) =>
-      prevObjects.map((object, i) => (i === index ? { ...object, text: newText } : object))
-    );
-  };
+    console.log(box.style.top);
+    return cleanup;
+  }, []);
 
   return (
-    <main>
-      <div>
-        <button onClick={handleAddObject}>Create New Object</button>
-        {/* ... (other controls for font size, font family, font color) */}
-      </div>
+    <div className="container">
       <div ref={canvasRef} className="canvas">
-        {objects.map((object, index) => (
-          <div
-            key={index}
-            className={`textEditor ${selectedObject === index ? "selected" : ""}`}
-            style={{
-              top: object.y,
-              left: object.x,
-              fontSize: object.fontSize,
-              color: object.fontColor,
-              fontFamily: object.fontFamily,
-              fontWeight: object.fontWeight
-            }}
-            ref={(ref) => (textEditorRef.current[index] = ref)}
-          >
-            <input
-              type="text"
-              value={object.text}
-              onChange={(e) => handleChangeText(index, e.target.value)}
-              onClick={(e) => e.stopPropagation()} // Prevent selecting text when clicking on the input
-            />
-            <div
-              className="moveIcon"
-              ref={(ref) => (moveIconRef.current[index] = ref)}
-              onMouseDown={(e) => e.stopPropagation()} // Prevent selecting text when clicking on the move icon
-            />
-          </div>
-        ))}
+        <div ref={boxRef} className="box"></div>
       </div>
-    </main>
+    </div>
   );
 };
 

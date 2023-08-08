@@ -1,0 +1,39 @@
+/* NavBar.css */
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style-type: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+nav {
+  font-size: 15px;
+  background-color: #ffffffa9;
+  filter: blur();
+  color: black;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.navimg {
+  height: 50px;
+  width: auto;
+}
+
+.auth-links {
+  display: flex;
+  align-items: center;
+}
+
+.auth-links a {
+  margin-left: 15px; /* Add some spacing between the links */
+}
+
+.nav-active {
+  color: rgb(56, 158, 136);
+  font-weight: bold;
+}
