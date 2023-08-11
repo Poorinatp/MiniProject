@@ -11,7 +11,7 @@ function Home()  {
 	}
 
 	return (
-		<main>
+		<main >
 			<NavBar/>
 			<div className="container1">
 				<section>

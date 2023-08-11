@@ -40,6 +40,7 @@ function Signup () {
 				<input 
 					type="text" 
 					id="firstname"
+					pattern="[a-zA-Z^ก-๏]+"
 					onChange={e =>{setFirstname(e.target.value)}}
                     required/> 
 					<br/>
@@ -48,6 +49,7 @@ function Signup () {
 				<input 
 					type="text" 
 					id="lastname"
+					pattern="[a-zA-Z^ก-๏]+"
 					onChange={e =>{setLastname(e.target.value)}}
                     required/> 
 					<br/>
@@ -57,6 +59,7 @@ function Signup () {
 					type="tel" 
 					id="tel"
 					placeholder="+66XX-XXX-XXXX"
+					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
 					onChange={e =>{setTel(e.target.value)}}
                     required/> 
 					<br/>
@@ -75,7 +78,8 @@ function Signup () {
                 <textarea
 					type="text" 
 					id="address"
-					placeholder="Adderss"
+					placeholder="Address"
+					maxLength={200}
 					onChange={e =>{setAddress(e.target.value)}}
                     required/>
 					<br/>
@@ -85,6 +89,7 @@ function Signup () {
 					type="text" 
 					id="city"
 					placeholder="City"
+					pattern="[a-zA-Zก-๏.]+"
 					onChange={e =>{setCity(e.target.value)}}
                     required/> 
 					<br/>
@@ -95,6 +100,7 @@ function Signup () {
 					type="text" 
 					id="country"
 					placeholder="Country"
+					pattern="[a-zA-Zก-๏]+"
 					onChange={e =>{setCountry(e.target.value)}}
                     required/> 
 					<br/>
@@ -104,6 +110,7 @@ function Signup () {
 					type="text" 
 					id="zipcode"
 					placeholder="Zipcode"
+					pattern="[0-9]{5}"
 					onChange={e =>{setZipcode(e.target.value)}}
                     required/> 
 					<br/>

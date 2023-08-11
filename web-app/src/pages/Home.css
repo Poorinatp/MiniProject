@@ -11,7 +11,7 @@
 }
 
 main{
-  background-image: url(https://cdn.pixabay.com/photo/2018/04/17/10/29/creativity-3327180_1280.jpg);
+  background-image: url(/public/image/bghome.jpg);
   background-repeat: no-repeat;
   background-size: cover;
 }
