@@ -8,8 +8,8 @@
 }
 
 nav {
-  font-size: 15px;
-  background-color: #ffffffbf;
+  font-size: 1rem;
+  background-color: #ffffff70;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
