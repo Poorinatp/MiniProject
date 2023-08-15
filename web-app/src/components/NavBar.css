@@ -8,10 +8,8 @@
 }
 
 nav {
-  font-size: 15px;
-  background-color: #ffffffa9;
-  filter: blur();
-  color: black;
+  font-size: 1rem;
+  background-color: #ffffff70;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
@@ -20,7 +18,7 @@ nav {
 }
 
 .navimg {
-  height: 50px;
+  height: 40px;
   width: auto;
 }
 

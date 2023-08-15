@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import  "./Signin.css";
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
 function Signin() {
   const [email, setEmail] = useState("");
@@ -21,28 +23,27 @@ function Signin() {
   }
 
   return (
-    <div>
+    <>
+      
+      <form onSubmit={handleSubmit}>
       <header>
         <h1>SIGN IN</h1>
       </header>
-
-      <form onSubmit={handleSubmit}>
-        <label>Email address</label><br />
         <input
           type="email"
           id="email"
-          placeholder="name@example.com"
+          placeholder="Your Email"
           value={email}
           onChange={e => { setEmail(e.target.value) }}
           required
         />
         <br />
-
-        <label>Password</label><br />
+        
         <input
           type="password"
           id="password"
-          placeholder="password"
+          placeholder="Your password"
+          pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
           value={password}
           onChange={e => { setPassword(e.target.value) }}
           required 
@@ -51,7 +52,7 @@ function Signin() {
 
         <button type="submit">Submit</button>
       </form>
-    </div>
+    </>
   )
 }
 

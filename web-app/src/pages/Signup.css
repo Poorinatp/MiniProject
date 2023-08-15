@@ -1,0 +1,68 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style-type:none;
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+  font-size: 100%;
+  
+}
+/* Style for the header */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight:initial;
+}
+
+/* Style for the form */
+form {
+  width: 100%;
+  max-width: 500px;
+  max-height: fit-content;
+  margin: 70px auto;
+  padding: 20px;
+  border-radius: 30px;
+  background-color:#00000031;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.521);
+}
+
+/* Style for the inputs and textarea */
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  background-color:white;
+}
+
+/* Style for the button */
+button[type="submit"] {
+  background-color: #003976;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  margin: 50px auto;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  font-weight: normal;
+  font-size: 1rem;
+  width: 100%;
+}
+
+button[type="submit"]:hover {
+  background-color:#cebd63	;
+}
+
