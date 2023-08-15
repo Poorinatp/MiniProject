@@ -43,6 +43,7 @@ function Signin() {
           type="password"
           id="password"
           placeholder="Your password"
+          pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
           value={password}
           onChange={e => { setPassword(e.target.value) }}
           required 

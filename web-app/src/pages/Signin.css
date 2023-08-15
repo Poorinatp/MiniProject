@@ -36,13 +36,6 @@ form  {
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.521);
 }
 
-/* Style for the labels */
-label {
-  font-weight: bold;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-
 /* Style for the inputs and textarea */
 input[type="email"],
 input[type="password"],
