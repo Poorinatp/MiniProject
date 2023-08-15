@@ -16,7 +16,7 @@ function Home()  {
 			<div className="container1">
 				<section>
 					<h1>PHIMNIYOM</h1>
-					<p>🌟 Unleash Your Creativity 🎨 Embrace Your Style 💫<br/>
+					<p className="sm">🌟 Unleash Your Creativity 🎨 Embrace Your Style 💫<br/>
 					Step into a world of limitless possibilities with CanDesign Cloth - a revolutionary clothing line that combines the beauty of art with the essence of fashion. <br></br>
 					We believe that clothing is an extension of one's personality, and that's why we offer you the power to design your own bespoke garments.</p>
 				</section>

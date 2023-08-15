@@ -39,3 +39,12 @@
     background-color: #333;
     cursor: grab;
 }
+
+.textinput {
+    outline: none;
+}
+
+.view {
+    position: absolute;
+    cursor: pointer;
+}
