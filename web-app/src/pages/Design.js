@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DesignLab from "../components/DesignLab"
 import NavBar from "../components/NavBar";
 import "./Design.css"
 import DesignLab2 from "../components/DesignLab2";
-const OptionTab = () => {
+const OptionTab = ({textData, setTextData}) => {
     const [selectedOption, setSelectedOption] = useState("product");
     const [objects, setObjects] = useState([]);
     const handleOptionChange = (option) => {
         setSelectedOption(option);
     };
 
+    useEffect(()=>{
+        console.log(textData)
+    })
+
     const handleAddObject = () => {
         const newObject = {
-          x: 100,
-          y: 100,
-          text: "New Text",
-          fontSize: "16px",
-          fontColor: "#000000",
-          fontFamily: "Arial",
-          fontWeight: "normal"
+            id:textData.length, 
+            value: "hi", 
+            fontFamily:"", 
+            fontSize:"10", 
+            fontColor:"black", 
+            x:"0px", 
+            y:"0px"
         };
-        setObjects((prevObjects) => [...prevObjects, newObject]);
+
+        setTextData((prevObjects) => [...prevObjects, newObject]);
       };
 
     return(
@@ -51,6 +56,13 @@ const OptionTab = () => {
                 {selectedOption === "text" && 
                 <div className="grid-item option-content">        
                     <div>
+                        {textData.map((text)=>{
+                            return(
+                                <p>
+                                    {text.value}
+                                </p>
+                            )
+                        })}
                         <button onClick={handleAddObject}>Create New Object</button>
                     </div>
                 </div>}
@@ -61,13 +73,19 @@ const OptionTab = () => {
 }
 
 const Design = () => {
+    const [textData,setTextData] = useState([
+        {id:1, value: "hi", fontFamily:"", fontSize:"10", fontColor:"black", x:"0px", y:"0px"},
+        {id:2, value: "mynameis", fontFamily:"", fontSize:"10", fontColor:"red", x:"100px", y:"100px"},
+        {id:3, value: "poom", fontFamily:"", fontSize:"10", fontColor:"blue", x:"200px", y:"200px"}
+    ])
+    
     return(
         <>
             <NavBar/>
             <div className="grid-container">
-                <OptionTab/>
+                <OptionTab textData={textData} setTextData={setTextData}/>
                 {/* <DesignLab/> */}
-                <DesignLab/>
+                <DesignLab textData={textData} setTextData={setTextData}/>
             </div>
         </>
     )

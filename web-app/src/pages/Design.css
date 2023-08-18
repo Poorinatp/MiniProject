@@ -48,6 +48,7 @@
 
 .canvas {
     position: relative;
+    background-color:white;
     border: 1px solid black;
     overflow: hidden;
 }
@@ -78,6 +79,8 @@
 
 .textinput {
   outline: none;
+  background: none;
+  border: 2px solid blue;
 }
 
 .view {

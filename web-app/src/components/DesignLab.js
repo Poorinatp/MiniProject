@@ -1,18 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const DesignLab = () => {
+const DesignLab = ({textData, setTextData}) => {
   const canvasRef = useRef(null);
-  const boxRef = useRef(null);
-
   const isClicked = useRef(false);
   
   const [currentElement, setcurrentElement] = useState(null);
 
-  const [textData,setTextData] = useState([
-    {id:1, value: "hi", fontFamily:"", fontSize:"10", fontColor:"black", x:"0px", y:"0px"},
-    {id:2, value: "mynameis", fontFamily:"", fontSize:"10", fontColor:"red", x:"100px", y:"100px"},
-    {id:3, value: "poom", fontFamily:"", fontSize:"10", fontColor:"blue", x:"200px", y:"200px"}
-  ])
+  
 
   const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
   const imgDesign = [
@@ -20,9 +14,6 @@ const DesignLab = () => {
     {x:"", Y:""},
     {x:"", Y:""}
   ]
-
-
-
 
   const coords = useRef({
     startX: 0,
@@ -33,7 +24,7 @@ const DesignLab = () => {
 
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
-    console.log(isSelected)
+    
     const canvas = canvasRef.current;
   
     const onMouseDown = (e) => {
@@ -42,11 +33,19 @@ const DesignLab = () => {
       coords.current.lastY = currentElement.offsetTop;
       coords.current.startX = e.clientX;
       coords.current.startY = e.clientY;
+      console.log(coords)
     }
 
     const onMouseUp = (e) => {
       isClicked.current = false;
-      setIsSelected(Array(textData.length).fill(false));
+      const updatedTextData = [...textData];
+      isSelected.forEach((isSelectedValue, index) => {
+        if (isSelectedValue) {
+          updatedTextData[index].x = currentElement.style.top;
+          updatedTextData[index].y = currentElement.style.left;
+        }
+      });
+      setTextData(updatedTextData);
     };
 
     const onMouseMove = (e) => {
@@ -55,15 +54,8 @@ const DesignLab = () => {
       const nextX = e.clientX - coords.current.startX + coords.current.lastX;
       const nextY = e.clientY - coords.current.startY + coords.current.lastY;
     
-      const updatedTextData = [...textData];
-      isSelected.forEach((isSelectedValue, index) => {
-        if (isSelectedValue) {
-          updatedTextData[index].x = `${nextX}px`;
-          updatedTextData[index].y = `${nextY}px`;
-        }
-      });
-    
-      setTextData(updatedTextData);
+      currentElement.style.top = `${nextY}px`;
+      currentElement.style.left = `${nextX}px`;
     };    
 
     currentElement.addEventListener("mousedown", onMouseDown);
@@ -78,7 +70,7 @@ const DesignLab = () => {
       canvas.removeEventListener("mouseleave", onMouseUp);
     };
     return cleanup;
-  }, [isSelected]);
+  }, [currentElement]);
 
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
@@ -86,12 +78,10 @@ const DesignLab = () => {
     setTextData(updatedTextData);
   };
 
-  const handleItemClick = (index) => {
-    console.log("Before update:", isSelected);
-    const updatedSelection = [...isSelected];
+  const handleItemClick = (index, id) => {
+    const updatedSelection = Array(textData.length).fill(false)
     updatedSelection[index] = !updatedSelection[index];
     setIsSelected(updatedSelection);
-    console.log("After update:", updatedSelection);
   };
   
 
@@ -105,8 +95,9 @@ const DesignLab = () => {
             id={"text" + text.id}
             className="box textinput"
             style={{ top: text.x, left: text.y }}
-            onClick={e => {
-              setcurrentElement(e.target);
+            onClick={e=>{
+              setcurrentElement(e.target)
+              console.log(e.target)
             }}
             onChange={e => handleTextChange(index, e)}
             value={text.value}
@@ -118,7 +109,7 @@ const DesignLab = () => {
             className="view"
             style={{ top: text.x, left: text.y }}
             onClick={e => {
-              setIsSelected(handleItemClick(index));
+              handleItemClick(index, text.id);
             }}
             >
             {text.value}
