@@ -28,7 +28,7 @@ form {
   width: 100%;
   max-width: 500px;
   max-height: fit-content;
-  margin: 70px auto;
+  margin: 90px auto;
   padding: 20px;
   border-radius: 30px;
   background-color:#00000031;
@@ -49,20 +49,31 @@ textarea {
 }
 
 /* Style for the button */
-button[type="submit"] {
+.btn-signup[type="submit"] {
   background-color: #003976;
   color: white;
   border: none;
   border-radius: 10px;
-  margin: 50px auto;
+  margin-top: 10px;
   padding: 1rem 1.25rem;
   cursor: pointer;
   font-weight: normal;
   font-size: 1rem;
-  width: 100%;
+  width: 100%; 
 }
 
-button[type="submit"]:hover {
+.btn-signup[type="submit"]:hover {
   background-color:#cebd63	;
+}
+
+.backto-signin{
+  color: #fff;
+  margin: 10px;
+  padding: 10px;
+  font-weight: lighter;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  text-decoration: underline;
 }
 

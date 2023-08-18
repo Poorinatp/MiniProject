@@ -4,10 +4,11 @@ import "./NavBar.css";
 const NavBar = () => {
 	let activeClassName = "nav-active"
     return(
-        <nav>
+        <nav> 
             <NavLink to="/" className="logo-link">
                 <img className="navimg" src="/image/logo.png" alt="logo"/>
             </NavLink>
+            {/* NavLink: This is used when you want to highlight the current or active link */}
             <div className="auth-links">
                 <NavLink to="/signup" className={({ isActive }) => isActive ? activeClassName : undefined }>Sign Up</NavLink>
                 <NavLink to="/signin" className={({ isActive }) => isActive ? activeClassName : undefined} >Sign In</NavLink>

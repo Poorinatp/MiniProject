@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import  "./Signin.css";
+import NavBar from '../components/NavBar';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
 function Signin() {
@@ -24,14 +25,14 @@ function Signin() {
 
   return (
     <>
-      
+     <NavBar/> 
       <form onSubmit={handleSubmit}>
       <header>
         <h1>SIGN IN</h1>
       </header>
         <input
           type="email"
-          id="email"
+          id="email" autoFocus
           placeholder="Your Email"
           value={email}
           onChange={e => { setEmail(e.target.value) }}
@@ -47,10 +48,12 @@ function Signin() {
           value={password}
           onChange={e => { setPassword(e.target.value) }}
           required 
+           maxlength="10"
         />
         <br />
 
-        <button type="submit">Submit</button>
+        <button className="btn-signin" type="submit">Submit</button>
+        <Link className="backto-signup" to="/signup">Sing Up</Link>
       </form>
     </>
   )
