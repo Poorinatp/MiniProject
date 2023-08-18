@@ -1,43 +1,90 @@
-/* DesignLab.css */
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 
-.container2 {
-    display: flex;
-    align-items: center; /* Align items to the top */
-    flex-direction: row;
-    padding: 20px;
+.grid-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+}
+
+.option-tab {
+  width: fit-content;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.option-tab button {
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 4px;
+  opacity: 1;
+}
+
+.option-tab button.active {
+  background-color: rgb(56, 158, 136);
+  color: white;
 }
   
-  .option-tab-container {
-    display: flex;
-    flex-direction: row;
-  }
+.option-content {
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.canvas {
+    position: relative;
+    border: 1px solid black;
+    overflow: hidden;
+}
   
-  .option-tab {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .option-tab button {
-    background: none;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  
-  .option-tab button.active {
-    background-color: rgb(56, 158, 136);
-    color: white;
-  }
-  
-  .option-content {
-    width: 500px; /* Set the width to 100% of the container */
-    height: 500px; /* Set the height to 100% of the container */
-    border: 1px solid #ccc; /* Example border to visualize the content */
-    padding: 20px; /* Add padding inside the content */
-    box-sizing: border-box;
-    overflow: auto;
-    text-align: center;
-  }
-  /* Add additional styling for option contents as needed */
-  
+.box {
+  position: absolute;
+  height: 60px;
+  width: 60px;
+  cursor: pointer;
+}
+
+.textEditor {
+  position: absolute;
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: grab;
+}
+
+.moveIcon {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background-color: #333;
+  cursor: grab;
+}
+
+.textinput {
+  outline: none;
+}
+
+.view {
+  position: absolute;
+  cursor: pointer;
+}
+
+.view:hover {
+  border: 2px solid blue; /* Adjust border properties as needed */
+}

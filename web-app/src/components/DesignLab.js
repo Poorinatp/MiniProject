@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../css/DesignLab.css";
 
 const DesignLab = () => {
   const canvasRef = useRef(null);
   const boxRef = useRef(null);
 
   const isClicked = useRef(false);
-  const [isSelected, setisSelected] = useState(null);
+  
   const [currentElement, setcurrentElement] = useState(null);
 
   const [textData,setTextData] = useState([
@@ -15,6 +14,7 @@ const DesignLab = () => {
     {id:3, value: "poom", fontFamily:"", fontSize:"10", fontColor:"blue", x:"200px", y:"200px"}
   ])
 
+  const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
   const imgDesign = [
     {x:"", Y:""},
     {x:"", Y:""},
@@ -32,32 +32,39 @@ const DesignLab = () => {
   });
 
   useEffect(() => {
-    if (!isSelected ) return;
+    if (isSelected.every(value => !value)) return;
+    console.log(isSelected)
     const canvas = canvasRef.current;
-    console.log("last X = "+coords.current.lastX+" last Y = "+coords.current.lastY);
-    console.log("start X = "+coords.current.startX+" start Y = "+coords.current.startY);
+  
     const onMouseDown = (e) => {
       isClicked.current = true;
       coords.current.lastX = currentElement.offsetLeft;
       coords.current.lastY = currentElement.offsetTop;
       coords.current.startX = e.clientX;
       coords.current.startY = e.clientY;
-    };
+    }
 
     const onMouseUp = (e) => {
       isClicked.current = false;
-      setisSelected(null)
+      setIsSelected(Array(textData.length).fill(false));
     };
 
     const onMouseMove = (e) => {
       if (!isClicked.current) return;
-
+    
       const nextX = e.clientX - coords.current.startX + coords.current.lastX;
       const nextY = e.clientY - coords.current.startY + coords.current.lastY;
-
-      currentElement.style.top = `${nextY}px`;
-      currentElement.style.left = `${nextX}px`;
-    };
+    
+      const updatedTextData = [...textData];
+      isSelected.forEach((isSelectedValue, index) => {
+        if (isSelectedValue) {
+          updatedTextData[index].x = `${nextX}px`;
+          updatedTextData[index].y = `${nextY}px`;
+        }
+      });
+    
+      setTextData(updatedTextData);
+    };    
 
     currentElement.addEventListener("mousedown", onMouseDown);
     currentElement.addEventListener("mouseup", onMouseUp);
@@ -79,18 +86,26 @@ const DesignLab = () => {
     setTextData(updatedTextData);
   };
 
+  const handleItemClick = (index) => {
+    console.log("Before update:", isSelected);
+    const updatedSelection = [...isSelected];
+    updatedSelection[index] = !updatedSelection[index];
+    setIsSelected(updatedSelection);
+    console.log("After update:", updatedSelection);
+  };
+  
+
   return (
-    <div className="container">
-      <div ref={canvasRef} className="canvas">
+    <div className="grid-item">
+      <div ref={canvasRef} className="canvas" style={{width:"500px", height:"500px"}}>
       {textData.map((text, index) => (
-        isSelected ? (
+        isSelected[index] ? (
           <input 
             key={"text" + text.id}
             id={"text" + text.id}
             className="box textinput"
             style={{ top: text.x, left: text.y }}
             onClick={e => {
-              setisSelected(text.id);
               setcurrentElement(e.target);
             }}
             onChange={e => handleTextChange(index, e)}
@@ -98,13 +113,12 @@ const DesignLab = () => {
           />
         ) : (
           <p
-            key={"text" + text.id}
-            id={"text" + text.id}
+            key={"textview" + text.id}
+            id={"textview" + text.id}
             className="view"
             style={{ top: text.x, left: text.y }}
             onClick={e => {
-              setisSelected(text.id);
-              setcurrentElement(e.target);
+              setIsSelected(handleItemClick(index));
             }}
             >
             {text.value}
