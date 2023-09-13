@@ -1,14 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const DesignLab = ({textData, setTextData}) => {
+const DesignLab = ({ textData, setTextData, isSelected, setIsSelected }) => {
   const canvasRef = useRef(null);
   const isClicked = useRef(false);
-  
   const [currentElement, setcurrentElement] = useState(null);
-
   
-
-  const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
   const imgDesign = [
     {x:"", Y:""},
     {x:"", Y:""},
@@ -38,14 +34,6 @@ const DesignLab = ({textData, setTextData}) => {
 
     const onMouseUp = (e) => {
       isClicked.current = false;
-      const updatedTextData = [...textData];
-      isSelected.forEach((isSelectedValue, index) => {
-        if (isSelectedValue) {
-          updatedTextData[index].x = currentElement.style.top;
-          updatedTextData[index].y = currentElement.style.left;
-        }
-      });
-      setTextData(updatedTextData);
     };
 
     const onMouseMove = (e) => {
@@ -72,6 +60,9 @@ const DesignLab = ({textData, setTextData}) => {
     return cleanup;
   }, [currentElement]);
 
+  useEffect(()=>{
+    console.log(textData)
+  }, [textData])
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
     updatedTextData[index].value = e.target.value;
@@ -82,40 +73,60 @@ const DesignLab = ({textData, setTextData}) => {
     const updatedSelection = Array(textData.length).fill(false)
     updatedSelection[index] = !updatedSelection[index];
     setIsSelected(updatedSelection);
+    console.log(isSelected)
   };
   
 
   return (
     <div className="grid-item">
-      <div ref={canvasRef} className="canvas" style={{width:"500px", height:"500px"}}>
+      <img src='../image/tshirt.jpg' alt="t-shirt" className="tshirt" />
+      <div ref={canvasRef} className="canvas" style={{width:"210px", height:"340px"}} 
+      onClick={e=>{
+        currentElement?currentElement.style.border = "transparent":console.log(e.target);
+      }}>
       {textData.map((text, index) => (
-        isSelected[index] ? (
+        <div
+          key={"textbox" + text.id}
+          id={"textbox" + text.id}
+          className="textbox"
+          onClick={e=>{
+            currentElement!==e.target&&currentElement!==null?currentElement.style.border = "transparent":console.log(e.target);
+            handleItemClick(index, text.id);
+            setcurrentElement(e.target)
+            e.target.style.border = "2px dashed black";
+          }}
+          onMouseEnter={e=>{
+            e.target.style.border = "2px dashed black";
+            e.target.style.padding = "4px";
+          }}
+          onMouseLeave={e=>{
+            if (currentElement!==e.target){
+              e.target.style.border = "transparent";
+              e.target.style.padding = "6px";
+            }
+          }}
+          >
           <input 
-            key={"text" + text.id}
-            id={"text" + text.id}
-            className="box textinput"
-            style={{ top: text.x, left: text.y }}
-            onClick={e=>{
-              setcurrentElement(e.target)
-              console.log(e.target)
+            key={"textinput" + text.id}
+            id={"textinput" + text.id}
+            className="textinput"
+            style={{ 
+              top: text.x,
+              left: text.y,
+              fontFamily: text.fontFamily,
+              fontSize: text.fontSize,
+              color: text.fontColor
+             }}
+            
+            onChange={e => {
+              const newWidth = e.target.value.length;
+              e.target.style.width = `${newWidth*text.fontSize}px`;
+              handleTextChange(index, e)
             }}
-            onChange={e => handleTextChange(index, e)}
             value={text.value}
           />
-        ) : (
-          <p
-            key={"textview" + text.id}
-            id={"textview" + text.id}
-            className="view"
-            style={{ top: text.x, left: text.y }}
-            onClick={e => {
-              handleItemClick(index, text.id);
-            }}
-            >
-            {text.value}
-          </p>
-        )
-      ))}
+        </div>
+        ))}
       </div>
     </div>
   );
