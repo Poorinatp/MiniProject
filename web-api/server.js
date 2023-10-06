@@ -22,10 +22,11 @@ var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'webappdb'
+    database: 'phimniyom_db'
 });
 // set mysql table names
-const tables = ["login", "customer", "order", "payment", "product_detail", "product_inventory", "product_order"];
+const database = 'phimniyom_db'
+const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
 // connect to database 
 connection.connect(function (err) {
     if (err) throw err
@@ -36,7 +37,39 @@ app.get('/', function (req, res) {
     res.send('Hello World');
 });
 
+for (var i = 0; i < tables.length; i++) {
+    (function(table) {
+    app.get('/' + table, function(req, res) {
+        connection.query('SELECT * FROM `' + table + '`', function(error, results, fields) {
+        if (error) throw error;
+        return res.send(results);
+        });
+    })
+    })(tables[i]);
+}
+
+app.get('/all', function(req, res) {
+    const allData = {};
+
+    // Loop through the tables and fetch data for each table
+    tables.forEach(function(table) {
+        connection.query('SELECT * FROM `' + table + '`', function(error, results, fields) {
+            if (error) throw error;
+
+            // Store the results in the 'allData' object with the table name as the key
+            allData[table] = results;
+
+            // Check if we have fetched data for all tables
+            if (Object.keys(allData).length === tables.length) {
+                // If all tables have been processed, send the 'allData' object as a response
+                res.send(allData);
+            }
+        });
+    });
+});
+
+
 // listen to port
-app.listen(8080, function () {
+app.listen(port, function () {
     console.log('Node app is running on port ' + port);
 })
