@@ -117,7 +117,6 @@
   left: 120px;
   position: absolute;
   background-color: transparent;
-  border: 0.5px solid black;
   overflow: hidden;
 }
 
@@ -138,7 +137,6 @@
 .imgbox {
   position: absolute;
   cursor: pointer;
-  background-color:white;
 }
 
 .display-image {
@@ -158,4 +156,12 @@
   border: none; /* Remove the default button border */
   cursor: pointer; /* Add a pointer cursor on hover */
   transition: transform 0.3s ease; /* Add a smooth rotation transition */
+}
+
+.btn-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }

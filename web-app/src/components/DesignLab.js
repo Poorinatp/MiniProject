@@ -104,18 +104,80 @@ const DesignLab = ({
     e.target.style.transform = `rotate(${newRotationAngles[index]}deg)`; // Apply rotation
   };
 
+  const handleSaveClick = () => {
+    const canvas = canvasRef.current;
+  
+    if (!canvas) {
+      console.error("Canvas element not found.");
+      return;
+    }
+  
+    const ctx = canvas.getContext('2d')
+  
+    if (!ctx) {
+      console.error("Canvas context not available.");
+      return;
+    }
+  
+    // Ensure all images are loaded before drawing
+    const imagesToLoad = imageData.length;
+  
+    let imagesLoaded = 0;
+  
+    const onImageLoad = () => {
+      imagesLoaded++;
+  
+      if (imagesLoaded === imagesToLoad) {
+        // All images are loaded, proceed to draw on the canvas
+  
+        // Draw text elements
+        textData.forEach((text) => {
+          ctx.font = `${text.fontSize}px ${text.fontFamily}`;
+          ctx.fillStyle = text.fontColor;
+          ctx.fillText(text.value, text.x, text.y);
+        });
+  
+        // Draw image elements
+        imageData.forEach((image) => {
+          const img = new Image();
+          img.src = image.src;
+          img.onload = () => {
+            ctx.drawImage(img, image.x, image.y, image.width, image.height);
+  
+            // Check if all images have been drawn
+            if (imagesLoaded === imagesToLoad) {
+              // Trigger the download
+              const link = document.createElement('a');
+              link.href = canvas.toDataURL('image/png'); // You can change the format if needed
+              link.download = 'design.png'; // You can change the filename
+              link.click();
+            }
+          };
+        });
+      }
+    };
+  
+    // Start loading images
+    imageData.forEach((image) => {
+      const img = new Image();
+      img.src = image.src;
+      img.onload = onImageLoad;
+    });
+  };  
+  
   return (
     <div className="grid-item-1 lab">
       <div className="container-1"
+      id="container"
+      ref={canvasRef}
       >
-        <img src='../image/tshirt.jpg' alt="t-shirt" className="tshirt" />
+        <img src={'../image/tshirt'+'white'+'.png'} alt="t-shirt" className="tshirt" />
         <div className="canvas"
-        ref={canvasRef}
         onClick={e=>{
           currentElement?currentElement.style.border = "transparent":console.log(e.target);
         }}>
         {textData.map((text, index) => (
-          <div>
+          <>
             <div
               key={`textbox${text.id}`}
               id={`textbox${text.id}`}
@@ -156,41 +218,11 @@ const DesignLab = ({
                   }
                 }}
               />
-              
             </div>
-            {/* {isSelected[index]?
-            <button
-            className="rotatebtn"
-            onClick={e=>{
-              const deltaX = e.clientX - coords.current.startX;
-              const deltaY = e.clientY - coords.current.startY;
-              const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-              rotationAngleRef.current += angle;
-              currentElement.style.transform = `rotate(${rotationAngleRef.current}deg)`;
-              coords.current.startX = e.clientX;
-              coords.current.startY = e.clientY;
-            }}
-            onMouseMove={e=>{
-              const deltaX = e.clientX - coords.current.startX;
-              const deltaY = e.clientY - coords.current.startY;
-              const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-              rotationAngleRef.current += angle;
-              currentElement.style.transform = `rotate(${rotationAngleRef.current}deg)`;
-              coords.current.startX = e.clientX;
-              coords.current.startY = e.clientY;
-            }}
-            style={{
-              top:currentElement.style.top,
-              left:currentElement.style.left
-            }}
-          >
-            <FontAwesomeIcon icon={faRotateLeft} style={{ color: "#0042aa" }} />
-          </button>:<></>
-            } */}
-          </div>
+          </>
           ))}
           {imageData.map((image, index) => (
-          <div>
+          <>
             <div
               key={`imgbox${image.id}`}
               id={`imgbox${image.id}`}
@@ -228,11 +260,14 @@ const DesignLab = ({
                 draggable="false"
               />
             </div>
-          </div>
+          </>
           ))}
         </div>
+        <div className="btn-group">
+          <button className="save-btn" onClick={handleSaveClick}>Save</button>
+          <button className="save-btn">Check Out</button>
+        </div>
       </div>
-      
     </div>
   );
 };
