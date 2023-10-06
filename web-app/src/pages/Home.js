@@ -1,5 +1,5 @@
 import "./Home.css"
-import {useNavigate,NavLink} from 'react-router-dom';
+import {useNavigate,NavLink, Link} from 'react-router-dom';
 import React from "react";
 import NavBar from "../components/NavBar";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
@@ -22,7 +22,7 @@ function Home()  {
 					We believe that clothing is an extension of one's personality, and that's why we offer you the power to design your own bespoke garments.</p>
 				</section>
 
-				<button onClick={navigateToDesign}>start Do it!</button>
+				<button className="btn-home" onClick={navigateToDesign}>start Do it!</button>
 			</div>
 		</main>
 	  );

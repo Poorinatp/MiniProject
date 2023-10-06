@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import {useNavigate} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import  "./Signup.css";
+import NavBar from '../components/NavBar';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
 function Signup () {
@@ -35,8 +36,8 @@ function Signup () {
 	
 	return(
         <>
-
-		<form   onSubmit={handleSubmit}>
+		<NavBar/>
+		<form onSubmit={handleSubmit}>
 			
 				<header>
 					<h1>SIGN UP</h1>
@@ -44,7 +45,7 @@ function Signup () {
 
 				<input 
 					type="text"  
-					id="firstname"
+					id="firstname" autoFocus
 					placeholder="First Name"
 					onChange={e =>{setFirstname(e.target.value)}}
                     required/> 
@@ -107,10 +108,11 @@ function Signup () {
                     required/> 
 					<br/>
 
-				<button type="submit">Sign up</button>
+				<button className="btn-signup" type="submit">Sign up</button>
+				<Link className='backto-signin' to="/signin">Sign in</Link>
 			</form>
 			
         </>
-    )
+    )	
 };
 export default Signup;

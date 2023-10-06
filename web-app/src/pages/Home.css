@@ -43,9 +43,8 @@
 
 a {
   color: #333;
-  display: flex;
+  display: inline-block;
   padding: 14px 16px;
-  float: right;
   text-align: center;
 }
   
@@ -87,7 +86,7 @@ section p{
   width: 1200px;
 }
 
-/* .button{
+.btn-home{
   text-align: center;
   font-size: 18px;
   width: 250px;
