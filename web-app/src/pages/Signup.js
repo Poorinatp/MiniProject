@@ -69,6 +69,7 @@ function Signup () {
 					type="email" 
 					id="email"
 					placeholder="name@example.com"
+					pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
 					onChange={e =>{setEmail(e.target.value)}}
                     required/> 
 					<br/>

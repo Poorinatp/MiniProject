@@ -7,17 +7,7 @@ function Signin() {
   const navigate = useNavigate();
 
   function handleSubmit(e) {
-    e.preventDefault();
-    const form = e.currentTarget;
-
-    if (form.checkValidity() === false) {
-      form.reportValidity(); 
-    } else {
-      
-      navigate('/design'); 
-      console.log('You clicked submit.');
-      console.log(email, password);
-    }
+    navigate('/design');
   }
 
   return (
@@ -32,8 +22,9 @@ function Signin() {
           type="email"
           id="email"
           placeholder="name@example.com"
+          pattern="/^[0-9]+@(hotmail\.com|gmail\.com)$/"
           value={email}
-          onChange={e => { setEmail(e.target.value) }}
+          onChange={e => { setEmail(e.target.value) }} 
           required
         />
         <br />
@@ -46,6 +37,7 @@ function Signin() {
           pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
           value={password}
           onChange={e => { setPassword(e.target.value) }}
+          maxLength={10}
           required 
         />
         <br />
