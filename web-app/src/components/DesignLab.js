@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
 
 const DesignLab = ({ 
   textData, 
@@ -13,15 +13,8 @@ const DesignLab = ({
  }) => {
   const canvasRef = useRef(null);
   const isClicked = useRef(false);
-  const rotationAngleRef = useRef(0);
-  const [currentElement, setcurrentElement] = useState(null);
+  const [currentContainer, setCurrentContainer] = useState(null);
   
-  const imgDesign = [
-    {x:"", Y:""},
-    {x:"", Y:""},
-    {x:"", Y:""}
-  ]
-
   const coords = useRef({
     startX: 0,
     startY: 0,
@@ -35,12 +28,14 @@ const DesignLab = ({
     const canvas = canvasRef.current;
   
     const onMouseDown = (e) => {
+      const container = e.target.closest('.text-container');
+      if (!container) return;
       isClicked.current = true;
-      coords.current.lastX = currentElement.offsetLeft;
-      coords.current.lastY = currentElement.offsetTop;
+      coords.current.lastX = container.offsetLeft;
+      coords.current.lastY = container.offsetTop;
       coords.current.startX = e.clientX;
       coords.current.startY = e.clientY;
-      console.log(coords)
+      setCurrentContainer(container);
     }
 
     const onMouseUp = (e) => {
@@ -53,49 +48,64 @@ const DesignLab = ({
       const nextX = e.clientX - coords.current.startX + coords.current.lastX;
       const nextY = e.clientY - coords.current.startY + coords.current.lastY;
     
-      currentElement.style.top = `${nextY}px`;
-      currentElement.style.left = `${nextX}px`;
+      currentContainer.style.top = `${nextY}px`;
+      currentContainer.style.left = `${nextX}px`;
     };    
 
-    currentElement.addEventListener("mousedown", onMouseDown);
-    currentElement.addEventListener("mouseup", onMouseUp);
-    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mousemove", onMouseMove);
 
     const cleanup = () => {
-      currentElement.removeEventListener("mousedown", onMouseDown);
-      currentElement.removeEventListener("mouseup", onMouseUp);
-      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("mousemove", onMouseMove);
     };
     return cleanup;
-  }, [currentElement]);
+  }, [currentContainer]);
 
   useEffect(()=>{
     console.log(textData)
   }, [textData])
+
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
-    const valueLength = e.target.value.length;
-    console.log("length = "+valueLength);
-    console.log("fontSize = "+valueLength*parseInt(updatedTextData[index].fontSize,10))
-    console.log("fontSize = "+valueLength*(parseInt(updatedTextData[index].fontSize,10))/1.618)
-    const newWidth = `${valueLength*(parseInt(updatedTextData[index].fontSize,10))/1.618}px`;
-    updatedTextData[index].value = e.target.value;
-    console.log(newWidth);
-    console.log("Before:")
-    console.log(updatedTextData);
-    updatedTextData[index].width = newWidth;
-    console.log("After:")
-    console.log(updatedTextData);
+    const value = e.target.value;
+    const fontSize = parseInt(updatedTextData[index].fontSize, 10);
+    const offset = 10; // Adjust this value as needed
+    const minWidth = 100; // Adjust this value as the minimum width
+    const maxWidth = 500; // Adjust this value as the maximum width
+  
+    const span = document.createElement('span');
+    span.style.display = 'inline-block'; // Change to inline-block to measure width accurately
+    span.style.fontFamily = updatedTextData[index].fontFamily;
+    span.style.fontSize = `${fontSize}px`;
+    span.innerHTML = value.replace(/ /g, '&nbsp'); // Prevent whitespace collapse
+  
+    document.body.appendChild(span);
+  
+    let newWidth = Math.max(minWidth, Math.min(maxWidth, span.offsetWidth + offset));
+  
+    document.body.removeChild(span);
+  
+    updatedTextData[index].value = value;
+    updatedTextData[index].width = `${newWidth}px`;
     setTextData(updatedTextData);
   };
+  
 
   const handleItemClick = (index, id) => {
     const updatedSelection = Array(textData.length).fill(false)
     updatedSelection[index] = !updatedSelection[index];
     setIsSelected(updatedSelection);
-    //console.log(isSelected)
   };
-  
+
+  const handleRemoveText = (index) => {
+    const newTextData = [...textData];
+    newTextData.splice(index, 1);
+    setTextData(newTextData);
+  };
+
   const handleRotate = (index, e) => {
     const updatedTextData = [...textData];
     const newRotationAngles = textData[index].rotationAngle + 45;
@@ -174,93 +184,88 @@ const DesignLab = ({
         <img src={'../image/tshirt'+'white'+'.png'} alt="t-shirt" className="tshirt" />
         <div className="canvas"
         onClick={e=>{
-          currentElement?currentElement.style.border = "transparent":console.log(e.target);
+          currentContainer?currentContainer.style.border = "transparent":console.log(e.target);
         }}>
         {textData.map((text, index) => (
-          <>
-            <div
-              key={`textbox${text.id}`}
-              id={`textbox${text.id}`}
-              className="textbox"
-              >
-              <input 
-                key={"textinput" + text.id}
-                id={"textinput" + text.id}
-                className="textinput"
-                style={{
-                  width: text.width,
-                  top: text.x,
-                  left: text.y,
-                  padding:"6px",
-                  transform: `rotate(${text.rotationAngle}deg)`,
-                  fontFamily: text.fontFamily,
-                  fontSize: text.fontSize,
-                  color: text.fontColor,
-                }}
-                
-                onChange={e => {
-                  handleTextChange(index, e)
-                }}
-                value={text.value}
-                onClick={e=>{
-                  handleItemClick(index, text.id);
-                  setcurrentElement(e.target)
-                  e.target.style.border = "2px dashed black";
-                }}
-                onMouseEnter={e=>{
-                  e.target.style.border = "2px dashed black";
-                  e.target.style.padding = "4px";
-                }}
-                onMouseLeave={e=>{
-                  if (currentElement!==e.target){
-                    e.target.style.border = "transparent";
-                    e.target.style.padding = "6px";
-                  }
-                }}
-              />
-            </div>
-          </>
-          ))}
-          {imageData.map((image, index) => (
-          <>
-            <div
-              key={`imgbox${image.id}`}
-              id={`imgbox${image.id}`}
-              className="imgbox"
+          <div
+            key={`textcontainer${text.id}`}
+            className="text-container"
+            style={{
+              top: text.x,
+              left: text.y,
+              transform: `rotate(${text.rotationAngle}deg)`,
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faTrash}
+              className="remove-icon"
+              onClick={() => handleRemoveText(index)}
+            />
+            <input
+              key={"textinput" + text.id}
+              id={"textinput" + text.id}
+              className="textinput"
               style={{
-                width: image.width,
-                top: image.x,
-                left: image.y,
-                padding:"6px",
-                transform: `rotate(${image.rotationAngle}deg)`,
+                width: text.width,
+                padding: "6px",
+                fontFamily: text.fontFamily,
+                fontSize: text.fontSize,
+                color: text.fontColor,
               }}
-              draggable="false"
-              onClick={e=>{
-                handleItemClick(index, image.id);
-                setcurrentElement(e.target)
+              onChange={(e) => {
+                handleTextChange(index, e);
+              }}
+              value={text.value}
+              onClick={(e) => {
+                handleItemClick(index, text.id);
+                setCurrentContainer(e.target);
+                e.target.style.border = "2px dashed black";
+              }}
+              onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
                 e.target.style.padding = "4px";
               }}
-              onMouseEnter={e=>{
-                e.target.style.border = "2px dashed black";
-                e.target.style.padding = "4px";
-              }}
-              onMouseLeave={e=>{
-                if (currentElement!==e.target){
+              onMouseLeave={(e) => {
+                if (currentContainer !== e.target) {
                   e.target.style.border = "transparent";
                   e.target.style.padding = "6px";
                 }
               }}
-              >
+            />
+          </div>
+        ))}
+          {imageData.map((image, index) => (
+            <div
+              key={`imgbox${image.id}`}
+              id={`imgbox${image.id}`}
+              className="img-container"
+              style={{
+                width: image.width,
+                top: image.x,
+                left: image.y,
+                padding: "6px",
+                transform: `rotate(${image.rotationAngle}deg)`,
+              }}
+              draggable="false"
+              onClick={() => {
+                handleItemClick(index, image.id);
+                setCurrentContainer(null);
+              }}
+              onMouseEnter={() => {
+                setCurrentContainer(document.getElementById(`imgbox${image.id}`));
+              }}
+              onMouseLeave={() => {
+                setCurrentContainer(null);
+              }}
+            >
               <img
                 src="blob:http://localhost:3000/b3158cc4-d925-4325-89d9-76162dde110e"
                 alt="Display Image"
                 className="display-image"
-                style={{width:"100%"}}
+                style={{ width: "100%" }}
                 draggable="false"
               />
             </div>
-          </>
           ))}
         </div>
         <div className="btn-group">

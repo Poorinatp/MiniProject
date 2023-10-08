@@ -100,6 +100,7 @@
   width: 450px;
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
 }
 
 .tshirt {
@@ -118,6 +119,16 @@
   position: absolute;
   background-color: transparent;
   overflow: hidden;
+}
+
+.text-container {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
 }
 
 .textinput {
@@ -147,15 +158,17 @@
   border: transparent;
 }
 
-.rotatebtn {
+.remove-icon {
   position: absolute;
-  width: 40px; /* Adjust the width and height as needed */
-  height: 40px;
+  top: calc(50% - 15px); /* Adjust the vertical position relative to the text element */
+  left: calc(100% - 15px); /* Adjust the horizontal position relative to the text element */
+  background-color: #ff0000; /* Customize the button's background color */
+  color: white; /* Customize the button's text color */
+  border: none;
   border-radius: 50%;
-  background-color: transparent; /* Make the background transparent */
-  border: none; /* Remove the default button border */
-  cursor: pointer; /* Add a pointer cursor on hover */
-  transition: transform 0.3s ease; /* Add a smooth rotation transition */
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .btn-group {

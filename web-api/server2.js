@@ -22,17 +22,17 @@ app.use(bodyParser.json());
 const port = 8090;
 
 // Create a PostgreSQL connection pool
-/* const pool = new Pool({
-  user: process.env?process.env.PGUSER:'phimniyom_db_user',
-  host: process.env?process.env.PGHOST:'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
-  database: process.env?process.env.PGDATABASE:'phimniyom_db',
-  password: process.env?process.env.PGPASSWORD:'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
-  port: process.env?process.env.PGPORT:5432,
+const pool = new Pool({
+  user: 'phimniyom_db_user',
+  host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
+  database: 'phimniyom_db',
+  password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
+  port: 5432,
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-}); */
-const pool = new Pool({
+});
+/* const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
@@ -41,7 +41,7 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-});
+}); */
 
 pool.on('error', (err) => {
   console.error('PostgreSQL connection error:', err.message);
@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 // Define routes for fetching data from tables
 tables.forEach((table) => {
   app.get(`/${table}`, (req, res) => {
-    pool.query(`SELECT * FROM ${table}`, (error, results) => {
+    pool.query(`SELECT * FROM '${table}'`, (error, results) => {
       if (error) throw error;
       res.send(results.rows);
     });

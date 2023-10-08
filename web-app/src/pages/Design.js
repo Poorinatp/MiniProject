@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DesignLab from "../components/DesignLab"
 import NavBar from "../components/NavBar";
 import "./Design.css"
+import axios from "axios";
 import DesignLab2 from "../components/DesignLab2";
 const OptionTab = ({
     textData, 
@@ -10,7 +11,8 @@ const OptionTab = ({
     setImageData, 
     isSelected, 
     setIsSelected, 
-    selectedImage, 
+    selectedImage,
+    fonts, 
     handleFontChange, 
     handleSizeChange, 
     handleColorChange,
@@ -90,14 +92,11 @@ const OptionTab = ({
                         <div>
                             <p>Font Family</p>
                             <select value={textData[isSelected.findIndex((selected) => selected === true)].fontFamily} onChange={(e) => handleFontChange(e, isSelected.findIndex((selected) => selected === true))}>
-                                <option value="Arial">Arial</option>
-                                <option value="Helvetica">Helvetica</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Tahoma">Tahoma</option>
-                                <option value="Palatino">Palatino</option>
+                                {fonts.map((fontName) => (
+                                    <option key={fontName} value={fontName}>
+                                        {fontName}
+                                    </option>
+                                ))}
                             </select>
 
                             <p>Font Size</p>
@@ -164,6 +163,23 @@ const Design = () => {
 
     const [selectedImage, setSelectedImage] = useState(null);
 
+    const [fonts, setFonts] = useState([]);
+
+    useEffect(() => {
+        // Fetch the list of fonts from the server using Axios
+        axios
+        .get("http://localhost:8080/fonts")
+        .then((response) => {
+            setFonts(response.data);
+            console.log(response.data);
+            response.data.forEach((fontName) => {
+                const fontFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
+                document.fonts.add(fontFace);
+            });
+        })
+        .catch((error) => console.error("Error fetching fonts:", error));
+    }, []);
+
     const handleFontChange = (event, index) => {
         const newTextElements = [...textData];
         newTextElements[index].fontFamily = event.target.value;
@@ -200,6 +216,7 @@ const Design = () => {
                     isSelected={isSelected}
                     setIsSelected={setIsSelected}
                     selectedImage={selectedImage}
+                    fonts={fonts}
                     handleFontChange={handleFontChange}
                     handleSizeChange={handleSizeChange}
                     handleColorChange={handleColorChange}

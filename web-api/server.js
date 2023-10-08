@@ -11,6 +11,9 @@ var mysql = require('mysql');
 // create express app
 var app = express();
 var cors = require('cors')
+var path = require('path');
+var fs = require('fs');
+
 app.use(cors())
 // configure bodyparser to handle post requests
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -65,6 +68,22 @@ app.get('/all', function(req, res) {
                 res.send(allData);
             }
         });
+    });
+});
+
+app.get('/fonts', (req, res) => {
+    const fontsDir = path.join(__dirname, './fonts');
+    fs.readdir(fontsDir, (err, files) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error reading fonts directory');
+            return;
+        }
+        
+        // Remove the .ttf extension from font names
+        const fontsWithoutExtension = files.map((file) => file.replace('.ttf', ''));
+
+        res.json(fontsWithoutExtension);
     });
 });
 
