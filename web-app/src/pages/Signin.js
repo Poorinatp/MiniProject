@@ -26,7 +26,7 @@ function Signin() {
   return (
     <>
      <NavBar/> 
-      <form onSubmit={handleSubmit}>
+      <form className='Signin' onSubmit={handleSubmit}>
       <header>
         <h1>SIGN IN</h1>
       </header>
