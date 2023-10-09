@@ -189,7 +189,7 @@ const Design = () => {
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
         axios
-        .get("http://localhost:8080/fonts")
+        .get("https://pimniyom-api.onrender.com/fonts")
         .then((response) => {
             setFonts(response.data);
             response.data.forEach((fontName) => {

@@ -28,7 +28,6 @@ var connection = mysql.createConnection({
     database: 'phimniyom_db'
 });
 // set mysql table names
-const database = 'phimniyom_db'
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
 // connect to database 
 connection.connect(function (err) {

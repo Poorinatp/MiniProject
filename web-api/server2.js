@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 const port = 8090;
 
 // Create a PostgreSQL connection pool
-const pool = new Pool({
+/* const pool = new Pool({
   user: 'phimniyom_db_user',
   host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
   database: 'phimniyom_db',
@@ -31,8 +31,8 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-});
-/* const pool = new Pool({
+}); */
+const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
@@ -41,7 +41,7 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-}); */
+});
 
 pool.on('error', (err) => {
   console.error('PostgreSQL connection error:', err.message);
@@ -83,6 +83,22 @@ app.get('/all', (req, res) => {
         res.send(allData);
       }
     });
+  });
+});
+
+app.get('/fonts', (req, res) => {
+  const fontsDir = path.join(__dirname, './fonts');
+  fs.readdir(fontsDir, (err, files) => {
+      if (err) {
+          console.error(err);
+          res.status(500).send('Error reading fonts directory');
+          return;
+      }
+      
+      // Remove the .ttf extension from font names
+      const fontsWithoutExtension = files.map((file) => file.replace('.ttf', ''));
+
+      res.json(fontsWithoutExtension);
   });
 });
 
