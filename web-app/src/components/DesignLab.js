@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import html2canvas from 'html2canvas';
 
 const DesignLab = ({ 
   textData, 
@@ -8,6 +9,8 @@ const DesignLab = ({
   imageData, 
   setImageData, 
   isSelected, 
+  tshirtcolor,
+  tshirtsize,
   setIsSelected,
   selectedImage
  }) => {
@@ -65,7 +68,6 @@ const DesignLab = ({
   }, [currentContainer]);
 
   useEffect(()=>{
-    console.log(textData)
   }, [textData])
 
   const handleTextChange = (index, e) => {
@@ -93,87 +95,70 @@ const DesignLab = ({
     setTextData(updatedTextData);
   };
   
-
-  const handleItemClick = (index, id) => {
-    const updatedSelection = Array(textData.length).fill(false)
+  const handleItemClick = (index, e) => {
+    const updatedSelection = Array(textData.length).fill(false);
     updatedSelection[index] = !updatedSelection[index];
     setIsSelected(updatedSelection);
+  
+    const canvas = document.getElementById("canvas");
+    const allInputs = canvas.querySelectorAll('input');
+  
+    // Set styles for all input elements
+    allInputs.forEach((input) => {
+      input.style.border = "none";
+      input.style.padding = "6px";
+    });
+  
+    // Set styles for the clicked item
+    e.target.style.border = "2px dashed black";
+    e.target.style.padding = "4px";
+  
+    setCurrentContainer(e.target);
   };
 
   const handleRemoveText = (index) => {
+    const updatedSelection = Array(textData.length).fill(false)
     const newTextData = [...textData];
     newTextData.splice(index, 1);
+    setIsSelected(updatedSelection)
     setTextData(newTextData);
   };
 
-  const handleRotate = (index, e) => {
-    const updatedTextData = [...textData];
-    const newRotationAngles = textData[index].rotationAngle + 45;
-    updatedTextData[index].rotationAngle += 45;
-    setTextData(updatedTextData);
-    e.target.style.transform = `rotate(${newRotationAngles[index]}deg)`; // Apply rotation
-  };
-
   const handleSaveClick = () => {
-    const canvas = canvasRef.current;
+    // Get the container element
+    const container = document.getElementById('container');
   
-    if (!canvas) {
-      console.error("Canvas element not found.");
-      return;
-    }
+    // Use html2canvas to capture the contents of the container
+    html2canvas(container).then((canvas) => {
+      // Create a blob from the canvas content
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          console.error('Failed to create a blob from the canvas.');
+          return;
+        }
   
-    const ctx = canvas.getContext('2d')
+        // Create a temporary download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'design.png'; // You can change the filename
+        link.click();
   
-    if (!ctx) {
-      console.error("Canvas context not available.");
-      return;
-    }
-  
-    // Ensure all images are loaded before drawing
-    const imagesToLoad = imageData.length;
-  
-    let imagesLoaded = 0;
-  
-    const onImageLoad = () => {
-      imagesLoaded++;
-  
-      if (imagesLoaded === imagesToLoad) {
-        // All images are loaded, proceed to draw on the canvas
-  
-        // Draw text elements
-        textData.forEach((text) => {
-          ctx.font = `${text.fontSize}px ${text.fontFamily}`;
-          ctx.fillStyle = text.fontColor;
-          ctx.fillText(text.value, text.x, text.y);
-        });
-  
-        // Draw image elements
-        imageData.forEach((image) => {
-          const img = new Image();
-          img.src = image.src;
-          img.onload = () => {
-            ctx.drawImage(img, image.x, image.y, image.width, image.height);
-  
-            // Check if all images have been drawn
-            if (imagesLoaded === imagesToLoad) {
-              // Trigger the download
-              const link = document.createElement('a');
-              link.href = canvas.toDataURL('image/png'); // You can change the format if needed
-              link.download = 'design.png'; // You can change the filename
-              link.click();
-            }
-          };
-        });
-      }
-    };
-  
-    // Start loading images
-    imageData.forEach((image) => {
-      const img = new Image();
-      img.src = image.src;
-      img.onload = onImageLoad;
+        // Clean up the URL.createObjectURL
+        URL.revokeObjectURL(link.href);
+      }, 'image/png'); // You can change the format if needed
     });
-  };  
+  }; 
+
+  const handleCheckoutClick = () => {
+    // Calculate the text design price based on the number of textData items
+    const textDesignPrice = textData.length * 10; // Adjust the price per item as needed
+  
+    // Construct the URL for the checkout page with parameters
+    const checkoutURL = `/checkout?color=${tshirtcolor}&size=${tshirtsize}&textDesignPrice=${textDesignPrice}`;
+  
+    // Redirect to the checkout page
+    window.location.href = checkoutURL;
+  };
   
   return (
     <div className="grid-item-1 lab">
@@ -181,11 +166,24 @@ const DesignLab = ({
       id="container"
       ref={canvasRef}
       >
-        <img src={'../image/tshirt'+'white'+'.png'} alt="t-shirt" className="tshirt" />
-        <div className="canvas"
-        onClick={e=>{
-          currentContainer?currentContainer.style.border = "transparent":console.log(e.target);
-        }}>
+        <img src={`../image/tshirt${tshirtcolor}.png`} alt="t-shirt" className="tshirt" />
+        <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
+        <div
+          className="canvas"
+          id="canvas"
+          onClick={(e) => {
+            if (currentContainer) {
+              // Check if the clicked element is not the currentContainer or its descendant
+              if (!currentContainer.contains(e.target)) {
+                currentContainer.style.border = "none";
+                currentContainer.style.padding = "6px";
+                const updatedSelection = Array(textData.length).fill(false)
+                setIsSelected(updatedSelection)
+                setCurrentContainer(null);
+              }
+            }
+          }}
+        >
         {textData.map((text, index) => (
           <div
             key={`textcontainer${text.id}`}
@@ -193,17 +191,20 @@ const DesignLab = ({
             style={{
               top: text.x,
               left: text.y,
-              transform: `rotate(${text.rotationAngle}deg)`,
             }}
           >
             <FontAwesomeIcon
               icon={faTrash}
               className="remove-icon"
+              id={`remove-btn-${text.id}`}
               onClick={() => handleRemoveText(index)}
+              style={{
+                display: isSelected[index] ? 'block' : 'none',
+              }}
             />
             <input
-              key={"textinput" + text.id}
-              id={"textinput" + text.id}
+              key={`textinput${text.id}`}
+              id={`textinput${text.id}`}
               className="textinput"
               style={{
                 width: text.width,
@@ -217,9 +218,7 @@ const DesignLab = ({
               }}
               value={text.value}
               onClick={(e) => {
-                handleItemClick(index, text.id);
-                setCurrentContainer(e.target);
-                e.target.style.border = "2px dashed black";
+                handleItemClick(index, e);
               }}
               onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
@@ -227,14 +226,14 @@ const DesignLab = ({
               }}
               onMouseLeave={(e) => {
                 if (currentContainer !== e.target) {
-                  e.target.style.border = "transparent";
+                  e.target.style.border = "none";
                   e.target.style.padding = "6px";
                 }
               }}
             />
           </div>
         ))}
-          {imageData.map((image, index) => (
+          {/* {imageData.map((image, index) => (
             <div
               key={`imgbox${image.id}`}
               id={`imgbox${image.id}`}
@@ -266,13 +265,13 @@ const DesignLab = ({
                 draggable="false"
               />
             </div>
-          ))}
-        </div>
-        <div className="btn-group">
-          <button className="save-btn" onClick={handleSaveClick}>Save</button>
-          <button className="save-btn">Check Out</button>
+          ))} */}
         </div>
       </div>
+      <div className="btn-group">
+          <button className="save-btn" onClick={handleSaveClick}>Save</button>
+          <button className="checkout-btn" onClick={handleCheckoutClick}>Check Out</button>
+        </div>
     </div>
   );
 };
