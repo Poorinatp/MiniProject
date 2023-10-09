@@ -12,6 +12,9 @@ const { Pool } = require('pg');
 // Create express app
 const app = express();
 const cors = require('cors');
+var path = require('path');
+var fs = require('fs');
+
 app.use(cors());
 
 // Configure body parser to handle post requests
