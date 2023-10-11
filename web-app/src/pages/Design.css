@@ -122,27 +122,17 @@
 
 .text-container {
   position: absolute;
-  top: 0;
-  left: 0;
 }
 
 .textinput {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   cursor: pointer;
   outline: none;
   background: none;
   border: transparent;
-}
-
-.textbox {
-  position: absolute;
-  background-color:white;
-}
-
-.imgbox {
-  position: absolute;
-  cursor: pointer;
 }
 
 .display-image {
@@ -157,14 +147,16 @@
   position: absolute;
   top: calc(50% - 15px); /* Adjust the vertical position relative to the text element */
   left: calc(100% - 15px); /* Adjust the horizontal position relative to the text element */
-  background-color: #000000; /* Customize the button's background color */
-  color: white; /* Customize the button's text color */
+  color: red; /* Customize the button's text color */
   border: none;
   border-radius: 50%;
   padding: 5px;
+  width: 10px;
+  height: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
   display: none;
+  z-index: 10;
 }
 
 .btn-group {

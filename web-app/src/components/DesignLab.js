@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faRotateLeft, faXmark } from '@fortawesome/free-solid-svg-icons';
 import html2canvas from 'html2canvas';
 
 const DesignLab = ({ 
@@ -24,6 +24,23 @@ const DesignLab = ({
     lastX: 0,
     lastY: 0
   });
+
+  const handleSaveClick = async () => {
+    const container = document.getElementById("container");
+    const inputs = container.querySelectorAll("input")
+    // Use html2canvas to capture the HTML content
+    inputs.forEach((input)=>{
+      console.log(input.style)
+    })
+    await html2canvas(container).then(function (canvas) {
+      // Convert the canvas image to a data URL and create a download link
+      const dataURL = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataURL;
+      link.download = "design.png"; // You can change the filename
+      link.click();
+    });
+  };
 
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
@@ -110,7 +127,7 @@ const DesignLab = ({
     });
   
     // Set styles for the clicked item
-    e.target.style.border = "2px dashed black";
+    e.target.style.border = "2px dashed blue";
     e.target.style.padding = "4px";
   
     setCurrentContainer(e.target);
@@ -122,32 +139,8 @@ const DesignLab = ({
     newTextData.splice(index, 1);
     setIsSelected(updatedSelection)
     setTextData(newTextData);
+    setCurrentContainer(null);
   };
-
-  const handleSaveClick = () => {
-    // Get the container element
-    const container = document.getElementById('container');
-  
-    // Use html2canvas to capture the contents of the container
-    html2canvas(container).then((canvas) => {
-      // Create a blob from the canvas content
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          console.error('Failed to create a blob from the canvas.');
-          return;
-        }
-  
-        // Create a temporary download link
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'design.png'; // You can change the filename
-        link.click();
-  
-        // Clean up the URL.createObjectURL
-        URL.revokeObjectURL(link.href);
-      }, 'image/png'); // You can change the format if needed
-    });
-  }; 
 
   const handleCheckoutClick = () => {
     // Calculate the text design price based on the number of textData items
@@ -194,7 +187,7 @@ const DesignLab = ({
             }}
           >
             <FontAwesomeIcon
-              icon={faTrash}
+              icon={faXmark}
               className="remove-icon"
               id={`remove-btn-${text.id}`}
               onClick={() => handleRemoveText(index)}
@@ -221,7 +214,7 @@ const DesignLab = ({
                 handleItemClick(index, e);
               }}
               onMouseEnter={(e) => {
-                e.target.style.border = "2px dashed black";
+                e.target.style.border = "2px dashed blue";
                 e.target.style.padding = "4px";
               }}
               onMouseLeave={(e) => {
@@ -270,7 +263,7 @@ const DesignLab = ({
       </div>
       <div className="btn-group">
           <button className="save-btn" onClick={handleSaveClick}>Save</button>
-          <button className="checkout-btn" onClick={handleCheckoutClick}>Check Out</button>
+          <button className="checkout-btn" onClick={handleCheckoutClick}>สั่งซื้อ</button>
         </div>
     </div>
   );
