@@ -37,7 +37,7 @@ function Signup () {
 	return(
         <>
 		<NavBar/>
-		<form onSubmit={handleSubmit}>
+		<form className='Signup' onSubmit={handleSubmit}>
 			
 				<header>
 					<h1>SIGN UP</h1>
