@@ -12,35 +12,19 @@ const DesignLab = ({
   tshirtcolor,
   tshirtsize,
   setIsSelected,
-  selectedImage
+  selectedImage,
+  handleCheckoutClick
  }) => {
   const canvasRef = useRef(null);
   const isClicked = useRef(false);
   const [currentContainer, setCurrentContainer] = useState(null);
-  
+
   const coords = useRef({
     startX: 0,
     startY: 0,
     lastX: 0,
     lastY: 0
   });
-
-  const handleSaveClick = async () => {
-    const container = document.getElementById("container");
-    const inputs = container.querySelectorAll("input")
-    // Use html2canvas to capture the HTML content
-    inputs.forEach((input)=>{
-      console.log(input.style)
-    })
-    await html2canvas(container).then(function (canvas) {
-      // Convert the canvas image to a data URL and create a download link
-      const dataURL = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = dataURL;
-      link.download = "design.png"; // You can change the filename
-      link.click();
-    });
-  };
 
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
@@ -85,6 +69,7 @@ const DesignLab = ({
   }, [currentContainer]);
 
   useEffect(()=>{
+    console.log(textData);
   }, [textData])
 
   const handleTextChange = (index, e) => {
@@ -127,7 +112,7 @@ const DesignLab = ({
     });
   
     // Set styles for the clicked item
-    e.target.style.border = "2px dashed blue";
+    e.target.style.border = "2px dashed black";
     e.target.style.padding = "4px";
   
     setCurrentContainer(e.target);
@@ -142,15 +127,29 @@ const DesignLab = ({
     setCurrentContainer(null);
   };
 
-  const handleCheckoutClick = () => {
-    // Calculate the text design price based on the number of textData items
-    const textDesignPrice = textData.length * 10; // Adjust the price per item as needed
+  const handleSaveClick = () => {
+    // Get the container element
+    const container = document.getElementById('container');
   
-    // Construct the URL for the checkout page with parameters
-    const checkoutURL = `/checkout?color=${tshirtcolor}&size=${tshirtsize}&textDesignPrice=${textDesignPrice}`;
+    // Use html2canvas to capture the contents of the container
+    html2canvas(container).then((canvas) => {
+      // Create a blob from the canvas content
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          console.error('Failed to create a blob from the canvas.');
+          return;
+        }
   
-    // Redirect to the checkout page
-    window.location.href = checkoutURL;
+        // Create a temporary download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'design.png'; // You can change the filename
+        link.click();
+  
+        // Clean up the URL.createObjectURL
+        URL.revokeObjectURL(link.href);
+      }, 'image/png'); // You can change the format if needed
+    });
   };
   
   return (
@@ -214,7 +213,7 @@ const DesignLab = ({
                 handleItemClick(index, e);
               }}
               onMouseEnter={(e) => {
-                e.target.style.border = "2px dashed blue";
+                e.target.style.border = "2px dashed black";
                 e.target.style.padding = "4px";
               }}
               onMouseLeave={(e) => {
@@ -263,7 +262,7 @@ const DesignLab = ({
       </div>
       <div className="btn-group">
           <button className="save-btn" onClick={handleSaveClick}>Save</button>
-          <button className="checkout-btn" onClick={handleCheckoutClick}>สั่งซื้อ</button>
+          <button className="checkout-btn" onClick={handleCheckoutClick}>Check Out</button>
         </div>
     </div>
   );

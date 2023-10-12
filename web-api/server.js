@@ -71,6 +71,15 @@ app.get('/all', function(req, res) {
     });
 });
 
+app.get('/products-with-details/:productid', function (req, res) {
+    const productid = req.params.productid; // Get the productid parameter from the URL
+
+    connection.query('SELECT * FROM product JOIN product_detail ON product.product_id = product_detail.product_id WHERE product.product_id = ?', [productid], function (error, results, fields) {
+        if (error) throw error;
+            res.send(results);
+    });
+});
+
 app.get('/fonts', (req, res) => {
     const fontsDir = path.join(__dirname, './fonts');
     fs.readdir(fontsDir, (err, files) => {

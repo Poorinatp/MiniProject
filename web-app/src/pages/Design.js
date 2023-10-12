@@ -4,6 +4,7 @@ import NavBar from "../components/NavBar";
 import "./Design.css"
 import axios from "axios";
 import DesignLab2 from "../components/DesignLab2";
+import { useParams } from "react-router-dom";
 const OptionTab = ({
     textData, 
     setTextData,
@@ -20,7 +21,8 @@ const OptionTab = ({
     handleFontChange, 
     handleSizeChange, 
     handleColorChange,
-    handleImageUpload}) => {
+    handleImageUpload
+}) => {
     const [selectedOption, setSelectedOption] = useState("product");
     const size = Array.from({ length: 50 }, (_, i) => (i + 12) * 2);
 
@@ -169,6 +171,33 @@ const OptionTab = ({
     )
 }
 
+const CheckoutPopup = ({
+    tshirtcolor,
+    tshirtsize,
+    textData,
+    textDesignPrice,
+    closePopup,
+}) => {
+    return (
+      <div className="checkout-popup">
+        <h2>Checkout Information</h2>
+        <p>T-Shirt Color: {tshirtcolor}</p>
+        <p>T-Shirt Size: {tshirtsize}</p>
+        <p>Text Design Price: ${textDesignPrice}</p>
+  
+        {/* Display text data for reconfirmation */}
+        <h3>Text Data:</h3>
+        <ul>
+          {textData.map((text, index) => (
+            <li key={`text-${index}`}>{text.value}</li>
+          ))}
+        </ul>
+  
+        <button onClick={closePopup}>Close</button>
+      </div>
+    );
+};
+
 const Design = () => {
     const [textData, setTextData] = useState([
         {id: 1, value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px", rotationAngle: 0},
@@ -186,18 +215,48 @@ const Design = () => {
     const [fonts, setFonts] = useState([]);
     const [tshirtcolor, setTshirtColor] = useState('white');
     const [tshirtsize, setTshirtSize] = useState('S');
+    const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
+
+    const { product_id } = useParams();
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
+        if (product_id) {
+            // Fetch data based on the product_id
+            axios
+                .get(`http://localhost:8080/products-with-details/${product_id}`)
+                .then((response) => {
+                    // Handle the response data here
+                    console.log(response.data.filter((item) => item.Font_family !== ""));
+                    // Update your state or perform other actions with the data
+                    const transformedData = response.data
+                    .filter((item) => item.Font_family !== "")
+                    .map((item) => ({
+                        id: item.id,
+                        value: 'EXAMPLE',
+                        fontFamily: item.Font_family,
+                        fontSize: item.Font_size + 'px',
+                        fontColor: item.Font_color,
+                        x: item.location_text.split(';')[0].trim() + 'px',
+                        y: item.location_text.split(';')[1].trim() + 'px',
+                        rotationAngle: 0, // You can set this to the default value
+                    }));
+                    console.log(transformedData);
+                    setTextData(transformedData);
+                })
+                .catch((error) => console.error("Error fetching product details:", error));
+        }else{
+            console.log("new product")
+        }
         axios
-        .get("http://localhost:8080/fonts")
-        .then((response) => {
-            setFonts(response.data);
-            response.data.forEach((fontName) => {
-                const fontFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
-                document.fonts.add(fontFace);
-            });
-        })
-        .catch((error) => console.error("Error fetching fonts:", error));
+            .get("http://localhost:8080/fonts")
+            .then((response) => {
+                setFonts(response.data);
+                response.data.forEach((fontName) => {
+                    const fontFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
+                    document.fonts.add(fontFace);
+                });
+            })
+            .catch((error) => console.error("Error fetching fonts:", error));
     }, []);
 
     const handleFontChange = (event, index) => {
@@ -221,6 +280,14 @@ const Design = () => {
     const handleImageUpload = (e) => {
         const imageFile = e.target.files[0];
         setSelectedImage(imageFile);
+    };
+
+    const handleCheckoutClick = () => {
+        setIsCheckoutPopupOpen(true);
+      };
+      
+    const closeCheckoutPopup = () => {
+        setIsCheckoutPopupOpen(false);
     };
 
     return(
@@ -256,8 +323,22 @@ const Design = () => {
                     setTextData={setTextData}
                     setIsSelected={setIsSelected}
                     selectedImage={selectedImage}
+                    setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
+                    handleCheckoutClick={handleCheckoutClick}
                 />
             </div>
+            {isCheckoutPopupOpen && (
+                <>
+                    <div className="popup-overlay"></div>
+                    <CheckoutPopup
+                        tshirtcolor={tshirtcolor}
+                        tshirtsize={tshirtsize}
+                        textData={textData}
+                        textDesignPrice={textData.length * 10}
+                        closePopup={closeCheckoutPopup}
+                    />
+                </>
+            )}
         </>
     )
 }
