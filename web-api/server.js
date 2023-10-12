@@ -87,7 +87,63 @@ app.get('/fonts', (req, res) => {
     });
 });
 
-
+app.post('/signin', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+  
+    connection.query(
+      "SELECT * FROM user WHERE email = ? AND password = ?",
+      [email, password],
+      (err, result) => {
+        if (err) {
+          console.error('Database error: ' + err.message);
+          res.status(500).send({ error: 'Database error' });
+        } else {
+          if (result.length > 0) {
+            console.log('Login successful');
+            res.status(200).send({ status: 200, result: result });
+          } else {
+            console.log('Login failed');
+            res.status(401).send({ message: 'Login failed' });
+          }
+        }
+      }
+    );
+  });
+  app.post('/signup', (req, res) => {
+    const userData = req.body.user;
+    const addressData = req.body.address;
+    
+    // Insert user data into the "user" table
+    connection.query('INSERT INTO user SET ?', userData, (userInsertError, userResult) => {
+      if (userInsertError) {
+        console.error('User insert error:', userInsertError);
+        res.status(500).send('User registration failed');
+        return;
+      }
+  
+      // Retrieve the last inserted user ID
+      connection.query('SELECT LAST_INSERT_ID() as user_id', (idQueryError, idResult) => {
+        if (idQueryError) {
+          console.error('User ID retrieval error:', idQueryError);
+          res.status(500).send('User registration failed');
+          return;
+        }
+  
+        // Link the user_id and insert address data into the "user address" table
+        addressData.user_id = idResult[0].user_id;
+        connection.query('INSERT INTO user_address SET ?', addressData, (addressInsertError) => {
+          if (addressInsertError) {
+            console.error('Address insert error:', addressInsertError);
+            res.status(500).send('User registration failed');
+          } else {
+            res.status(200).send('User registration successful');
+          }
+        });
+      });
+    });
+  });  
+  
 // listen to port
 app.listen(port, function () {
     console.log('Node app is running on port ' + port);
