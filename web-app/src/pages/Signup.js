@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Axios from 'axios'; 
 import {useNavigate} from 'react-router-dom';
 function Signup () {
 
@@ -6,13 +7,36 @@ function Signup () {
 	const [lastname,setLastname] = useState("");
     const [tel,setTel] = useState("");
     const [email,setEmail] = useState("")
+	  const [password, setPassword] = useState("");
     const [address,setAddress] = useState("")
     const [city,setCity] = useState("")
     const [country,setCountry] = useState("")
     const [zipcode,setZipcode] = useState("")
 	const navigate = useNavigate();
+	const[Userlist,setUserlist] = useState([]);
 	
-
+	
+		Axios.get('http://localhost:8080/').then((response)=> {
+			setUserlist(response.data);
+		})
+	
+  const addUserlist = () => {
+	Axios.get('http://localhost:8080/Singup',{
+				firstname: firstname,
+				lastname: lastname,
+				tel: tel,
+				email: email,
+			}).then(()=>{
+				setUserlist([
+				...Userlist,{
+				firstname: firstname,
+				lastname: lastname,
+				tel: tel,
+				email: email,
+				}
+			])
+			})
+  }
 
 	function handleSubmit(e) {
         e.preventDefault();
@@ -35,7 +59,7 @@ function Signup () {
                 <h1>SIGN UP</h1>
             </header>
 
-			<form   onSubmit={handleSubmit}>
+			<form   onSubmit={handleSubmit} >
 				<label>First name</label><br/>
 				<input 
 					type="text" 
@@ -69,14 +93,25 @@ function Signup () {
 					type="email" 
 					id="email"
 					placeholder="name@example.com"
-					pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+					pattern="^[a-zA-Z0-9]+@(hotmail\.com|gmail\.com)$"
 					onChange={e =>{setEmail(e.target.value)}}
                     required/> 
 					<br/>
+					<label>Password</label><br />
+        		<input
+       			   type="password"
+     				id="password"
+        		  	placeholder="password"
+        			pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
+         			value={password}
+          			onChange={e => { setPassword(e.target.value) }}
+         			maxLength={10}
+          			required 
+      				  />
+        			<br />			
 
                     <label>Address</label><br/>
-				
-                <textarea
+				<textarea
 					type="text" 
 					id="address"
 					placeholder="Address"
@@ -116,7 +151,7 @@ function Signup () {
                     required/> 
 					<br/>
 
-				<button type="submit">Signup</button>
+				<button type="submit" >Signup</button>
 			</form>
         </div>
     )
