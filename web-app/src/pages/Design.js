@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DesignLab from "../components/DesignLab"
 import NavBar from "../components/NavBar";
 import "./Design.css"
+import axios from "axios";
 import DesignLab2 from "../components/DesignLab2";
 const OptionTab = ({
     textData, 
@@ -10,7 +11,12 @@ const OptionTab = ({
     setImageData, 
     isSelected, 
     setIsSelected, 
-    selectedImage, 
+    selectedImage,
+    fonts,
+    tshirtcolor,
+    setTshirtColor,
+    tshirtsize,
+    setTshirtSize, 
     handleFontChange, 
     handleSizeChange, 
     handleColorChange,
@@ -24,7 +30,7 @@ const OptionTab = ({
 
     const handleAddText = () => {
         const newObject = {
-            id:textData.length, 
+            id:textData.length+1, 
             value: "new text", 
             fontFamily:"Arial", 
             fontSize:"10px", 
@@ -73,14 +79,30 @@ const OptionTab = ({
                     </button>
                 </div>
                 {/* Render content based on selectedOption */}
-                {selectedOption === "product" && <div className="grid-item-3 option-content">Product Option Content</div>}
+                {selectedOption === "product" && 
+                <div className="grid-item-3 option-content">
+                    <div>
+                        <p>Select T-shirt Color</p>
+                        <select value={tshirtcolor} onChange={(e)=>setTshirtColor(e.target.value)}>
+                            <option key="white" value="white">White</option>
+                            <option key="black" value="black">Black</option>
+                        </select>
+                        <p>Select T-shirt Size</p>
+                        <select value={tshirtsize} onChange={(e)=>setTshirtSize(e.target.value)}>
+                            <option key="S" value="S">S</option>
+                            <option key="M" value="M">M</option>
+                            <option key="L" value="L">L</option>
+                            <option key="XL" value="XL">XL</option>
+                        </select>
+                    </div>
+                </div>}
                 {selectedOption === "text" && 
                 <div className="grid-item-3 option-content">        
                     <div>
                         {textData.map((text)=>{
                             return(
-                                <p>
-                                    {text.value}
+                                <p key={text.id}>
+                                    {text.id}: {text.value}
                                 </p>
                             )
                         })}
@@ -90,14 +112,11 @@ const OptionTab = ({
                         <div>
                             <p>Font Family</p>
                             <select value={textData[isSelected.findIndex((selected) => selected === true)].fontFamily} onChange={(e) => handleFontChange(e, isSelected.findIndex((selected) => selected === true))}>
-                                <option value="Arial">Arial</option>
-                                <option value="Helvetica">Helvetica</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Tahoma">Tahoma</option>
-                                <option value="Palatino">Palatino</option>
+                                {fonts.map((fontName) => (
+                                    <option key={fontName} value={fontName}>
+                                        {fontName}
+                                    </option>
+                                ))}
                             </select>
 
                             <p>Font Size</p>
@@ -152,9 +171,9 @@ const OptionTab = ({
 
 const Design = () => {
     const [textData, setTextData] = useState([
-        {id: 1, value: "hi", fontFamily: "Arial", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px", rotationAngle: 0},
-        {id: 2, value: "mynameis", fontFamily: "Arial", width:"100px", fontSize: "24px", fontColor: "red", x: "50px", y: "50px", rotationAngle: 0},
-        {id: 3, value: "poom", fontFamily: "Arial", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px", rotationAngle: 0}
+        {id: 1, value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px", rotationAngle: 0},
+        {id: 2, value: "mynameis", fontFamily: "Basic-Regular", width:"120px", fontSize: "24px", fontColor: "red", x: "50px", y: "50px", rotationAngle: 0},
+        {id: 3, value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px", rotationAngle: 0}
     ]);      
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
     
@@ -163,6 +182,23 @@ const Design = () => {
     ]);
 
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const [fonts, setFonts] = useState([]);
+    const [tshirtcolor, setTshirtColor] = useState('white');
+    const [tshirtsize, setTshirtSize] = useState('S');
+    useEffect(() => {
+        // Fetch the list of fonts from the server using Axios
+        axios
+        .get("http://localhost:8080/fonts")
+        .then((response) => {
+            setFonts(response.data);
+            response.data.forEach((fontName) => {
+                const fontFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
+                document.fonts.add(fontFace);
+            });
+        })
+        .catch((error) => console.error("Error fetching fonts:", error));
+    }, []);
 
     const handleFontChange = (event, index) => {
         const newTextElements = [...textData];
@@ -185,7 +221,6 @@ const Design = () => {
     const handleImageUpload = (e) => {
         const imageFile = e.target.files[0];
         setSelectedImage(imageFile);
-        console.log(selectedImage);
     };
 
     return(
@@ -200,6 +235,11 @@ const Design = () => {
                     isSelected={isSelected}
                     setIsSelected={setIsSelected}
                     selectedImage={selectedImage}
+                    fonts={fonts}
+                    tshirtcolor={tshirtcolor}
+                    setTshirtColor={setTshirtColor}
+                    tshirtsize={tshirtsize}
+                    setTshirtSize={setTshirtSize}
                     handleFontChange={handleFontChange}
                     handleSizeChange={handleSizeChange}
                     handleColorChange={handleColorChange}
@@ -210,6 +250,8 @@ const Design = () => {
                     textData={textData}
                     isSelected={isSelected}
                     imageData={imageData}
+                    tshirtcolor={tshirtcolor}
+                    tshirtsize={tshirtsize}
                     setImageData={setImageData}
                     setTextData={setTextData}
                     setIsSelected={setIsSelected}

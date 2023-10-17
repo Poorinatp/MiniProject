@@ -11,6 +11,7 @@
   font-size: 100%;
   
 }
+
 /* Style for the header */
 header {
   text-align: center;
@@ -24,7 +25,8 @@ header h1 {
 }
 
 /* Style for the form */
-form {
+.Signup{
+  font-size: 18px;
   width: 100%;
   max-width: 500px;
   max-height: fit-content;
@@ -75,5 +77,19 @@ textarea {
   display: flex;
   justify-content: center;
   text-decoration: underline;
+}
+@media screen and (max-width: 800px) {
+  .Signup{
+    max-width: 400px;
+    max-height: fit-content;
+
+  }
+
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  textarea {
+    font-size: 15px; 
+  }
 }
 

@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import React from "react";
 import NavBar from "../components/NavBar";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
-
+ 
 function Home()  {
 	const navigate = useNavigate();
 

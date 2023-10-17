@@ -2,42 +2,57 @@ import { useState } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import  "./Signup.css";
 import NavBar from '../components/NavBar';
+import Axios from "axios";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
-function Signup () {
-
-
-	const [firstname,setFirstname] = useState("");
-	const [lastname,setLastname] = useState("");
-    const [tel,setTel] = useState("");
-    const [email,setEmail] = useState("")
-    const [address,setAddress] = useState("")
-    const [city,setCity] = useState("")
-    const [country,setCountry] = useState("")
-    const [zipcode,setZipcode] = useState("")
+function Signup() {
+	const [Firstname, setFirstname] = useState('');
+	const [Lastname, setLastname] = useState('');
+	const [Telephone, setTel] = useState('');
+	const [Email, setEmail] = useState('');
+	const [Password, setPassword] = useState('');
+	const [Address, setAddress] = useState('');
+	const [City, setCity] = useState('');
+	const [Country, setCountry] = useState('');
+	const [Zipcode, setZipcode] = useState('');
 	const navigate = useNavigate();
-	
-
-
-	function handleSubmit(e) {
-        e.preventDefault();
-        const form = e.currentTarget;
-    
-        if (form.checkValidity() === false) {
-          form.reportValidity(); 
-        } else {
-          
-          navigate('/design'); 
-          console.log('You clicked submit.');
-          console.log(firstname,lastname,tel,email,address,city,country,zipcode );
-        }
-      }
+  
+	const handleSubmit = (e) => {
+	  e.preventDefault();
+	  const userData = {
+		Firstname,
+		Lastname,
+		Telephone,
+		Email,
+		Password,
+	  };
+	  const addressData = {
+		Address,
+		City,
+		Country,
+		Zipcode,
+	  };
+  
+	  Axios.post('http://localhost:8080/signup', { user: userData, address: addressData })
+		.then((response) => {
+		  console.log(response);
+		  if (response.status === 200) {
+			console.log('Signup successful');
+			navigate('/signin');
+		  } else {
+			alert('Signup failed');
+		  }
+		})
+		.catch((error) => {
+		  console.error('Error sending request:', error);
+		});
+	};
 
 	
 	return(
         <>
 		<NavBar/>
-		<form onSubmit={handleSubmit}>
+		<form className='Signup' onSubmit={handleSubmit}>
 			
 				<header>
 					<h1>SIGN UP</h1>
@@ -45,8 +60,9 @@ function Signup () {
 
 				<input 
 					type="text"  
-					id="firstname" autoFocus
+					id="Firstname" autoFocus
 					placeholder="First Name"
+					pattern="[a-zA-Z^ก-๏]+"
 					onChange={e =>{setFirstname(e.target.value)}}
                     required/> 
 					<br/>
@@ -54,56 +70,75 @@ function Signup () {
                  
 				<input 
 					type="text" 
-					id="lastname"
+					id="Lastname"
 					placeholder="Last Name"
+					pattern="[a-zA-Z^ก-๏]+"
 					onChange={e =>{setLastname(e.target.value)}}
                     required/> 
 					<br/>
                    
 				<input 
 					type="tel" 
-					id="tel"
-					placeholder="Your Phone"
+					id="Telephone"
+					placeholder="+66XX-XXX-XXXX"
+					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
 					onChange={e =>{setTel(e.target.value)}}
                     required/> 
 					<br/>
 
 				<input 
-					type="email" 
-					id="email"
+					type="Email" 
+					id="Email"
 					placeholder="Your Email"
+					pattern="^[a-zA-Z0-9]+@(hotmail\.com|gmail\.com)$"
 					onChange={e =>{setEmail(e.target.value)}}
                     required/> 
 					<br/>
-				
+
+				<input
+					type="Password"
+					id="Password"
+					placeholder="Your Password"
+					pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
+					value={Password}
+					onChange={e => { setPassword(e.target.value) }}
+					required 
+					maxlength="10"
+					/>
+					<br />
+							
                 <textarea
 					type="text" 
-					id="address"
+					id="Address"
 					placeholder="Your Adderss"
+					pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
 					onChange={e =>{setAddress(e.target.value)}}
                     required/>
 					<br/>
 
 				<input 
 					type="text" 
-					id="city"
+					id="City"
 					placeholder="City"
+					pattern="[a-zA-Zก-๏.]+"
 					onChange={e =>{setCity(e.target.value)}}
                     required/> 
 					<br/>
 
 				<input 
 					type="text" 
-					id="country"
+					id="Country"
 					placeholder="Country"
+					pattern="[a-zA-Zก-๏]+"
 					onChange={e =>{setCountry(e.target.value)}}
                     required/> 
 					<br/>
 
 				<input 
 					type="text" 
-					id="zipcode"
+					id="Zipcode"
 					placeholder="Zip-code"
+					pattern="[0-9]{5}"
 					onChange={e =>{setZipcode(e.target.value)}}
                     required/> 
 					<br/>
