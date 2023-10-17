@@ -89,13 +89,28 @@ app.get('/fonts', (req, res) => {
             return;
         }
         
-        // Remove the .ttf extension from font names
         const fontsWithoutExtension = files.map((file) => file.replace('.ttf', ''));
 
         res.json(fontsWithoutExtension);
     });
 });
 
+app.get('/picture', (req, res) => {
+    const imagesDir = path.join(__dirname, './picture');
+    fs.readdir(imagesDir, (err, files) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error reading images directory');
+            return;
+        }
+        const imageFiles = files.filter((file) => {
+            const extname = path.extname(file).toLowerCase();
+            return extname === '.jpg' || extname === '.png' || extname === '.gif' || extname === '.jpeg';
+        });
+
+        res.json(imageFiles);
+    });
+});
 
 // listen to port
 app.listen(port, function () {

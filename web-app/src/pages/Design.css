@@ -39,12 +39,15 @@
 }
 
 .grid-item-3 {
+  display: flex;
+  flex-direction: column;
   background-color: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 10px;
   grid-column: 2/7;
   min-width: 200px;
   padding: 10px;
+  gap: 10px;
 }
 
 .grid-item-4 {
@@ -96,6 +99,49 @@
   max-width: 100px;
 }
 
+.search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+  padding: 0px 10px;
+  border: 1px solid #ccc;
+  height: 50px;
+  margin-bottom: 10px;
+}
+
+.search-icon {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.search-img {
+  flex: 1;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none;
+  height: 30px;
+  margin: 0 !important;
+}
+
+.show-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+  overflow: hidden;
+}
+
+.img-img {
+  width: 100%;
+  cursor:pointer;
+  transition: opacity 0.3s;
+}
+
+.img-img:hover {
+  opacity: 0.7;
+  border: 2px solid #ff0000;
+}
+
 .container-1 {
   width: 450px;
   margin: 0 auto;
@@ -126,8 +172,6 @@
 
 .text-container {
   position: absolute;
-  top: 0;
-  left: 0;
 }
 
 .textinput {
@@ -153,13 +197,18 @@
   display: block;
   position: absolute;
   cursor: pointer;
+  outline: none;
   background: none;
   border: transparent;
 }
 
+.img-container {
+  position: absolute;
+}
+
 .remove-icon {
   position: absolute;
-  top: calc(50% - 15px); /* Adjust the vertical position relative to the text element */
+  top: calc(0% - 15px); /* Adjust the vertical position relative to the text element */
   left: calc(100% - 15px); /* Adjust the horizontal position relative to the text element */
   color: red; /* Customize the button's text color */
   border: none;
@@ -170,6 +219,38 @@
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
   display: none;
+}
+
+.decrease-icon {
+  position: absolute;
+  top: calc(0% - 15px); /* Adjust the vertical position relative to the text element */
+  left: calc(100% + 15px); /* Adjust the horizontal position relative to the text element */
+  color: gray; /* Customize the button's text color */
+  border: none;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: none;
+  background-color: white;
+}
+
+.increase-icon {
+  position: absolute;
+  top: calc(0% - 15px); /* Adjust the vertical position relative to the text element */
+  left: calc(100% + 35px); /* Adjust the horizontal position relative to the text element */
+  color: gray; /* Customize the button's text color */
+  border: none;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: none;
+  background-color: white;
 }
 
 .btn-group {
@@ -231,4 +312,25 @@
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   z-index: 999;
+}
+
+.text-list-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow:hidden;
+}
+
+.text-list:hover {
+  background-color: aqua;
+}
+
+.text-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
