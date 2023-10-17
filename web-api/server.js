@@ -25,17 +25,14 @@ var connection = mysql.createConnection({
     database: 'phimniyom_db'
 });
 // set mysql table names
-const database = 'phimniyom_db'
+const database = 'designshop'
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
 // connect to database 
-connection.connect(function (err) {
+connection.connect(function (err) {  
     if (err) throw err
     console.log('You are now connected with mysql database...')
 })
 // define root route
-app.get('/', function (req, res) {
-    res.send('Hello World');
-});
 
 for (var i = 0; i < tables.length; i++) {
     (function(table) {
@@ -48,26 +45,40 @@ for (var i = 0; i < tables.length; i++) {
     })(tables[i]);
 }
 
-app.get('/all', function(req, res) {
-    const allData = {};
 
-    // Loop through the tables and fetch data for each table
-    tables.forEach(function(table) {
-        connection.query('SELECT * FROM `' + table + '`', function(error, results, fields) {
-            if (error) throw error;
-
-            // Store the results in the 'allData' object with the table name as the key
-            allData[table] = results;
-
-            // Check if we have fetched data for all tables
-            if (Object.keys(allData).length === tables.length) {
-                // If all tables have been processed, send the 'allData' object as a response
-                res.send(allData);
-            }
-        });
+app.get('/user/orders', function(req, res) {
+    connection.query('SELECT product.product_image, product.User_id, product.Description, product.Created_at, orders.*, payment.Amount ' +
+    'FROM product ' +
+    'INNER JOIN orders ON product.product_id = orders.product_id ' +
+    'LEFT JOIN payment ON orders.payment_id = payment.payment_id', function(error, results) {
+        if (error) {
+            console.error('Error querying table');
+        } else {
+            res.send(results);
+        }
     });
 });
 
+// update customer data from mysql database by id
+app.put('/user/:username', function(req, res) {
+    const User_id = parseInt(req.params.username);
+    const { Firstname, Lastname, Telephone, Address, Zipcode , City, Country} = req.body;
+    connection.query('UPDATE user'
+    + 'LEFT JOIN user_address ON user.User_id = user_address.User_id'
+    + 'SET user.Firstname = ?, user.Lastname = ?, user.Telephone = ?, user_address.Address = ?, user_address.Zipcode = ?, user_address.City = ?, user_address.Country = ?'
+    + 'WHERE user.User_id = ?',
+    [ Firstname, Lastname, Telephone, Address, Zipcode , City, Country,User_id],
+    function(error, results, fields) {
+        if (error) {
+        res.status(500).send({ message: "Error updating customer data" });
+        } else if (results.affectedRows > 0) {
+        res.status(200).send({ message: "Customer updated successfully" });
+        } else {
+        res.status(401).send({ message: "Customer not found" });
+        }
+    }
+    );
+});
 
 // listen to port
 app.listen(port, function () {
