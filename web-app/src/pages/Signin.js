@@ -25,11 +25,12 @@ function Signin() {
         if (response.status === 200) {
           console.log(response.data)
           const userData = {
-            email: response.data.result.Email,
-            user_id: response.data.result.User_id,
+            email: response.data.result[0].Email,
+            user_id: response.data.result[0].User_id,
             status: "success"
           }
           sessionStorage.setItem('userData', JSON.stringify(userData));
+          console.log(userData)
           navigate('/design');
         } else {
           alert('เข้าสู่ระบบล้มเหลว');

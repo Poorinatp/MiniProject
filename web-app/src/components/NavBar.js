@@ -20,11 +20,15 @@ const NavBar = () => {
   }, []);
 
   const handleLogout = () => {
-    // Clear the user's session or login status, e.g., by removing an item from sessionStorage.
     sessionStorage.removeItem('userData');
     navigate("/signin")
     setIsLogin(false); // Set the login state to false.
   };
+  const handleProfile = () => {
+    setIsLogin(true);
+    navigate("/profile")
+  };
+
 
   return (
     <nav>
@@ -33,10 +37,11 @@ const NavBar = () => {
       </NavLink>
       <div className="auth-links">
         {isLogin ? (
-          // If the user is logged in, show the logout button.
+          <>
           <button onClick={handleLogout}>Logout</button>
+          <button onClick={handleProfile}>Profile</button>
+        </>
         ) : (
-          // If the user is not logged in, show the Sign Up and Sign In links.
           <>
             <NavLink
               to="/signup"

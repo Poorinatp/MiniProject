@@ -144,6 +144,68 @@ app.post('/signin', (req, res) => {
     });
   });  
   
+  app.get('/profile/:id', function(req, res) {
+    const user_id = req.params.id;
+    // console.log('username:', username);
+    connection.query('SELECT User_id, Email,Firstname,Lastname,Telephone FROM user WHERE User_id = ?', [user_id],
+      function(error, results, fields){
+        if (error) {
+          console.error('Error querying table:', error);
+          res.status(500).send({ error: 'Error querying table' });
+        } else {
+            res.send(results);
+        }
+      }
+    );
+  });
+
+  app.get('/user/orders/:id', function(req, res) {
+    const userId = parseInt(req.params.id); // Parse the ID parameter from the URL
+    const sqlQuery = `
+        SELECT 
+            product.product_image, 
+            product.User_id, 
+            product.Description, 
+            product.Created_at, 
+            orders.*, 
+            payment.Amount
+        FROM product 
+        INNER JOIN orders ON product.product_id = orders.product_id  
+        LEFT JOIN payment ON orders.payment_id = payment.payment_id
+        WHERE product.User_id = ?`;
+
+    connection.query(sqlQuery, [userId], function(error, results) {
+        if (error) {
+            console.error('Error querying table:', error);
+            res.status(500).send({ error: 'Error querying table' });
+        } else {
+            res.send(results);
+        }
+    });
+});
+
+
+// update customer data from mysql database by id
+app.put('/user/:username', function(req, res) {
+    const User_id = parseInt(req.params.username);
+    const { Firstname, Lastname, Telephone, Address, Zipcode , City, Country} = req.body;
+    connection.query('UPDATE user'
+    + 'LEFT JOIN user_address ON user.User_id = user_address.User_id'
+    + 'SET user.Firstname = ?, user.Lastname = ?, user.Telephone = ?, user_address.Address = ?, user_address.Zipcode = ?, user_address.City = ?, user_address.Country = ?'
+    + 'WHERE user.User_id = ?',
+    [ Firstname, Lastname, Telephone, Address, Zipcode , City, Country,User_id],
+    function(error, results, fields) {
+        if (error) {
+        res.status(500).send({ message: "Error updating customer data" });
+        } else if (results.affectedRows > 0) {
+        res.status(200).send({ message: "Customer updated successfully" });
+        } else {
+        res.status(401).send({ message: "Customer not found" });
+        }
+    }
+    );
+});
+
 // listen to port
 app.listen(port, function () {
     console.log('Node app is running on port ' + port);
