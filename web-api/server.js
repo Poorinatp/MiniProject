@@ -71,6 +71,15 @@ app.get('/all', function(req, res) {
     });
 });
 
+app.get('/products-with-details/:productid', function (req, res) {
+    const productid = req.params.productid; // Get the productid parameter from the URL
+
+    connection.query('SELECT * FROM product JOIN product_detail ON product.product_id = product_detail.product_id WHERE product.product_id = ?', [productid], function (error, results, fields) {
+        if (error) throw error;
+            res.send(results);
+    });
+});
+
 app.get('/fonts', (req, res) => {
     const fontsDir = path.join(__dirname, './fonts');
     fs.readdir(fontsDir, (err, files) => {
@@ -80,7 +89,6 @@ app.get('/fonts', (req, res) => {
             return;
         }
         
-        // Remove the .ttf extension from font names
         const fontsWithoutExtension = files.map((file) => file.replace('.ttf', ''));
 
         res.json(fontsWithoutExtension);
@@ -204,6 +212,22 @@ app.put('/user/:username', function(req, res) {
         }
     }
     );
+});
+app.get('/picture', (req, res) => {
+    const imagesDir = path.join(__dirname, './picture');
+    fs.readdir(imagesDir, (err, files) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error reading images directory');
+            return;
+        }
+        const imageFiles = files.filter((file) => {
+            const extname = path.extname(file).toLowerCase();
+            return extname === '.jpg' || extname === '.png' || extname === '.gif' || extname === '.jpeg';
+        });
+
+        res.json(imageFiles);
+    });
 });
 
 // listen to port

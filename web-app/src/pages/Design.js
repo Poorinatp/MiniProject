@@ -4,6 +4,10 @@ import NavBar from "../components/NavBar";
 import "./Design.css"
 import axios from "axios";
 import DesignLab2 from "../components/DesignLab2";
+import { useParams } from "react-router-dom";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 const OptionTab = ({
     textData, 
     setTextData,
@@ -20,9 +24,23 @@ const OptionTab = ({
     handleFontChange, 
     handleSizeChange, 
     handleColorChange,
-    handleImageUpload}) => {
+    handleImageUpload
+}) => {
     const [selectedOption, setSelectedOption] = useState("product");
     const size = Array.from({ length: 50 }, (_, i) => (i + 12) * 2);
+    const [searchImg, setsearchImg] = useState("");
+    const [imgname, setImgname] = useState([]);
+    const [filteredImages, setFilteredImages] = useState([]);
+      
+    useEffect(()=>{
+        axios
+        .get("http://localhost:8080/picture")
+        .then((response) => {
+            setImgname(response.data)
+            setFilteredImages(response.data)
+        })
+        .catch((error) => console.error("Error fetching fonts:", error));
+    },[])
 
     const handleOptionChange = (option) => {
         setSelectedOption(option);
@@ -30,7 +48,8 @@ const OptionTab = ({
 
     const handleAddText = () => {
         const newObject = {
-            id:textData.length+1, 
+            id: textData.length+1, 
+            type: "text",
             value: "new text", 
             fontFamily:"Arial", 
             fontSize:"10px", 
@@ -43,17 +62,23 @@ const OptionTab = ({
     };
     const handleAddImage = (image) => {
         const newObject = {
-            id: 1, 
-            width:"50px", 
+            id: imageData.length+1,
+            type: "image",
+            width: "100px", 
             x: "0px", 
-            y: "0px", 
-            rotationAngle: 0, 
-            image: selectedImage,
-            filename: selectedImage.name
+            y: "0px",
+            imagename: image,
         }
         setImageData((prevObjects) => [...prevObjects, newObject]);
     };
-      
+
+    const handleSearch = (query) => {
+        const lowerQuery = query.toLowerCase();
+        const filtered = imgname.filter((name) =>
+          name.toLowerCase().includes(lowerQuery)
+        );
+        setFilteredImages(filtered);
+    };
 
     return(
         <div className="grid-item">
@@ -98,18 +123,33 @@ const OptionTab = ({
                 </div>}
                 {selectedOption === "text" && 
                 <div className="grid-item-3 option-content">        
-                    <div>
-                        {textData.map((text)=>{
+                    <div className="text-list-wrap">
+                        {textData.map((text, index)=>{
                             return(
-                                <p key={text.id}>
-                                    {text.id}: {text.value}
+                                <p 
+                                    key={"p"+index}
+                                    className="text-list"
+                                    style={{ 
+                                        padding: isSelected[index]? "0px 9px":"0px 10px",
+                                        backgroundColor: isSelected[index]? "mediumseagreen": "transparent", 
+                                        border: isSelected[index]? "1px solid gray": "none", 
+                                        borderRadius: "20px",
+                                        cursor: "pointer"
+                                    }}
+                                    onClick={(e)=>{
+                                        const updatedSelection = Array(textData.length).fill(false);
+                                        updatedSelection[index] = !updatedSelection[index];
+                                        setIsSelected(updatedSelection);
+                                    }}
+                                >
+                                    {index+1}: {text.value}
                                 </p>
                             )
                         })}
                         <button onClick={handleAddText}>Create New Object</button>
                     </div>
-                    {isSelected.some((selected) => selected === true)&&
-                        <div>
+                    {(isSelected.some((selected) => selected === true)&&textData.length!==0)&&
+                        <div className="text-option">
                             <p>Font Family</p>
                             <select value={textData[isSelected.findIndex((selected) => selected === true)].fontFamily} onChange={(e) => handleFontChange(e, isSelected.findIndex((selected) => selected === true))}>
                                 {fonts.map((fontName) => (
@@ -148,37 +188,72 @@ const OptionTab = ({
                 </div>}
                 {selectedOption === "image" && 
                     <div className="grid-item-4 option-content">
-                        <input
-                        type="file"
-                        accept="image/*"
-                        onChange={e=>handleImageUpload(e)}
+                        <div className="search-container">
+                        <FontAwesomeIcon
+                            icon={faMagnifyingGlass}
+                            className="search-icon"
+                            id={`search-btn`}
+                            
                         />
-                        {selectedImage && (
-                            <>
-                            <img
-                                src={URL.createObjectURL(selectedImage)}
-                                alt="Uploaded Image"
-                                className="uploaded-image"
-                            />
-                            <button onClick={handleAddImage}>Add image</button>
-                            </>
-                        )}
+                        <input
+                            type="search"
+                            className="search-img"
+                            value={searchImg}
+                            onChange={(e) => {
+                                setsearchImg(e.target.value);
+                                handleSearch(e.target.value);
+                              }}
+                            placeholder="Search image by keywords..."
+                        />
+                        </div>
+                        <div className="show-container">
+                            {filteredImages.map((name, index)=>(
+                                <img className="img-img" key={index} src={`../picture/${name}`} alt={`image${index}`} onClick={e=>handleAddImage(name)} />
+                            ))}
+                        </div>
                     </div>}
             </div>
         </div>
     )
 }
 
+const CheckoutPopup = ({
+    tshirtcolor,
+    tshirtsize,
+    textData,
+    textDesignPrice,
+    closePopup,
+}) => {
+    return (
+      <div className="checkout-popup">
+        <h2>Checkout Information</h2>
+        <p>T-Shirt Color: {tshirtcolor}</p>
+        <p>T-Shirt Size: {tshirtsize}</p>
+        <p>Text Design Price: ${textDesignPrice}</p>
+  
+        {/* Display text data for reconfirmation */}
+        <h3>Text Data:</h3>
+        <ul>
+          {textData.map((text, index) => (
+            <li key={`text-${index}`}>{text.value}</li>
+          ))}
+        </ul>
+  
+        <button onClick={closePopup}>Close</button>
+      </div>
+    );
+};
+
 const Design = () => {
     const [textData, setTextData] = useState([
-        {id: 1, value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px", rotationAngle: 0},
-        {id: 2, value: "mynameis", fontFamily: "Basic-Regular", width:"120px", fontSize: "24px", fontColor: "red", x: "50px", y: "50px", rotationAngle: 0},
-        {id: 3, value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px", rotationAngle: 0}
+        {id: 1, type: "text", value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px", rotationAngle: 0},
+        {id: 2, type: "text", value: "mynameis", fontFamily: "Basic-Regular", width:"120px", fontSize: "36px", fontColor: "red", x: "50px", y: "50px", rotationAngle: 0},
+        {id: 3, type: "text", value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px", rotationAngle: 0}
     ]);      
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
     
     const [imageData, setImageData] = useState([
-        {id: 1, width:"50px", x: "0px", y: "0px", rotationAngle: 0, image: "blob:http://localhost:3000/b3158cc4-d925-4325-89d9-76162dde110e", filename:""}
+        {id: 1, type: "image", width:"100px", x: "0px", y: "0px", rotationAngle: 0, imagename:"แมวบนโซฟาสีเขียว.png"}
     ]);
 
     const [selectedImage, setSelectedImage] = useState(null);
@@ -186,18 +261,48 @@ const Design = () => {
     const [fonts, setFonts] = useState([]);
     const [tshirtcolor, setTshirtColor] = useState('white');
     const [tshirtsize, setTshirtSize] = useState('S');
+    const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
+
+    const { product_id } = useParams();
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
+        if (product_id) {
+            // Fetch data based on the product_id
+            axios
+                .get(`http://localhost:8080/products-with-details/${product_id}`)
+                .then((response) => {
+                    // Handle the response data here
+                    console.log(response.data.filter((item) => item.Font_family !== ""));
+                    // Update your state or perform other actions with the data
+                    const transformedData = response.data
+                    .filter((item) => item.Font_family !== "")
+                    .map((item) => ({
+                        id: item.id,
+                        value: 'EXAMPLE',
+                        fontFamily: item.Font_family,
+                        fontSize: item.Font_size + 'px',
+                        fontColor: item.Font_color,
+                        x: item.location_text.split(';')[0].trim() + 'px',
+                        y: item.location_text.split(';')[1].trim() + 'px',
+                        rotationAngle: 0, // You can set this to the default value
+                    }));
+                    console.log(transformedData);
+                    setTextData(transformedData);
+                })
+                .catch((error) => console.error("Error fetching product details:", error));
+        }else{
+            console.log("new product")
+        }
         axios
-        .get("http://localhost:8080/fonts")
-        .then((response) => {
-            setFonts(response.data);
-            response.data.forEach((fontName) => {
-                const fontFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
-                document.fonts.add(fontFace);
-            });
-        })
-        .catch((error) => console.error("Error fetching fonts:", error));
+            .get("http://localhost:8080/fonts")
+            .then((response) => {
+                setFonts(response.data);
+                response.data.forEach((fontName) => {
+                    const fontFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
+                    document.fonts.add(fontFace);
+                });
+            })
+            .catch((error) => console.error("Error fetching fonts:", error));
     }, []);
 
     const handleFontChange = (event, index) => {
@@ -221,6 +326,14 @@ const Design = () => {
     const handleImageUpload = (e) => {
         const imageFile = e.target.files[0];
         setSelectedImage(imageFile);
+    };
+
+    const handleCheckoutClick = () => {
+        setIsCheckoutPopupOpen(true);
+      };
+      
+    const closeCheckoutPopup = () => {
+        setIsCheckoutPopupOpen(false);
     };
 
     return(
@@ -256,8 +369,22 @@ const Design = () => {
                     setTextData={setTextData}
                     setIsSelected={setIsSelected}
                     selectedImage={selectedImage}
+                    setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
+                    handleCheckoutClick={handleCheckoutClick}
                 />
             </div>
+            {isCheckoutPopupOpen && (
+                <>
+                    <div className="popup-overlay"></div>
+                    <CheckoutPopup
+                        tshirtcolor={tshirtcolor}
+                        tshirtsize={tshirtsize}
+                        textData={textData}
+                        textDesignPrice={textData.length * 10}
+                        closePopup={closeCheckoutPopup}
+                    />
+                </>
+            )}
         </>
     )
 }
