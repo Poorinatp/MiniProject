@@ -31,6 +31,8 @@ function Profile() {
       .then((response) => {
         setmyHistory(response.data);
         setmyDesignList(response.data);
+
+        console.log(response.data);
       })
       .catch((error) => {
         console.error('Error fetching user data:', error);

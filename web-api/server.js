@@ -76,7 +76,11 @@ app.get('/products-with-details/:productid', function (req, res) {
 
     connection.query('SELECT * FROM product JOIN product_detail ON product.product_id = product_detail.product_id WHERE product.product_id = ?', [productid], function (error, results, fields) {
         if (error) throw error;
-            res.send(results);
+        if (results.length > 0) {
+          res.status(200).send(results);
+        } else {
+          res.status(400).send({ message: 'Product not found!' });
+        }
     });
 });
 
@@ -229,6 +233,58 @@ app.get('/picture', (req, res) => {
         res.json(imageFiles);
     });
 });
+
+app.post('/saveproduct', (req, res) => {
+  const productData = req.body.productData;
+  const productDetails = req.body.productDetails;
+
+  // Insert into the product table
+  const productQuery = 'INSERT INTO product (User_id, Description, product_image) VALUES (?, ?, ?)';
+  const productValues = [
+    productData.User_id,
+    productData.Description,
+    productData.product_image,
+  ];
+
+  connection.query(productQuery, productValues, (productError, productResults) => {
+    if (productError) {
+      return res.status(500).json({ message: 'Error inserting product data'+productError.message });
+    }
+
+    const productId = productResults.insertId; // Get the ID of the inserted product
+    console.log(productId)
+    // Insert all product details using a loop
+    productDetails.forEach((productDetailData, index) => {
+      productDetailData.Product_id = productId;
+      const productDetailQuery = 'INSERT INTO product_detail (Product_id, Font_size, Font_family, Font_color, location_img, img_width, img, location_text, text_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      const productDetailValues = [
+        productDetailData.Product_id,
+        productDetailData.Font_size,
+        productDetailData.Font_family,
+        productDetailData.Font_color,
+        productDetailData.location_img,
+        productDetailData.img_width,
+        productDetailData.img,
+        productDetailData.location_text,
+        productDetailData.text_value,
+      ];
+    
+      console.log('Inserting product detail at index', index);
+      console.log('Query:', productDetailQuery);
+      console.log('Values:', productDetailValues);
+    
+      connection.query(productDetailQuery, productDetailValues, (productDetailError, productDetailResults) => {
+        if (productDetailError) {
+          console.error('Error inserting product detail at index', index, productDetailError);
+          return res.status(500).json({ message: `Error inserting product detail at index ${index}` + productDetailError.message });
+        }
+      });
+    });
+
+    res.status(201).json({ message: 'Product and details saved successfully', insertId: productId });
+  });
+});
+
 
 // listen to port
 app.listen(port, function () {

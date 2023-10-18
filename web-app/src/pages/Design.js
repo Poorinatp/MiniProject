@@ -246,14 +246,14 @@ const CheckoutPopup = ({
 
 const Design = () => {
     const [textData, setTextData] = useState([
-        {id: 1, type: "text", value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px", rotationAngle: 0},
-        {id: 2, type: "text", value: "mynameis", fontFamily: "Basic-Regular", width:"120px", fontSize: "36px", fontColor: "red", x: "50px", y: "50px", rotationAngle: 0},
-        {id: 3, type: "text", value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px", rotationAngle: 0}
+        {id: 1, type: "text", value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px"},
+        {id: 2, type: "text", value: "mynameis", fontFamily: "Basic-Regular", width:"120px", fontSize: "36px", fontColor: "red", x: "50px", y: "50px"},
+        {id: 3, type: "text", value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px"}
     ]);      
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
     
     const [imageData, setImageData] = useState([
-        {id: 1, type: "image", width:"100px", x: "0px", y: "0px", rotationAngle: 0, imagename:"แมวบนโซฟาสีเขียว.png"}
+        {id: 1, type: "image", width:"100px", x: "0px", y: "0px", imagename:"แมวบนโซฟาสีเขียว.png"}
     ]);
 
     const [selectedImage, setSelectedImage] = useState(null);
@@ -272,24 +272,38 @@ const Design = () => {
                 .get(`http://localhost:8080/products-with-details/${product_id}`)
                 .then((response) => {
                     // Handle the response data here
-                    console.log(response.data.filter((item) => item.Font_family !== ""));
-                    // Update your state or perform other actions with the data
-                    const transformedData = response.data
-                    .filter((item) => item.Font_family !== "")
-                    .map((item) => ({
-                        id: item.id,
-                        value: 'EXAMPLE',
-                        fontFamily: item.Font_family,
-                        fontSize: item.Font_size + 'px',
-                        fontColor: item.Font_color,
-                        x: item.location_text.split(';')[0].trim() + 'px',
-                        y: item.location_text.split(';')[1].trim() + 'px',
-                        rotationAngle: 0, // You can set this to the default value
-                    }));
-                    console.log(transformedData);
-                    setTextData(transformedData);
+                    if (response.status === 200) {
+                        // Update your state or perform other actions with the data
+                        const textDetailData = response.data
+                        .filter((item) => item.Font_family !== "")
+                        .map((item) => ({
+                            id: item.id,
+                            type: "text",
+                            value: item.text_value,
+                            fontFamily: item.Font_family,
+                            fontSize: item.Font_size + 'px',
+                            fontColor: item.Font_color,
+                            x: item.location_text.split(';')[0].trim() + 'px',
+                            y: item.location_text.split(';')[1].trim() + 'px',
+                        }));
+                        const imageDetailData = response.data
+                        .filter((item) => item.Font_family === "")
+                        .map((item) => ({
+                            id: item.id,
+                            type: "image",
+                            width: item.img_width,
+                            x: item.location_img.split(';')[0].trim() + 'px',
+                            y: item.location_img.split(';')[1].trim() + 'px',
+                            imagename: item.img
+                        }));
+                        setTextData(textDetailData);
+                        setImageData(imageDetailData);
+                    } else {
+
+                    }
+                    
                 })
-                .catch((error) => console.error("Error fetching product details:", error));
+                .catch((error) => console.log("new product"));
         }else{
             console.log("new product")
         }
