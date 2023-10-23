@@ -5,6 +5,7 @@ import {BrowserRouter,Routes,Route}  from 'react-router-dom';
 import Signup from './pages/Signup';
 import Design from './pages/Design';
 import Profile from './pages/Profile';
+import TestUpload from './pages/TestUpload';
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/design/:product_id" element={<Design />} />
         <Route path="/design" element={<Design />} />
         <Route path="/Profile" element={<Profile/>}/>
+        <Route path="/test" element={<TestUpload/>}/>
       </Routes>
     </BrowserRouter>
   

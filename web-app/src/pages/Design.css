@@ -254,6 +254,7 @@
 }
 
 .btn-group {
+  width: 50%;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -303,6 +304,7 @@
   border: none;
   cursor: pointer;
 }
+
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -312,6 +314,26 @@
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   z-index: 999;
+}
+
+.info-grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  grid-gap: 30px;
+  margin: 10px;
+  height: 50%;
+}
+
+.info-grid-item {
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+}
+
+.info-grid-item div {
+  display: flex;
+  justify-content: space-between;
 }
 
 .text-list-wrap {

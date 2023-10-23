@@ -48,7 +48,7 @@ const OptionTab = ({
 
     const handleAddText = () => {
         const newObject = {
-            id: textData.length+1, 
+            id: textData[textData.length-1].id+1, 
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
@@ -62,7 +62,7 @@ const OptionTab = ({
     };
     const handleAddImage = (image) => {
         const newObject = {
-            id: imageData.length+1,
+            id: imageData[imageData.length-1].id+1,
             type: "image",
             width: "100px", 
             x: "0px", 
@@ -221,25 +221,52 @@ const CheckoutPopup = ({
     tshirtcolor,
     tshirtsize,
     textData,
-    textDesignPrice,
+    imageData,
+    tshirtprice,
+    textprice,
+    imageprice,
+    designPrice,
     closePopup,
 }) => {
+
+    const handlePayment = () => {
+        console.log('Payment');
+    }
     return (
       <div className="checkout-popup">
         <h2>Checkout Information</h2>
         <p>T-Shirt Color: {tshirtcolor}</p>
         <p>T-Shirt Size: {tshirtsize}</p>
-        <p>Text Design Price: ${textDesignPrice}</p>
-  
+        <p>T-Shirt Price: {tshirtprice} ฿</p>
+        <p>Design Price: {designPrice} ฿</p>
+        <h3>Total Price: {tshirtprice+designPrice} ฿</h3>
         {/* Display text data for reconfirmation */}
-        <h3>Text Data:</h3>
-        <ul>
-          {textData.map((text, index) => (
-            <li key={`text-${index}`}>{text.value}</li>
-          ))}
-        </ul>
-  
-        <button onClick={closePopup}>Close</button>
+        <div className="info-grid-container">
+            <div className="info-grid-item">
+                <h3>Text Design:</h3>
+                {textData.map((text, index) => (
+                    <div key={`text-row-${index}`}>
+                        <p key={`text-${index}`} className="text-name">{text.value}</p>
+                        <p key={`text-price-${index}`} className="text-price">{textprice} ฿</p>
+                    </div>
+                ))}
+                <h3 style={{alignSelf:"flex-end"}}>{textData.length*textprice} ฿</h3>
+            </div>
+            <div className="info-grid-item">
+                <h3>Image Design:</h3>
+                {imageData.map((image, index) => (
+                    <div key={`img-row-${index}`}>
+                        <p key={`img-${index}`} className="img-name">{image.imagename.replace(/\.png$/, '')}</p>
+                        <p key={`img-price-${index}`} className="img-price">{imageprice} ฿</p>
+                    </div>
+                ))}
+                <h3 style={{alignSelf:"flex-end"}}>{imageData.length*imageprice} ฿</h3>
+            </div>
+        </div>
+        <div style={{alignSelf:"flex-end"}} className="btn-group">
+            <button onClick={handlePayment}>Payment</button>
+            <button onClick={closePopup}>Close</button>
+        </div>
       </div>
     );
 };
@@ -251,7 +278,6 @@ const Design = () => {
         {id: 3, type: "text", value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px"}
     ]);      
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
-    
     const [imageData, setImageData] = useState([
         {id: 1, type: "image", width:"100px", x: "0px", y: "0px", imagename:"แมวบนโซฟาสีเขียว.png"}
     ]);
@@ -262,10 +288,14 @@ const Design = () => {
     const [tshirtcolor, setTshirtColor] = useState('white');
     const [tshirtsize, setTshirtSize] = useState('S');
     const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
+    const tshirtprice = 100;
+    const textprice = 10;
+    const imageprice = 30;
 
     const { product_id } = useParams();
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
+        
         if (product_id) {
             // Fetch data based on the product_id
             axios
@@ -283,8 +313,8 @@ const Design = () => {
                             fontFamily: item.Font_family,
                             fontSize: item.Font_size + 'px',
                             fontColor: item.Font_color,
-                            x: item.location_text.split(';')[0].trim() + 'px',
-                            y: item.location_text.split(';')[1].trim() + 'px',
+                            x: item.location_text.split(';')[0].trim(),
+                            y: item.location_text.split(';')[1].trim(),
                         }));
                         const imageDetailData = response.data
                         .filter((item) => item.Font_family === "")
@@ -292,11 +322,12 @@ const Design = () => {
                             id: item.id,
                             type: "image",
                             width: item.img_width,
-                            x: item.location_img.split(';')[0].trim() + 'px',
-                            y: item.location_img.split(';')[1].trim() + 'px',
+                            x: item.location_img.split(';')[0].trim(),
+                            y: item.location_img.split(';')[1].trim(),
                             imagename: item.img
                         }));
                         setTextData(textDetailData);
+                        console.log(textDetailData)
                         setImageData(imageDetailData);
                     } else {
 
@@ -305,7 +336,7 @@ const Design = () => {
                 })
                 .catch((error) => console.log("new product"));
         }else{
-            console.log("new product")
+            //console.log("new product")
         }
         axios
             .get("http://localhost:8080/fonts")
@@ -394,7 +425,11 @@ const Design = () => {
                         tshirtcolor={tshirtcolor}
                         tshirtsize={tshirtsize}
                         textData={textData}
-                        textDesignPrice={textData.length * 10}
+                        imageData={imageData}
+                        tshirtprice={tshirtprice}
+                        textprice={textprice}
+                        imageprice={imageprice}
+                        designPrice={textData.length * textprice + imageData.length * imageprice}
                         closePopup={closeCheckoutPopup}
                     />
                 </>

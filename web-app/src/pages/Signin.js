@@ -67,7 +67,7 @@ function Signin() {
               value={password}
               onChange={e => { setPassword(e.target.value) }}
               required 
-              maxlength="10"
+              maxLength="10"
           />
           <br />
 

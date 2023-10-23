@@ -13,7 +13,7 @@ var app = express();
 var cors = require('cors')
 var path = require('path');
 var fs = require('fs');
-
+var multer = require('multer');
 app.use(cors())
 // configure bodyparser to handle post requests
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -30,6 +30,19 @@ var connection = mysql.createConnection({
 // set mysql table names
 const database = 'phimniyom_db'
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../web-app/public/shirt-design');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+// Initialize multer with the storage engine
+const upload = multer({ storage });
+
 // connect to database 
 connection.connect(function (err) {
     if (err) throw err
@@ -232,6 +245,14 @@ app.get('/picture', (req, res) => {
 
         res.json(imageFiles);
     });
+});
+
+app.post('/saveimage', upload.single('image'), (req, res) => {
+  // The uploaded file can be accessed as req.file.
+  if (!req.file) {
+    res.status(400).send('No image file')
+  }
+  res.status(200).send(req.file.originalname);
 });
 
 app.post('/saveproduct', (req, res) => {
