@@ -4,9 +4,10 @@ import NavBar from "../components/NavBar";
 import "./Design.css"
 import axios from "axios";
 import DesignLab2 from "../components/DesignLab2";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import html2canvas from 'html2canvas';
 
 const OptionTab = ({
     textData, 
@@ -31,7 +32,7 @@ const OptionTab = ({
     const [searchImg, setsearchImg] = useState("");
     const [imgname, setImgname] = useState([]);
     const [filteredImages, setFilteredImages] = useState([]);
-      
+
     useEffect(()=>{
         axios
         .get("http://localhost:8080/picture")
@@ -222,24 +223,25 @@ const CheckoutPopup = ({
     tshirtsize,
     textData,
     imageData,
-    tshirtprice,
-    textprice,
-    imageprice,
+    tshirtPrice,
+    textPrice,
+    imagePrice,
     designPrice,
+    totalPrice,
     closePopup,
+    handlePayment,
 }) => {
 
-    const handlePayment = () => {
-        console.log('Payment');
-    }
     return (
       <div className="checkout-popup">
+        <div>
         <h2>Checkout Information</h2>
         <p>T-Shirt Color: {tshirtcolor}</p>
         <p>T-Shirt Size: {tshirtsize}</p>
-        <p>T-Shirt Price: {tshirtprice} ฿</p>
+        <p>T-Shirt Price: {tshirtPrice} ฿</p>
         <p>Design Price: {designPrice} ฿</p>
-        <h3>Total Price: {tshirtprice+designPrice} ฿</h3>
+        <h3>Total Price: {totalPrice} ฿</h3>
+        </div>
         {/* Display text data for reconfirmation */}
         <div className="info-grid-container">
             <div className="info-grid-item">
@@ -247,23 +249,26 @@ const CheckoutPopup = ({
                 {textData.map((text, index) => (
                     <div key={`text-row-${index}`}>
                         <p key={`text-${index}`} className="text-name">{text.value}</p>
-                        <p key={`text-price-${index}`} className="text-price">{textprice} ฿</p>
+                        <p key={`text-price-${index}`} className="text-price">{textPrice} ฿</p>
                     </div>
                 ))}
-                <h3 style={{alignSelf:"flex-end"}}>{textData.length*textprice} ฿</h3>
+                <h3 style={{alignSelf:"flex-end"}}>{textData.length*textPrice} ฿</h3>
             </div>
             <div className="info-grid-item">
                 <h3>Image Design:</h3>
                 {imageData.map((image, index) => (
                     <div key={`img-row-${index}`}>
                         <p key={`img-${index}`} className="img-name">{image.imagename.replace(/\.png$/, '')}</p>
-                        <p key={`img-price-${index}`} className="img-price">{imageprice} ฿</p>
+                        <p key={`img-price-${index}`} className="img-price">{imagePrice} ฿</p>
                     </div>
                 ))}
-                <h3 style={{alignSelf:"flex-end"}}>{imageData.length*imageprice} ฿</h3>
+                <h3 style={{alignSelf:"flex-end"}}>{imageData.length*imagePrice} ฿</h3>
             </div>
         </div>
-        <div style={{alignSelf:"flex-end"}} className="btn-group">
+        <div>
+            <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr-code"/>
+        </div>
+        <div className="btn-group">
             <button onClick={handlePayment}>Payment</button>
             <button onClick={closePopup}>Close</button>
         </div>
@@ -288,11 +293,14 @@ const Design = () => {
     const [tshirtcolor, setTshirtColor] = useState('white');
     const [tshirtsize, setTshirtSize] = useState('S');
     const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
-    const tshirtprice = 100;
-    const textprice = 10;
-    const imageprice = 30;
-
+    const tshirtPrice = 100;
+    const textPrice = 10;
+    const imagePrice = 30;
+    const totalPrice = tshirtPrice+(textData.length*textPrice+imageData.length*imagePrice);
     const { product_id } = useParams();
+    const session =  JSON.parse(sessionStorage.getItem('userData'));
+    const navigate = useNavigate();
+
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
         
@@ -381,6 +389,96 @@ const Design = () => {
         setIsCheckoutPopupOpen(false);
     };
 
+    const handleSaveDesign = () => {
+        if (!session) {
+          navigate('/signin');
+        } else {
+          const container = document.getElementById('container');
+        
+          html2canvas(container).then((canvas) => {
+            canvas.toBlob((blob) => {
+              const formData = new FormData();
+              const fileName = `${session.user_id}_${Date.now()}.png`;
+              formData.append('image', blob, fileName);
+        
+              axios
+                .post('http://localhost:8080/saveimage', formData)
+                .then((response) => {
+                  const imageDescriptions = imageData.map((image) => image.imagename.replace(/\.png$/, '')).join(' ');
+                  const productData = {
+                    User_id: session.user_id,
+                    Description: imageDescriptions,
+                    product_image: response.data,
+                  };
+        
+                  const productDetails = [];
+        
+                  textData.forEach((item) => {
+                    const productDetailData = {
+                      Product_id: null,
+                      Font_size: parseInt(item.fontSize),
+                      Font_family: item.fontFamily,
+                      Font_color: item.fontColor,
+                      location_img: '',
+                      img_width: '',
+                      img: '',
+                      location_text: `${item.x};${item.y}`,
+                      text_value: item.value,
+                    };
+                    productDetails.push(productDetailData);
+                  });
+        
+                  imageData.forEach((item) => {
+                    const productDetailData = {
+                      Product_id: null,
+                      Font_size: 0,
+                      Font_family: '',
+                      Font_color: '',
+                      location_img: `${item.x};${item.y}`,
+                      img_width: item.width,
+                      img: item.imagename,
+                      location_text: '',
+                      text_value: '',
+                    };
+                    productDetails.push(productDetailData);
+                  });
+        
+                  axios
+                    .post('http://localhost:8080/saveproduct', { productData, productDetails })
+                    .then((response) => {
+                      console.log("create product success")
+                      
+                    })
+                    .catch((error) => {
+    
+                    });
+                })
+                .catch((error) => {
+                  
+                });
+            }, 'image/png');
+          });
+        }
+    };
+
+    const handlePayment = () => {
+        const paymentData = {
+            User_id: session.user_id,
+            Amount: totalPrice,
+            status: "ยังไม่ชำระเงิน",
+        }
+        axios
+        .post('http://localhost:8080/createpayment', { paymentData })
+        .then((response) => {
+            console.log(response.data)
+            
+        })
+        .catch((error) => {
+
+        });
+        //handleSaveDesign()
+    }
+
     return(
         <>
             <NavBar/>
@@ -415,6 +513,7 @@ const Design = () => {
                     setIsSelected={setIsSelected}
                     selectedImage={selectedImage}
                     setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
+                    handleSaveDesign={handleSaveDesign}
                     handleCheckoutClick={handleCheckoutClick}
                 />
             </div>
@@ -426,11 +525,13 @@ const Design = () => {
                         tshirtsize={tshirtsize}
                         textData={textData}
                         imageData={imageData}
-                        tshirtprice={tshirtprice}
-                        textprice={textprice}
-                        imageprice={imageprice}
-                        designPrice={textData.length * textprice + imageData.length * imageprice}
+                        tshirtPrice={tshirtPrice}
+                        textPrice={textPrice}
+                        imagePrice={imagePrice}
+                        designPrice={textData.length * textPrice + imageData.length * imagePrice}
+                        totalPrice={totalPrice}
                         closePopup={closeCheckoutPopup}
+                        handlePayment={handlePayment}
                     />
                 </>
             )}

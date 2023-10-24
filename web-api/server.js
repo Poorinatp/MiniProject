@@ -306,6 +306,45 @@ app.post('/saveproduct', (req, res) => {
   });
 });
 
+app.post('/createpayment', (req, res) => {
+  const paymentData = req.body.paymentData;
+
+  // Insert into the product table
+  const paymentQuery = 'INSERT INTO payment (User_id, Amount, status) VALUES (?, ?, ?)';
+  const paymentValues = [
+    paymentData.User_id,
+    paymentData.Amount,
+    paymentData.status,
+  ];
+
+  connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
+    if (paymentError) {
+      return res.status(500).json({ message: 'Error inserting payment data'+paymentError.message });
+    }
+    const paymentId = paymentResults.insertId;
+    res.status(200).json({ message: 'Payment created successfully', paymentId: paymentId });
+  });
+});
+
+app.post('/createorder', (req, res) => {
+  const paymentData = req.body.paymentData;
+
+  // Insert into the product table
+  const paymentQuery = 'INSERT INTO payment (User_id, Amount, status) VALUES (?, ?, ?)';
+  const paymentValues = [
+    paymentData.User_id,
+    paymentData.Amount,
+    paymentData.status,
+  ];
+
+  connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
+    if (paymentError) {
+      return res.status(500).json({ message: 'Error inserting payment data'+paymentError.message });
+    }
+    const paymentId = paymentResults.insertId;
+    res.status(200).json({ message: 'Payment created successfully', paymentId: paymentId });
+  });
+});
 
 // listen to port
 app.listen(port, function () {
