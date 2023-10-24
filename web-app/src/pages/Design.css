@@ -324,6 +324,12 @@
   justify-content: space-between;
 }
 
+.payment-warn {
+  text-align: center;
+  font-size: 36px;
+  color: red;
+}
+
 .payment-qr {
   position: relative;
   width: 100%;

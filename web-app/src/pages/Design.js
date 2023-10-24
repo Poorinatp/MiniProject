@@ -40,7 +40,7 @@ const OptionTab = ({
             setImgname(response.data)
             setFilteredImages(response.data)
         })
-        .catch((error) => console.error("Error fetching fonts:", error));
+        .catch((error) => {});
     },[])
 
     const handleOptionChange = (option) => {
@@ -227,11 +227,19 @@ const CheckoutPopup = ({
     textPrice,
     imagePrice,
     designPrice,
+    setTotalItem,
+    totalItem,
     totalPrice,
+    openQr,
+    timeLeft,
     closePopup,
     handlePayment,
 }) => {
-
+    const formatTime = (timeLeft) => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        return `${minutes} minute${minutes !== 1 ? 's' : ''}${seconds > 0 ? ` and ${seconds} second${seconds !== 1 ? 's' : ''}` : ''}`;
+    };
     return (
       <div className="checkout-popup">
         <div>
@@ -240,7 +248,9 @@ const CheckoutPopup = ({
         <p>T-Shirt Size: {tshirtsize}</p>
         <p>T-Shirt Price: {tshirtPrice} ฿</p>
         <p>Design Price: {designPrice} ฿</p>
-        <h3>Total Price: {totalPrice} ฿</h3>
+        <p>Total Price: {tshirtPrice+designPrice} ฿</p>
+        <p>Number of t-shirts: <input value={totalItem} style={{width:"50px"}} onChange={e=>setTotalItem(e.target.value)} type="number"/> </p>
+        <h3>Total: {totalPrice} ฿</h3>
         </div>
         {/* Display text data for reconfirmation */}
         <div className="info-grid-container">
@@ -265,9 +275,15 @@ const CheckoutPopup = ({
                 <h3 style={{alignSelf:"flex-end"}}>{imageData.length*imagePrice} ฿</h3>
             </div>
         </div>
-        <div>
-            <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr-code"/>
-        </div>
+        {openQr&&
+            <div>
+                <h1 className="payment-warn">Please pay via QR-code within {formatTime(timeLeft)}</h1>
+                <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr-code"/>
+            </div>
+        }
+        {timeLeft==0&&
+            <h1 className="payment-warn">Payment unsuccessfully please try agian. {formatTime(timeLeft)}</h1>
+        }
         <div className="btn-group">
             <button onClick={handlePayment}>Payment</button>
             <button onClick={closePopup}>Close</button>
@@ -296,10 +312,17 @@ const Design = () => {
     const tshirtPrice = 100;
     const textPrice = 10;
     const imagePrice = 30;
-    const totalPrice = tshirtPrice+(textData.length*textPrice+imageData.length*imagePrice);
+    const [totalItem, setTotalItem] = useState(1);
+    const totalPrice = (tshirtPrice+(textData.length*textPrice+imageData.length*imagePrice))*totalItem;
     const { product_id } = useParams();
     const session =  JSON.parse(sessionStorage.getItem('userData'));
     const navigate = useNavigate();
+
+    const [productId, setProductId] = useState(null);
+    const [openQr, setOpenQr] = useState(false)
+    const [timeLeft, setTimeLeft] = useState(180);
+    const timeout = 180 * 1000;
+    const [paymentTimer, setPaymentTimer] = useState(null);
 
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
@@ -335,16 +358,15 @@ const Design = () => {
                             imagename: item.img
                         }));
                         setTextData(textDetailData);
-                        console.log(textDetailData)
                         setImageData(imageDetailData);
                     } else {
 
                     }
                     
                 })
-                .catch((error) => console.log("new product"));
+                .catch((error) =>{});
         }else{
-            //console.log("new product")
+
         }
         axios
             .get("http://localhost:8080/fonts")
@@ -355,9 +377,17 @@ const Design = () => {
                     document.fonts.add(fontFace);
                 });
             })
-            .catch((error) => console.error("Error fetching fonts:", error));
+            .catch((error) => {});
     }, []);
 
+    useEffect(() => {
+        if (timeLeft === 0) {
+          setOpenQr(false);
+          clearInterval(paymentTimer); // Stop the timer when time is up
+        }
+    }, [timeLeft, paymentTimer]);
+
+      
     const handleFontChange = (event, index) => {
         const newTextElements = [...textData];
         newTextElements[index].fontFamily = event.target.value;
@@ -446,8 +476,9 @@ const Design = () => {
                   axios
                     .post('http://localhost:8080/saveproduct', { productData, productDetails })
                     .then((response) => {
-                      console.log("create product success")
-                      
+                        if (response.status==200) {
+                            setProductId(response.data.insertId)
+                        }
                     })
                     .catch((error) => {
     
@@ -462,21 +493,55 @@ const Design = () => {
     };
 
     const handlePayment = () => {
-        const paymentData = {
-            User_id: session.user_id,
-            Amount: totalPrice,
-            status: "ยังไม่ชำระเงิน",
-        }
-        axios
-        .post('http://localhost:8080/createpayment', { paymentData })
-        .then((response) => {
-            console.log(response.data)
-            
-        })
-        .catch((error) => {
+        if (!session) {
+            navigate('/signin');
+        } else {
+            setOpenQr(true)
+            setPaymentTimer(
+                setInterval(() => {
+                    setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
+                }, 1000) // Update every 1 second
+            );
+            const paymentData = {
+                User_id: session.user_id,
+                Amount: totalPrice,
+                status: "ยังไม่ชำระเงิน",
+            }
+            axios
+            .post('http://localhost:8080/createpayment', { paymentData })
+            .then((response) => {
+                if(response.status==200) {
+                    handleSaveDesign()
+                    const orderData = {
+                        Product_id: productId,
+                        Payment_id: response.data.paymentId,
+                        Color: tshirtcolor,
+                        Size: tshirtsize,
+                        Total_item: totalItem
+                    }
+                    axios
+                    .post('http://localhost:8080/createorder', { orderData })
+                    .then((response) => {
+                        if(response.status==200) {
+                            
+                        } else {
 
-        });
-        //handleSaveDesign()
+                        }
+                    })
+                    .catch((error) => {
+        
+                    });
+
+                } else {
+
+                }
+                
+            })
+            .catch((error) => {
+
+            });
+            //handleSaveDesign()
+        }
     }
 
     return(
@@ -529,7 +594,11 @@ const Design = () => {
                         textPrice={textPrice}
                         imagePrice={imagePrice}
                         designPrice={textData.length * textPrice + imageData.length * imagePrice}
+                        setTotalItem={setTotalItem}
+                        totalItem={totalItem}
                         totalPrice={totalPrice}
+                        openQr={openQr}
+                        timeLeft={timeLeft}
                         closePopup={closeCheckoutPopup}
                         handlePayment={handlePayment}
                     />

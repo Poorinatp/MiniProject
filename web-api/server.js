@@ -101,7 +101,6 @@ app.get('/fonts', (req, res) => {
     const fontsDir = path.join(__dirname, './fonts');
     fs.readdir(fontsDir, (err, files) => {
         if (err) {
-            console.error(err);
             res.status(500).send('Error reading fonts directory');
             return;
         }
@@ -121,14 +120,11 @@ app.post('/signin', (req, res) => {
       [email, password],
       (err, result) => {
         if (err) {
-          console.error('Database error: ' + err.message);
           res.status(500).send({ error: 'Database error' });
         } else {
           if (result.length > 0) {
-            console.log('Login successful');
             res.status(200).send({ status: 200, result: result });
           } else {
-            console.log('Login failed');
             res.status(401).send({ message: 'Login failed' });
           }
         }
@@ -142,7 +138,6 @@ app.post('/signin', (req, res) => {
     // Insert user data into the "user" table
     connection.query('INSERT INTO user SET ?', userData, (userInsertError, userResult) => {
       if (userInsertError) {
-        console.error('User insert error:', userInsertError);
         res.status(500).send('User registration failed');
         return;
       }
@@ -150,7 +145,6 @@ app.post('/signin', (req, res) => {
       // Retrieve the last inserted user ID
       connection.query('SELECT LAST_INSERT_ID() as user_id', (idQueryError, idResult) => {
         if (idQueryError) {
-          console.error('User ID retrieval error:', idQueryError);
           res.status(500).send('User registration failed');
           return;
         }
@@ -159,7 +153,6 @@ app.post('/signin', (req, res) => {
         addressData.user_id = idResult[0].user_id;
         connection.query('INSERT INTO user_address SET ?', addressData, (addressInsertError) => {
           if (addressInsertError) {
-            console.error('Address insert error:', addressInsertError);
             res.status(500).send('User registration failed');
           } else {
             res.status(200).send('User registration successful');
@@ -171,11 +164,9 @@ app.post('/signin', (req, res) => {
   
   app.get('/profile/:id', function(req, res) {
     const user_id = req.params.id;
-    // console.log('username:', username);
     connection.query('SELECT User_id, Email,Firstname,Lastname,Telephone FROM user WHERE User_id = ?', [user_id],
       function(error, results, fields){
         if (error) {
-          console.error('Error querying table:', error);
           res.status(500).send({ error: 'Error querying table' });
         } else {
             res.send(results);
@@ -201,7 +192,6 @@ app.post('/signin', (req, res) => {
 
     connection.query(sqlQuery, [userId], function(error, results) {
         if (error) {
-            console.error('Error querying table:', error);
             res.status(500).send({ error: 'Error querying table' });
         } else {
             res.send(results);
@@ -234,7 +224,6 @@ app.get('/picture', (req, res) => {
     const imagesDir = path.join(__dirname, './picture');
     fs.readdir(imagesDir, (err, files) => {
         if (err) {
-            console.error(err);
             res.status(500).send('Error reading images directory');
             return;
         }
@@ -273,7 +262,6 @@ app.post('/saveproduct', (req, res) => {
     }
 
     const productId = productResults.insertId; // Get the ID of the inserted product
-    console.log(productId)
     // Insert all product details using a loop
     productDetails.forEach((productDetailData, index) => {
       productDetailData.Product_id = productId;
@@ -290,19 +278,14 @@ app.post('/saveproduct', (req, res) => {
         productDetailData.text_value,
       ];
     
-      console.log('Inserting product detail at index', index);
-      console.log('Query:', productDetailQuery);
-      console.log('Values:', productDetailValues);
-    
       connection.query(productDetailQuery, productDetailValues, (productDetailError, productDetailResults) => {
         if (productDetailError) {
-          console.error('Error inserting product detail at index', index, productDetailError);
           return res.status(500).json({ message: `Error inserting product detail at index ${index}` + productDetailError.message });
         }
       });
     });
 
-    res.status(201).json({ message: 'Product and details saved successfully', insertId: productId });
+    res.status(200).json({ message: 'Product and details saved successfully', insertId: productId });
   });
 });
 
@@ -319,7 +302,7 @@ app.post('/createpayment', (req, res) => {
 
   connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
     if (paymentError) {
-      return res.status(500).json({ message: 'Error inserting payment data'+paymentError.message });
+      return res.status(400).json({ message: 'Error inserting payment data'+paymentError.message });
     }
     const paymentId = paymentResults.insertId;
     res.status(200).json({ message: 'Payment created successfully', paymentId: paymentId });
@@ -327,22 +310,24 @@ app.post('/createpayment', (req, res) => {
 });
 
 app.post('/createorder', (req, res) => {
-  const paymentData = req.body.paymentData;
+  const orderData = req.body.orderData;
 
   // Insert into the product table
-  const paymentQuery = 'INSERT INTO payment (User_id, Amount, status) VALUES (?, ?, ?)';
-  const paymentValues = [
-    paymentData.User_id,
-    paymentData.Amount,
-    paymentData.status,
+  const orderQuery = 'INSERT INTO orders (Product_id, Payment_id, Color, Size, Total_item) VALUES (?, ?, ?, ?, ?)';
+  const orderValues = [
+    orderData.Product_id,
+    orderData.Payment_id,
+    orderData.Color,
+    orderData.Size,
+    orderData.Total_item
   ];
 
-  connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
-    if (paymentError) {
-      return res.status(500).json({ message: 'Error inserting payment data'+paymentError.message });
+  connection.query(orderQuery, orderValues, (orderError, orderResults) => {
+    if (orderError) {
+      return res.status(500).json({ message: 'Error inserting order data'+orderError.message });
     }
-    const paymentId = paymentResults.insertId;
-    res.status(200).json({ message: 'Payment created successfully', paymentId: paymentId });
+    const orderId = orderResults.insertId;
+    res.status(200).json({ message: 'Order created successfully', orderId: orderId });
   });
 });
 
