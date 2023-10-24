@@ -11,7 +11,7 @@ const NavBar = () => {
     // Check if the user is logged in, for example, by examining sessionStorage or a token.
     // You can set a flag in sessionStorage when the user logs in and clear it when they log out.
     const userIsLoggedIn = sessionStorage.getItem('userData'); // Check your storage for the user login status.
-    console.log(userIsLoggedIn)
+    //console.log(userIsLoggedIn)
     if (userIsLoggedIn) {
       setIsLogin(true);
     } else {

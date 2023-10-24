@@ -4,9 +4,10 @@ import NavBar from "../components/NavBar";
 import "./Design.css"
 import axios from "axios";
 import DesignLab2 from "../components/DesignLab2";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import html2canvas from 'html2canvas';
 
 const OptionTab = ({
     textData, 
@@ -31,7 +32,7 @@ const OptionTab = ({
     const [searchImg, setsearchImg] = useState("");
     const [imgname, setImgname] = useState([]);
     const [filteredImages, setFilteredImages] = useState([]);
-      
+
     useEffect(()=>{
         axios
         .get("http://localhost:8080/picture")
@@ -39,7 +40,7 @@ const OptionTab = ({
             setImgname(response.data)
             setFilteredImages(response.data)
         })
-        .catch((error) => console.error("Error fetching fonts:", error));
+        .catch((error) => {});
     },[])
 
     const handleOptionChange = (option) => {
@@ -48,7 +49,7 @@ const OptionTab = ({
 
     const handleAddText = () => {
         const newObject = {
-            id: textData.length+1, 
+            id: textData[textData.length-1].id+1, 
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
@@ -62,7 +63,7 @@ const OptionTab = ({
     };
     const handleAddImage = (image) => {
         const newObject = {
-            id: imageData.length+1,
+            id: imageData[imageData.length-1].id+1,
             type: "image",
             width: "100px", 
             x: "0px", 
@@ -221,25 +222,72 @@ const CheckoutPopup = ({
     tshirtcolor,
     tshirtsize,
     textData,
-    textDesignPrice,
+    imageData,
+    tshirtPrice,
+    textPrice,
+    imagePrice,
+    designPrice,
+    setTotalItem,
+    totalItem,
+    totalPrice,
+    openQr,
+    timeLeft,
     closePopup,
+    handlePayment,
 }) => {
+    const formatTime = (timeLeft) => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        return `${minutes} minute${minutes !== 1 ? 's' : ''}${seconds > 0 ? ` and ${seconds} second${seconds !== 1 ? 's' : ''}` : ''}`;
+    };
     return (
       <div className="checkout-popup">
+        <div>
         <h2>Checkout Information</h2>
         <p>T-Shirt Color: {tshirtcolor}</p>
         <p>T-Shirt Size: {tshirtsize}</p>
-        <p>Text Design Price: ${textDesignPrice}</p>
-  
+        <p>T-Shirt Price: {tshirtPrice} ฿</p>
+        <p>Design Price: {designPrice} ฿</p>
+        <p>Total Price: {tshirtPrice+designPrice} ฿</p>
+        <p>Number of t-shirts: <input value={totalItem} style={{width:"50px"}} onChange={e=>setTotalItem(e.target.value)} type="number"/> </p>
+        <h3>Total: {totalPrice} ฿</h3>
+        </div>
         {/* Display text data for reconfirmation */}
-        <h3>Text Data:</h3>
-        <ul>
-          {textData.map((text, index) => (
-            <li key={`text-${index}`}>{text.value}</li>
-          ))}
-        </ul>
-  
-        <button onClick={closePopup}>Close</button>
+        <div className="info-grid-container">
+            <div className="info-grid-item">
+                <h3>Text Design:</h3>
+                {textData.map((text, index) => (
+                    <div key={`text-row-${index}`}>
+                        <p key={`text-${index}`} className="text-name">{text.value}</p>
+                        <p key={`text-price-${index}`} className="text-price">{textPrice} ฿</p>
+                    </div>
+                ))}
+                <h3 style={{alignSelf:"flex-end"}}>{textData.length*textPrice} ฿</h3>
+            </div>
+            <div className="info-grid-item">
+                <h3>Image Design:</h3>
+                {imageData.map((image, index) => (
+                    <div key={`img-row-${index}`}>
+                        <p key={`img-${index}`} className="img-name">{image.imagename.replace(/\.png$/, '')}</p>
+                        <p key={`img-price-${index}`} className="img-price">{imagePrice} ฿</p>
+                    </div>
+                ))}
+                <h3 style={{alignSelf:"flex-end"}}>{imageData.length*imagePrice} ฿</h3>
+            </div>
+        </div>
+        {openQr&&
+            <div>
+                <h1 className="payment-warn">Please pay via QR-code within {formatTime(timeLeft)}</h1>
+                <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr-code"/>
+            </div>
+        }
+        {timeLeft==0&&
+            <h1 className="payment-warn">Payment unsuccessfully please try agian. {formatTime(timeLeft)}</h1>
+        }
+        <div className="btn-group">
+            <button onClick={handlePayment}>Payment</button>
+            <button onClick={closePopup}>Close</button>
+        </div>
       </div>
     );
 };
@@ -251,7 +299,6 @@ const Design = () => {
         {id: 3, type: "text", value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px"}
     ]);      
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
-    
     const [imageData, setImageData] = useState([
         {id: 1, type: "image", width:"100px", x: "0px", y: "0px", imagename:"แมวบนโซฟาสีเขียว.png"}
     ]);
@@ -262,10 +309,24 @@ const Design = () => {
     const [tshirtcolor, setTshirtColor] = useState('white');
     const [tshirtsize, setTshirtSize] = useState('S');
     const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
-
+    const tshirtPrice = 100;
+    const textPrice = 10;
+    const imagePrice = 30;
+    const [totalItem, setTotalItem] = useState(1);
+    const totalPrice = (tshirtPrice+(textData.length*textPrice+imageData.length*imagePrice))*totalItem;
     const { product_id } = useParams();
+    const session =  JSON.parse(sessionStorage.getItem('userData'));
+    const navigate = useNavigate();
+
+    const [productId, setProductId] = useState(null);
+    const [openQr, setOpenQr] = useState(false)
+    const [timeLeft, setTimeLeft] = useState(180);
+    const timeout = 180 * 1000;
+    const [paymentTimer, setPaymentTimer] = useState(null);
+
     useEffect(() => {
         // Fetch the list of fonts from the server using Axios
+        
         if (product_id) {
             // Fetch data based on the product_id
             axios
@@ -283,8 +344,8 @@ const Design = () => {
                             fontFamily: item.Font_family,
                             fontSize: item.Font_size + 'px',
                             fontColor: item.Font_color,
-                            x: item.location_text.split(';')[0].trim() + 'px',
-                            y: item.location_text.split(';')[1].trim() + 'px',
+                            x: item.location_text.split(';')[0].trim(),
+                            y: item.location_text.split(';')[1].trim(),
                         }));
                         const imageDetailData = response.data
                         .filter((item) => item.Font_family === "")
@@ -292,8 +353,8 @@ const Design = () => {
                             id: item.id,
                             type: "image",
                             width: item.img_width,
-                            x: item.location_img.split(';')[0].trim() + 'px',
-                            y: item.location_img.split(';')[1].trim() + 'px',
+                            x: item.location_img.split(';')[0].trim(),
+                            y: item.location_img.split(';')[1].trim(),
                             imagename: item.img
                         }));
                         setTextData(textDetailData);
@@ -303,9 +364,9 @@ const Design = () => {
                     }
                     
                 })
-                .catch((error) => console.log("new product"));
+                .catch((error) =>{});
         }else{
-            console.log("new product")
+
         }
         axios
             .get("http://localhost:8080/fonts")
@@ -316,9 +377,17 @@ const Design = () => {
                     document.fonts.add(fontFace);
                 });
             })
-            .catch((error) => console.error("Error fetching fonts:", error));
+            .catch((error) => {});
     }, []);
 
+    useEffect(() => {
+        if (timeLeft === 0) {
+          setOpenQr(false);
+          clearInterval(paymentTimer); // Stop the timer when time is up
+        }
+    }, [timeLeft, paymentTimer]);
+
+      
     const handleFontChange = (event, index) => {
         const newTextElements = [...textData];
         newTextElements[index].fontFamily = event.target.value;
@@ -349,6 +418,131 @@ const Design = () => {
     const closeCheckoutPopup = () => {
         setIsCheckoutPopupOpen(false);
     };
+
+    const handleSaveDesign = () => {
+        if (!session) {
+          navigate('/signin');
+        } else {
+          const container = document.getElementById('container');
+        
+          html2canvas(container).then((canvas) => {
+            canvas.toBlob((blob) => {
+              const formData = new FormData();
+              const fileName = `${session.user_id}_${Date.now()}.png`;
+              formData.append('image', blob, fileName);
+        
+              axios
+                .post('http://localhost:8080/saveimage', formData)
+                .then((response) => {
+                  const imageDescriptions = imageData.map((image) => image.imagename.replace(/\.png$/, '')).join(' ');
+                  const productData = {
+                    User_id: session.user_id,
+                    Description: imageDescriptions,
+                    product_image: response.data,
+                  };
+        
+                  const productDetails = [];
+        
+                  textData.forEach((item) => {
+                    const productDetailData = {
+                      Product_id: null,
+                      Font_size: parseInt(item.fontSize),
+                      Font_family: item.fontFamily,
+                      Font_color: item.fontColor,
+                      location_img: '',
+                      img_width: '',
+                      img: '',
+                      location_text: `${item.x};${item.y}`,
+                      text_value: item.value,
+                    };
+                    productDetails.push(productDetailData);
+                  });
+        
+                  imageData.forEach((item) => {
+                    const productDetailData = {
+                      Product_id: null,
+                      Font_size: 0,
+                      Font_family: '',
+                      Font_color: '',
+                      location_img: `${item.x};${item.y}`,
+                      img_width: item.width,
+                      img: item.imagename,
+                      location_text: '',
+                      text_value: '',
+                    };
+                    productDetails.push(productDetailData);
+                  });
+        
+                  axios
+                    .post('http://localhost:8080/saveproduct', { productData, productDetails })
+                    .then((response) => {
+                        if (response.status==200) {
+                            setProductId(response.data.insertId)
+                        }
+                    })
+                    .catch((error) => {
+    
+                    });
+                })
+                .catch((error) => {
+                  
+                });
+            }, 'image/png');
+          });
+        }
+    };
+
+    const handlePayment = () => {
+        if (!session) {
+            navigate('/signin');
+        } else {
+            setOpenQr(true)
+            setPaymentTimer(
+                setInterval(() => {
+                    setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
+                }, 1000) // Update every 1 second
+            );
+            const paymentData = {
+                User_id: session.user_id,
+                Amount: totalPrice,
+                status: "ยังไม่ชำระเงิน",
+            }
+            axios
+            .post('http://localhost:8080/createpayment', { paymentData })
+            .then((response) => {
+                if(response.status==200) {
+                    handleSaveDesign()
+                    const orderData = {
+                        Product_id: productId,
+                        Payment_id: response.data.paymentId,
+                        Color: tshirtcolor,
+                        Size: tshirtsize,
+                        Total_item: totalItem
+                    }
+                    axios
+                    .post('http://localhost:8080/createorder', { orderData })
+                    .then((response) => {
+                        if(response.status==200) {
+                            
+                        } else {
+
+                        }
+                    })
+                    .catch((error) => {
+        
+                    });
+
+                } else {
+
+                }
+                
+            })
+            .catch((error) => {
+
+            });
+            //handleSaveDesign()
+        }
+    }
 
     return(
         <>
@@ -384,6 +578,7 @@ const Design = () => {
                     setIsSelected={setIsSelected}
                     selectedImage={selectedImage}
                     setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
+                    handleSaveDesign={handleSaveDesign}
                     handleCheckoutClick={handleCheckoutClick}
                 />
             </div>
@@ -394,8 +589,18 @@ const Design = () => {
                         tshirtcolor={tshirtcolor}
                         tshirtsize={tshirtsize}
                         textData={textData}
-                        textDesignPrice={textData.length * 10}
+                        imageData={imageData}
+                        tshirtPrice={tshirtPrice}
+                        textPrice={textPrice}
+                        imagePrice={imagePrice}
+                        designPrice={textData.length * textPrice + imageData.length * imagePrice}
+                        setTotalItem={setTotalItem}
+                        totalItem={totalItem}
+                        totalPrice={totalPrice}
+                        openQr={openQr}
+                        timeLeft={timeLeft}
                         closePopup={closeCheckoutPopup}
+                        handlePayment={handlePayment}
                     />
                 </>
             )}

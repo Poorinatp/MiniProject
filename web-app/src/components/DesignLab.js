@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRotateLeft, faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
-import html2canvas from 'html2canvas';
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const DesignLab = ({ 
   textData, 
@@ -15,6 +12,7 @@ const DesignLab = ({
   tshirtsize,
   setIsSelected,
   selectedImage,
+  handleSaveDesign,
   handleCheckoutClick
  }) => {
   const canvasRef = useRef(null);
@@ -27,8 +25,6 @@ const DesignLab = ({
     lastX: 0,
     lastY: 0
   });
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
@@ -82,9 +78,6 @@ const DesignLab = ({
     return cleanup;
   }, [currentContainer]);
 
-  useEffect(()=>{
-    console.log(textData);
-  }, [textData])
 
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
@@ -155,97 +148,11 @@ const DesignLab = ({
     const resizeFactor = type === "increase" ? 1.2 : 0.8;
     const newWidth = currentWidth * resizeFactor;
 
-    console.log(selectedImage)
-    console.log(newWidth+"px")
     selectedImage.width = newWidth + "px";
     imageDataCopy[index] = selectedImage;
-    console.log(imageDataCopy)
     setImageData(imageDataCopy);
   };
-
-  const handleSaveClick = () => {
-    // Get the container element
-    const container = document.getElementById('container');
   
-    // Use html2canvas to capture the contents of the container
-    html2canvas(container).then((canvas) => {
-      // Create a blob from the canvas content
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          console.error('Failed to create a blob from the canvas.');
-          return;
-        }
-  
-        // Create a temporary download link
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'design.png'; // You can change the filename
-        link.click();
-  
-        // Clean up the URL.createObjectURL
-        URL.revokeObjectURL(link.href);
-      }, 'image/png'); // You can change the format if needed
-    });
-  };
-  
-  const handleSave = () => {
-    // if (!sessionStorage.getItem('userData')) {
-    //   navigate('/signin');
-    // }
-  
-    // Construct the product data
-    const productData = {
-      User_id: 60010,
-      Description: "Your product description",
-      product_image: `${60010}_product_image_url.jpg`,
-    };
-  
-    // Create an array to store product details
-    const productDetails = [];
-  
-    // Iterate through textData and create product details
-    textData.forEach((item) => {
-      const productDetailData = {
-        Product_id: null, // Will be filled later
-        Font_size: parseInt(item.fontSize),
-        Font_family: item.fontFamily,
-        Font_color: item.fontColor,
-        location_img: "", // You may need to provide this value
-        img_width: "", // You may need to provide this value
-        img: "", // You may need to provide this value
-        location_text: `${item.x};${item.y}`,
-        text_value: item.value,
-      };
-      productDetails.push(productDetailData);
-    });
-  
-    imageData.forEach((item) => {
-      const productDetailData = {
-        Product_id: null, // Will be filled later
-        Font_size: 0,
-        Font_family: "",
-        Font_color: "",
-        location_img: `${item.x};${item.y}`, // You may need to provide this value
-        img_width: item.width, // You may need to provide this value
-        img: item.imagename, // You may need to provide this value
-        location_text: "",
-        text_value: "",
-      };
-      productDetails.push(productDetailData);
-    });
-
-    // Send the POST request to create the product and its details
-    axios
-      .post('http://localhost:8080/saveproduct', { productData, productDetails })
-      .then((response) => {
-        console.log('Product and details saved successfully', response.data);
-        console.log(response)
-      })
-      .catch((error) => {
-        console.error('Error saving product and details:', error);
-      });
-  };    
-
   return (
     <div className="grid-item-1 lab">
       <div className="container-1"
@@ -386,9 +293,9 @@ const DesignLab = ({
         </div>
       </div>
       <div className="btn-group">
-          <button className="save-btn" onClick={handleSave}>Save</button>
-          <button className="checkout-btn" onClick={e=>handleCheckoutClick}>Check Out</button>
-        </div>
+          <button className="save-btn" onClick={handleSaveDesign}>Save</button>
+          <button className="checkout-btn" onClick={handleCheckoutClick}>Check Out</button>
+      </div>
     </div>
   );
 };
