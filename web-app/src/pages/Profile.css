@@ -43,8 +43,18 @@
     background: none;
 }
 .tab-pane-history ,.tab-pane-design{
-    display:flex;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; 
+    
 }
 .card-body{
     width: 250px;
+    margin: 30px;
+}
+.deletebtn{
+    background: none;
+    border: none;
+    margin-right: 70px;
+    padding:5px;
 }

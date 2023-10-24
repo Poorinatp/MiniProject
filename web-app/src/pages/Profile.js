@@ -3,6 +3,8 @@ import {useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 import NavBar from '../components/NavBar';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 function Profile() {
   const [userList, setUserList] = useState([]);
@@ -11,8 +13,8 @@ function Profile() {
   const username =  JSON.parse(sessionStorage.getItem('userData'));
   const [activeTab, setActiveTab] = useState('mydesign'); 
   const [editMode, setEditMode] = useState(false);
+  
   const navigate = useNavigate();
-
   useEffect(() => {
     // Make the Axios GET request
     if (!sessionStorage.getItem('userData')){
@@ -27,11 +29,18 @@ function Profile() {
         console.error('Error fetching user data:', error);
       });
 
+      Axios.get('http://localhost:8080/user/product/'+ username.user_id)
+      .then((response) => {
+        setmyDesignList(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
+
       Axios.get('http://localhost:8080/user/orders/'+ username.user_id)
       .then((response) => {
         setmyHistory(response.data);
-        setmyDesignList(response.data);
-
         console.log(response.data);
       })
       .catch((error) => {
@@ -43,9 +52,7 @@ function Profile() {
     setActiveTab(tabName);
   };
 
-  const handleCancelClick = () => {
-    setEditMode(false);
-  }
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserList(prevState => ({
@@ -56,10 +63,28 @@ function Profile() {
   const handleEditClick = () => {
     setEditMode(true);
   }
+  const handleCancelClick = () => {
+    setEditMode(false);
+  }
+  const handleDelete = (product_id) => {
+    Axios.delete(`http://localhost:8080/delete/${product_id}`)
+      .then(() => {
+        // Filter out the deleted product from myDesignList
+        setmyDesignList((prevList) => prevList.filter((item) => item.Product_id !== product_id));
+        alert('Product Deleted!');
+      })
+      .catch((error) => {
+        console.error('Error deleting product_detail:', error);
+      });
+  };
+  
+
+  
   
   const handleSaveClick = () => {
-    Axios.put('http://localhost:8080/user'+ userList.User_id, userList)
+    Axios.put('http://localhost:8080/update/'+ userList.User_id, userList)
       .then(response => {
+        console.log(response.data.messege)
         console.log(response);
         setEditMode(false);
       })
@@ -77,21 +102,22 @@ function Profile() {
               {editMode ? (
             <div>
               <label>First Name:</label>
-              <input type="text" name="fname" value={userList.Firstname} onChange={handleInputChange} />
+              <input type="text" name="Firstname" value={userList.Firstname} onChange={handleInputChange} />
               <br />
               <label>Last Name:</label>
-              <input type="text" name="lname" value={userList.Lastname} onChange={handleInputChange} />
+              <input type="text" name="Lastname" value={userList.Lastname} onChange={handleInputChange} />
               <br />
               <label>Address:</label>
-              <input type="text" name="address" value={userList.Address} onChange={handleInputChange} />
+              <input type="text" name="Address" value={userList.Address} onChange={handleInputChange} />
               <br />
               <label>Phone:</label>
-              <input type="text" name="phone" value={userList.Telephone} onChange={handleInputChange} />
+              <input type="tel" name="Telephone" value={userList.Telephone} onChange={handleInputChange} />
               <br />
               <label>Zipcode:</label>
-              <input type="text" name="zipcode" value={userList.Zipcode} onChange={handleInputChange} />
+              <input type="text" name="Zipcode" value={userList.Zipcode} onChange={handleInputChange} />
               <br />
-              <input type="text" name="country" value={userList.Country} onChange={handleInputChange} />
+              <label>Country:</label>
+              <input type="text" name="Country" value={userList.Country} onChange={handleInputChange} />
               <br />
               <button className='CancelButton' onClick={handleCancelClick}>Cancel</button>
               <button onClick={handleSaveClick}>Save</button>
@@ -130,11 +156,17 @@ function Profile() {
         <section className="Design-card" id="mydesign">
           {activeTab === 'mydesign' && (
             <p className="tab-pane-design" >
-              {myDesignList.map((myDesign, key) => {
+              {myDesignList.map((myDesignList, key) => {
+                const createdDate = myDesignList.Created_at.split("T")[0]; 
                 return (
                   <article className="card-body" key={key}>
-                    <img id="img-design" src={myDesign.product_image} alt="myDesign" />
-                    <p id="data-his">Detail: {myDesign.Description}</p>
+                    <img id="img-design" src={myDesignList.product_image} alt="myDesign" />
+                    <p id="data-his">Created_at: {createdDate}</p>
+                    <p id="data-his">Product_id: {myDesignList.Product_id}</p>
+
+                    <button className='deletebtn' onClick={() => handleDelete(myDesignList.Product_id)}>
+                      <FontAwesomeIcon icon={faTrash} style={{ color: '#002d7a' }} />
+                    </button>
                   </article>
                 );
               })}
