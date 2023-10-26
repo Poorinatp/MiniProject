@@ -49,7 +49,7 @@ const OptionTab = ({
 
     const handleAddText = () => {
         const newObject = {
-            id: textData[textData.length-1].id+1, 
+            id: textData.length==0?1:textData[textData.length-1].id+1, 
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
@@ -63,7 +63,7 @@ const OptionTab = ({
     };
     const handleAddImage = (image) => {
         const newObject = {
-            id: imageData[imageData.length-1].id+1,
+            id: imageData.length==0?1:imageData[imageData.length-1].id+1,
             type: "image",
             width: "100px", 
             x: "0px", 
