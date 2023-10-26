@@ -11,7 +11,7 @@ const DesignLab = ({
   tshirtcolor,
   tshirtsize,
   setIsSelected,
-  selectedImage,
+  setIsSelectedImage,
   handleSaveDesign,
   handleCheckoutClick
  }) => {
@@ -41,6 +41,7 @@ const DesignLab = ({
         coords.current.lastY = textContainer.offsetTop;
         coords.current.startX = e.clientX;
         coords.current.startY = e.clientY;
+
         setCurrentContainer(textContainer);
       } else if (imgContainer) {
         isClicked.current = true;
@@ -76,7 +77,7 @@ const DesignLab = ({
       window.removeEventListener("mousemove", onMouseMove);
     };
     return cleanup;
-  }, [currentContainer]);
+  }, [currentContainer, textData]);
 
 
   const handleTextChange = (index, e) => {
@@ -85,7 +86,6 @@ const DesignLab = ({
     const fontSize = parseInt(updatedTextData[index].fontSize, 10);
     const offset = 10; // Adjust this value as needed
     const minWidth = 100; // Adjust this value as the minimum width
-    const maxWidth = 500; // Adjust this value as the maximum width
   
     const span = document.createElement('span');
     span.style.display = 'inline-block'; // Change to inline-block to measure width accurately
@@ -95,7 +95,7 @@ const DesignLab = ({
   
     document.body.appendChild(span);
   
-    let newWidth = Math.max(minWidth, Math.min(maxWidth, span.offsetWidth + offset));
+    let newWidth = Math.max(minWidth, span.offsetWidth + offset);
   
     document.body.removeChild(span);
   
@@ -158,24 +158,24 @@ const DesignLab = ({
       <div className="container-1"
       id="container"
       ref={canvasRef}
+      onClick={(e) => {
+        if (currentContainer) {
+          // Check if the clicked element is not the currentContainer or its descendant
+          if (!currentContainer.contains(e.target)) {
+            currentContainer.style.border = "none";
+            currentContainer.style.padding = "6px";
+            const updatedSelection = Array(textData.length).fill(false)
+            setIsSelected(updatedSelection)
+            setCurrentContainer(null);
+          }
+        }
+      }}
       >
         <img src={`../image/tshirt${tshirtcolor}.png`} alt="t-shirt" className="tshirt" />
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
           id="canvas"
-          onClick={(e) => {
-            if (currentContainer) {
-              // Check if the clicked element is not the currentContainer or its descendant
-              if (!currentContainer.contains(e.target)) {
-                currentContainer.style.border = "none";
-                currentContainer.style.padding = "6px";
-                const updatedSelection = Array(textData.length).fill(false)
-                setIsSelected(updatedSelection)
-                setCurrentContainer(null);
-              }
-            }
-          }}
         >
         {textData.map((text, index) => (
           <div
@@ -199,7 +199,7 @@ const DesignLab = ({
             <input
               key={`textinput${text.id}`}
               id={`textinput${text.id}`}
-              className="textinput"
+              className="text-input"
               style={{
                 width: text.width,
                 padding: (isSelected[index]&&text.type==="text")? "4px":"6px",
@@ -214,6 +214,7 @@ const DesignLab = ({
               value={text.value}
               onClick={(e) => {
                 handleItemClick(index, e);
+                setIsSelectedImage(false)
               }}
               onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
@@ -276,6 +277,7 @@ const DesignLab = ({
                 draggable="false"
                 onClick={(e) => {
                   handleItemClick(index, e);
+                  setIsSelectedImage(true)
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.border = "2px dashed black";
