@@ -31,7 +31,7 @@ var connection = mysql.createConnection({
 const database = 'phimniyom_db'
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
 
-const storage = multer.diskStorage({
+const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, '../web-app/public/shirt-design');
   },
@@ -40,8 +40,17 @@ const storage = multer.diskStorage({
   },
 });
 
-// Initialize multer with the storage engine
-const upload = multer({ storage });
+const receiptStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../web-app/public/receipts-uncheck'); // Set the destination folder for receipts
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const uploadShirtDesign = multer({ storage: shirtDesignStorage });
+const uploadReceipt = multer({ storage: receiptStorage });
 
 // connect to database 
 connection.connect(function (err) {
@@ -87,7 +96,10 @@ app.get('/all', function(req, res) {
 app.get('/products-with-details/:productid', function (req, res) {
     const productid = req.params.productid; // Get the productid parameter from the URL
 
-    connection.query('SELECT * FROM product JOIN product_detail ON product.product_id = product_detail.product_id WHERE product.product_id = ?', [productid], function (error, results, fields) {
+    connection.query('SELECT * FROM product \
+    JOIN product_detail ON product.product_id = product_detail.product_id \
+    WHERE product.product_id = ?\
+    ', [productid], function (error, results, fields) {
         if (error) throw error;
         if (results.length > 0) {
           res.status(200).send(results);
@@ -281,12 +293,18 @@ app.get('/picture', (req, res) => {
     });
 });
 
-app.post('/saveimage', upload.single('image'), (req, res) => {
-  // The uploaded file can be accessed as req.file.
+app.post('/saveimage', uploadShirtDesign.single('image'), (req, res) => {
   if (!req.file) {
     res.status(400).send('No image file')
   }
-  res.status(200).send(req.file.originalname);
+  res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
+});
+
+app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
+  if (!req.file) {
+    res.status(400).send('No image file')
+  }
+  res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
 app.post('/saveproduct', (req, res) => {
@@ -350,7 +368,7 @@ app.post('/createpayment', (req, res) => {
       return res.status(400).json({ message: 'Error inserting payment data'+paymentError.message });
     }
     const paymentId = paymentResults.insertId;
-    res.status(200).json({ message: 'Payment created successfully', paymentId: paymentId });
+    res.status(200).json({ message: 'Payment created successfully', insertId: paymentId });
   });
 });
 
