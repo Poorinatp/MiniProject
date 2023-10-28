@@ -1,18 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
-import html2canvas from 'html2canvas';
+import { faRotateLeft, faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 
 const DesignLab = ({ 
   textData, 
   setTextData,
   imageData, 
   setImageData, 
-  isSelected, 
+  isSelected,
+  isImageSelected, 
   tshirtcolor,
   tshirtsize,
   setIsSelected,
-  selectedImage
+  setIsImageSelected,
+  handleSaveDesign,
+  handleCheckoutClick,
+  findNewWidth
  }) => {
   const canvasRef = useRef(null);
   const isClicked = useRef(false);
@@ -25,73 +28,69 @@ const DesignLab = ({
     lastY: 0
   });
 
+  const borderColor = tshirtcolor==="black"?"white":"black"
+
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
-    
+  
     const canvas = canvasRef.current;
   
     const onMouseDown = (e) => {
-      const container = e.target.closest('.text-container');
-      if (!container) return;
-      isClicked.current = true;
-      coords.current.lastX = container.offsetLeft;
-      coords.current.lastY = container.offsetTop;
-      coords.current.startX = e.clientX;
-      coords.current.startY = e.clientY;
-      setCurrentContainer(container);
-    }
+      const textContainer = e.target.closest('.text-container');
+      const imgContainer = e.target.closest('.img-container');
+  
+      if (textContainer) {
+        isClicked.current = true;
+        coords.current.lastX = textContainer.offsetLeft;
+        coords.current.lastY = textContainer.offsetTop;
+        coords.current.startX = e.clientX;
+        coords.current.startY = e.clientY;
 
+        setCurrentContainer(textContainer);
+      } else if (imgContainer) {
+        isClicked.current = true;
+        coords.current.lastX = imgContainer.offsetLeft;
+        coords.current.lastY = imgContainer.offsetTop;
+        coords.current.startX = e.clientX;
+        coords.current.startY = e.clientY;
+        setCurrentContainer(imgContainer);
+      }
+    };
+  
     const onMouseUp = (e) => {
       isClicked.current = false;
     };
-
+  
     const onMouseMove = (e) => {
       if (!isClicked.current) return;
-
+  
       const nextX = e.clientX - coords.current.startX + coords.current.lastX;
       const nextY = e.clientY - coords.current.startY + coords.current.lastY;
-    
+  
       currentContainer.style.top = `${nextY}px`;
       currentContainer.style.left = `${nextX}px`;
-    };    
-
+    };
+  
     canvas.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("mousemove", onMouseMove);
-
+  
     const cleanup = () => {
       canvas.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("mousemove", onMouseMove);
     };
     return cleanup;
-  }, [currentContainer]);
-
-  useEffect(()=>{
-  }, [textData])
+  }, [currentContainer, textData]);
 
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
     const value = e.target.value;
     const fontSize = parseInt(updatedTextData[index].fontSize, 10);
-    const offset = 10; // Adjust this value as needed
-    const minWidth = 100; // Adjust this value as the minimum width
-    const maxWidth = 500; // Adjust this value as the maximum width
-  
-    const span = document.createElement('span');
-    span.style.display = 'inline-block'; // Change to inline-block to measure width accurately
-    span.style.fontFamily = updatedTextData[index].fontFamily;
-    span.style.fontSize = `${fontSize}px`;
-    span.innerHTML = value.replace(/ /g, '&nbsp'); // Prevent whitespace collapse
-  
-    document.body.appendChild(span);
-  
-    let newWidth = Math.max(minWidth, Math.min(maxWidth, span.offsetWidth + offset));
-  
-    document.body.removeChild(span);
-  
+    const fontFamily = updatedTextData[index].fontFamily;
+    
     updatedTextData[index].value = value;
-    updatedTextData[index].width = `${newWidth}px`;
+    updatedTextData[index].width = `${findNewWidth(fontSize, fontFamily, value)}px`;
     setTextData(updatedTextData);
   };
   
@@ -102,16 +101,16 @@ const DesignLab = ({
   
     const canvas = document.getElementById("canvas");
     const allInputs = canvas.querySelectorAll('input');
-  
-    // Set styles for all input elements
+    const allImages = canvas.querySelectorAll('img');
+
     allInputs.forEach((input) => {
       input.style.border = "none";
       input.style.padding = "6px";
     });
-  
-    // Set styles for the clicked item
-    e.target.style.border = "2px dashed black";
-    e.target.style.padding = "4px";
+    allImages.forEach((img) => {
+      img.style.border = "none";
+      img.style.padding = "6px";
+    });
   
     setCurrentContainer(e.target);
   };
@@ -122,42 +121,30 @@ const DesignLab = ({
     newTextData.splice(index, 1);
     setIsSelected(updatedSelection)
     setTextData(newTextData);
+    setCurrentContainer(null);
   };
 
-  const handleSaveClick = () => {
-    // Get the container element
-    const container = document.getElementById('container');
-  
-    // Use html2canvas to capture the contents of the container
-    html2canvas(container).then((canvas) => {
-      // Create a blob from the canvas content
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          console.error('Failed to create a blob from the canvas.');
-          return;
-        }
-  
-        // Create a temporary download link
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'design.png'; // You can change the filename
-        link.click();
-  
-        // Clean up the URL.createObjectURL
-        URL.revokeObjectURL(link.href);
-      }, 'image/png'); // You can change the format if needed
-    });
-  }; 
+  const handleRemoveImage = (index) => {
+    const updatedSelection = Array(textData.length).fill(false)
+    const newImgData = [...imageData];
+    newImgData.splice(index, 1);
+    setIsSelected(updatedSelection)
+    setImageData(newImgData);
+    setCurrentContainer(null);
+  };
 
-  const handleCheckoutClick = () => {
-    // Calculate the text design price based on the number of textData items
-    const textDesignPrice = textData.length * 10; // Adjust the price per item as needed
+  const handleResizeImage = (type, index) => {
+    if (!isSelected[index]) return;
   
-    // Construct the URL for the checkout page with parameters
-    const checkoutURL = `/checkout?color=${tshirtcolor}&size=${tshirtsize}&textDesignPrice=${textDesignPrice}`;
-  
-    // Redirect to the checkout page
-    window.location.href = checkoutURL;
+    const imageDataCopy = [...imageData];
+    const selectedImage = imageDataCopy[index];
+    const currentWidth = parseFloat(selectedImage.width);
+    const resizeFactor = type === "increase" ? 1.2 : 0.8;
+    const newWidth = currentWidth * resizeFactor;
+
+    selectedImage.width = newWidth + "px";
+    imageDataCopy[index] = selectedImage;
+    setImageData(imageDataCopy);
   };
   
   return (
@@ -165,27 +152,27 @@ const DesignLab = ({
       <div className="container-1"
       id="container"
       ref={canvasRef}
+      onClick={(e) => {
+        if (currentContainer) {
+          if (!currentContainer.contains(e.target)) {
+            currentContainer.style.border = "none";
+            currentContainer.style.padding = "6px";
+            const updatedSelection = Array(textData.length).fill(false)
+            setIsSelected(updatedSelection)
+            setCurrentContainer(null);
+          }
+        }
+      }}
       >
         <img src={`../image/tshirt${tshirtcolor}.png`} alt="t-shirt" className="tshirt" />
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
           id="canvas"
-          onClick={(e) => {
-            if (currentContainer) {
-              // Check if the clicked element is not the currentContainer or its descendant
-              if (!currentContainer.contains(e.target)) {
-                currentContainer.style.border = "none";
-                currentContainer.style.padding = "6px";
-                const updatedSelection = Array(textData.length).fill(false)
-                setIsSelected(updatedSelection)
-                setCurrentContainer(null);
-              }
-            }
-          }}
         >
         {textData.map((text, index) => (
           <div
+            id={`textcontainer${text.id}`}
             key={`textcontainer${text.id}`}
             className="text-container"
             style={{
@@ -194,21 +181,22 @@ const DesignLab = ({
             }}
           >
             <FontAwesomeIcon
-              icon={faTrash}
+              icon={faXmark}
               className="remove-icon"
               id={`remove-btn-${text.id}`}
               onClick={() => handleRemoveText(index)}
               style={{
-                display: isSelected[index] ? 'block' : 'none',
+                display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
               }}
             />
             <input
               key={`textinput${text.id}`}
               id={`textinput${text.id}`}
-              className="textinput"
+              className="text-input"
               style={{
                 width: text.width,
-                padding: "6px",
+                padding: ( isSelected[index]&& !isImageSelected )? "4px":"6px",
+                border: ( isSelected[index]&& !isImageSelected )? "2px dashed black": "none", 
                 fontFamily: text.fontFamily,
                 fontSize: text.fontSize,
                 color: text.fontColor,
@@ -219,6 +207,7 @@ const DesignLab = ({
               value={text.value}
               onClick={(e) => {
                 handleItemClick(index, e);
+                setIsImageSelected(false)
               }}
               onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
@@ -233,45 +222,77 @@ const DesignLab = ({
             />
           </div>
         ))}
-          {/* {imageData.map((image, index) => (
+          {imageData.map((image, index) => (
             <div
-              key={`imgbox${image.id}`}
               id={`imgbox${image.id}`}
+              key={`imgbox${image.id}`}
               className="img-container"
               style={{
-                width: image.width,
                 top: image.x,
                 left: image.y,
                 padding: "6px",
-                transform: `rotate(${image.rotationAngle}deg)`,
-              }}
-              draggable="false"
-              onClick={() => {
-                handleItemClick(index, image.id);
-                setCurrentContainer(null);
-              }}
-              onMouseEnter={() => {
-                setCurrentContainer(document.getElementById(`imgbox${image.id}`));
-              }}
-              onMouseLeave={() => {
-                setCurrentContainer(null);
               }}
             >
+              <FontAwesomeIcon
+                icon={faXmark}
+                className="remove-icon"
+                id={`remove-btn-${image.id}`}
+                onClick={() => handleRemoveImage(index)}
+                style={{
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faMinus}
+                className="decrease-icon"
+                id={`decrease-btn-${image.id}`}
+                onClick={() => handleResizeImage("decrease", index)}
+                style={{
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faPlus}
+                className="increase-icon"
+                id={`increase-btn-${image.id}`}
+                onClick={() => handleResizeImage("increase", index)}
+                style={{
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
+                }}
+              />
               <img
-                src="blob:http://localhost:3000/b3158cc4-d925-4325-89d9-76162dde110e"
+                src={`../picture/${image.imagename}`}
                 alt="Display Image"
                 className="display-image"
-                style={{ width: "100%" }}
+                style={{ 
+                  width: image.width,
+                  padding: (isSelected[index]&&isImageSelected )? "4px":"6px",
+                  border: (isSelected[index]&&isImageSelected )? "2px dashed black": "none", 
+                 }}
                 draggable="false"
+                onClick={(e) => {
+                  handleItemClick(index, e);
+                  setIsImageSelected(true)
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.border = "2px dashed black";
+                  e.target.style.padding = "4px";
+                }}
+                onMouseLeave={(e) => {
+                  if (currentContainer !== e.target) {
+                    e.target.style.border = "none";
+                    e.target.style.padding = "6px";
+                  }
+                }}
               />
             </div>
-          ))} */}
+          ))}
         </div>
       </div>
       <div className="btn-group">
-          <button className="save-btn" onClick={handleSaveClick}>Save</button>
-          <button className="checkout-btn" onClick={handleCheckoutClick}>Check Out</button>
-        </div>
+          <button className="save-btn design-btn" onClick={handleSaveDesign}>Save</button>
+          <button className="checkout-btn design-btn" onClick={handleCheckoutClick}>Check Out</button>
+      </div>
     </div>
   );
 };

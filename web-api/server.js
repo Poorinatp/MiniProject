@@ -13,7 +13,7 @@ var app = express();
 var cors = require('cors')
 var path = require('path');
 var fs = require('fs');
-
+var multer = require('multer');
 app.use(cors())
 // configure bodyparser to handle post requests
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,6 +29,28 @@ var connection = mysql.createConnection({
 });
 // set mysql table names
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
+
+const shirtDesignStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../web-app/public/shirt-design');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const receiptStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../web-app/public/receipts-uncheck'); // Set the destination folder for receipts
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const uploadShirtDesign = multer({ storage: shirtDesignStorage });
+const uploadReceipt = multer({ storage: receiptStorage });
+
 // connect to database 
 connection.connect(function (err) {
     if (err) throw err
@@ -70,22 +92,261 @@ app.get('/all', function(req, res) {
     });
 });
 
+app.get('/products-with-details/:productid', function (req, res) {
+    const productid = req.params.productid; // Get the productid parameter from the URL
+
+    connection.query('SELECT * FROM product \
+    JOIN product_detail ON product.product_id = product_detail.product_id \
+    WHERE product.product_id = ?\
+    ', [productid], function (error, results, fields) {
+        if (error) throw error;
+        if (results.length > 0) {
+          res.status(200).send(results);
+        } else {
+          res.status(400).send({ message: 'Product not found!' });
+        }
+    });
+});
+
 app.get('/fonts', (req, res) => {
     const fontsDir = path.join(__dirname, './fonts');
     fs.readdir(fontsDir, (err, files) => {
         if (err) {
-            console.error(err);
             res.status(500).send('Error reading fonts directory');
             return;
         }
         
-        // Remove the .ttf extension from font names
         const fontsWithoutExtension = files.map((file) => file.replace('.ttf', ''));
 
         res.json(fontsWithoutExtension);
     });
 });
 
+app.post('/signin', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+  
+    connection.query(
+      "SELECT * FROM user WHERE email = ? AND password = ?",
+      [email, password],
+      (err, result) => {
+        if (err) {
+          res.status(500).send({ error: 'Database error' });
+        } else {
+          if (result.length > 0) {
+            res.status(200).send({ status: 200, result: result });
+          } else {
+            res.status(401).send({ message: 'Login failed' });
+          }
+        }
+      }
+    );
+  });
+  app.post('/signup', (req, res) => {
+    const userData = req.body.user;
+    const addressData = req.body.address;
+    
+    // Insert user data into the "user" table
+    connection.query('INSERT INTO user SET ?', userData, (userInsertError, userResult) => {
+      if (userInsertError) {
+        res.status(500).send('User registration failed');
+        return;
+      }
+  
+      // Retrieve the last inserted user ID
+      connection.query('SELECT LAST_INSERT_ID() as user_id', (idQueryError, idResult) => {
+        if (idQueryError) {
+          res.status(500).send('User registration failed');
+          return;
+        }
+  
+        // Link the user_id and insert address data into the "user address" table
+        addressData.user_id = idResult[0].user_id;
+        connection.query('INSERT INTO user_address SET ?', addressData, (addressInsertError) => {
+          if (addressInsertError) {
+            res.status(500).send('User registration failed');
+          } else {
+            res.status(200).send('User registration successful');
+          }
+        });
+      });
+    });
+  });  
+  
+  app.get('/profile/:id', function(req, res) {
+    const user_id = req.params.id;
+    connection.query('SELECT User_id, Email,Firstname,Lastname,Telephone FROM user WHERE User_id = ?', [user_id],
+      function(error, results, fields){
+        if (error) {
+          res.status(500).send({ error: 'Error querying table' });
+        } else {
+            res.send(results);
+        }
+      }
+    );
+  });
+
+  app.get('/user/orders/:id', function(req, res) {
+    const userId = parseInt(req.params.id); // Parse the ID parameter from the URL
+    const sqlQuery = `
+        SELECT 
+            product.product_image, 
+            product.User_id, 
+            product.Description, 
+            product.Created_at, 
+            orders.*, 
+            payment.Amount
+        FROM product 
+        INNER JOIN orders ON product.product_id = orders.product_id  
+        LEFT JOIN payment ON orders.payment_id = payment.payment_id
+        WHERE product.User_id = ?`;
+
+    connection.query(sqlQuery, [userId], function(error, results) {
+        if (error) {
+            res.status(500).send({ error: 'Error querying table' });
+        } else {
+            res.send(results);
+        }
+    });
+});
+
+
+// update customer data from mysql database by id
+app.put('/user/:username', function(req, res) {
+    const User_id = parseInt(req.params.username);
+    const { Firstname, Lastname, Telephone, Address, Zipcode , City, Country} = req.body;
+    connection.query('UPDATE user'
+    + 'LEFT JOIN user_address ON user.User_id = user_address.User_id'
+    + 'SET user.Firstname = ?, user.Lastname = ?, user.Telephone = ?, user_address.Address = ?, user_address.Zipcode = ?, user_address.City = ?, user_address.Country = ?'
+    + 'WHERE user.User_id = ?',
+    [ Firstname, Lastname, Telephone, Address, Zipcode , City, Country,User_id],
+    function(error, results, fields) {
+        if (error) {
+        res.status(500).send({ message: "Error updating customer data" });
+        } else if (results.affectedRows > 0) {
+        res.status(200).send({ message: "Customer updated successfully" });
+        } else {
+        res.status(401).send({ message: "Customer not found" });
+        }
+    }
+    );
+});
+app.get('/picture', (req, res) => {
+    const imagesDir = path.join(__dirname, './picture');
+    fs.readdir(imagesDir, (err, files) => {
+        if (err) {
+            res.status(500).send('Error reading images directory');
+            return;
+        }
+        const imageFiles = files.filter((file) => {
+            const extname = path.extname(file).toLowerCase();
+            return extname === '.jpg' || extname === '.png' || extname === '.gif' || extname === '.jpeg';
+        });
+
+        res.json(imageFiles);
+    });
+});
+
+app.post('/saveimage', uploadShirtDesign.single('image'), (req, res) => {
+  if (!req.file) {
+    res.status(400).send('No image file')
+  }
+  res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
+});
+
+app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
+  if (!req.file) {
+    res.status(400).send('No image file')
+  }
+  res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
+});
+
+app.post('/saveproduct', (req, res) => {
+  const productData = req.body.productData;
+  const productDetails = req.body.productDetails;
+
+  // Insert into the product table
+  const productQuery = 'INSERT INTO product (User_id, Description, product_image) VALUES (?, ?, ?)';
+  const productValues = [
+    productData.User_id,
+    productData.Description,
+    productData.product_image,
+  ];
+
+  connection.query(productQuery, productValues, (productError, productResults) => {
+    if (productError) {
+      return res.status(500).json({ message: 'Error inserting product data'+productError.message });
+    }
+
+    const productId = productResults.insertId; // Get the ID of the inserted product
+    // Insert all product details using a loop
+    productDetails.forEach((productDetailData, index) => {
+      productDetailData.Product_id = productId;
+      const productDetailQuery = 'INSERT INTO product_detail (Product_id, Font_size, Font_family, Font_color, location_img, img_width, img, location_text, text_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      const productDetailValues = [
+        productDetailData.Product_id,
+        productDetailData.Font_size,
+        productDetailData.Font_family,
+        productDetailData.Font_color,
+        productDetailData.location_img,
+        productDetailData.img_width,
+        productDetailData.img,
+        productDetailData.location_text,
+        productDetailData.text_value,
+      ];
+    
+      connection.query(productDetailQuery, productDetailValues, (productDetailError, productDetailResults) => {
+        if (productDetailError) {
+          return res.status(500).json({ message: `Error inserting product detail at index ${index}` + productDetailError.message });
+        }
+      });
+    });
+
+    res.status(200).json({ message: 'Product and details saved successfully', insertId: productId });
+  });
+});
+
+app.post('/createpayment', (req, res) => {
+  const paymentData = req.body.paymentData;
+
+  // Insert into the product table
+  const paymentQuery = 'INSERT INTO payment (User_id, Amount, status) VALUES (?, ?, ?)';
+  const paymentValues = [
+    paymentData.User_id,
+    paymentData.Amount,
+    paymentData.status,
+  ];
+
+  connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
+    if (paymentError) {
+      return res.status(400).json({ message: 'Error inserting payment data'+paymentError.message });
+    }
+    const paymentId = paymentResults.insertId;
+    res.status(200).json({ message: 'Payment created successfully', insertId: paymentId });
+  });
+});
+
+app.post('/createorder', (req, res) => {
+  const orderData = req.body.orderData;
+
+  // Insert into the product table
+  const orderQuery = 'INSERT INTO orders (Product_id, Payment_id, Color, Size, Total_item) VALUES (?, ?, ?, ?, ?)';
+  const orderValues = [
+    orderData.Product_id,
+    orderData.Payment_id,
+    orderData.Color,
+    orderData.Size,
+    orderData.Total_item
+  ];
+
+  connection.query(orderQuery, orderValues, (orderError, orderResults) => {
+    if (orderError) {
+      return res.status(500).json({ message: 'Error inserting order data'+orderError.message });
+    }
+    const orderId = orderResults.insertId;
+    res.status(200).json({ message: 'Order created successfully', orderId: orderId });
+  });
+});
 
 // listen to port
 app.listen(port, function () {

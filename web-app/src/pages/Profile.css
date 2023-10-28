@@ -1,0 +1,50 @@
+.author{
+    padding: 3%;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    border-radius: 0.5rem;
+    width: 100%;
+}
+.Design-card,.History-card{
+    padding: 3%;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    border-radius: 0.5rem;
+    background: #ffffffc1;
+    width: 100%;
+}
+
+.author-card{
+    padding: 3%;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    border-radius: 0.5rem;
+    background: #fff;
+}
+#menu-P{
+    display: inline;
+    float: left;
+}
+#menu-A{
+    display: block;
+    padding: 8px;
+    background-color: #dddddd;
+}
+#img-design, #img-his{
+    width: 150px;
+    display: flex;
+    margin-top: 10px;
+}
+#data-his{
+    padding: 0px;
+    text-align:left ;
+    color: black;
+    font-size: medium;
+    background: none;
+}
+.tab-pane-history ,.tab-pane-design{
+    display:flex;
+}
+.card-body{
+    width: 250px;
+}
