@@ -26,16 +26,16 @@ app.use(bodyParser.json());
 const port = 8090;
 
 // Create a PostgreSQL connection pool
-/* const pool = new Pool({
-  user: 'phimniyom_db_user',
-  host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
-  database: 'phimniyom_db',
-  password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
-  },
-}); */
+// const pool = new Pool({
+//   user: 'phimniyom_db_user',
+//   host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
+//   database: 'phimniyom_db',
+//   password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
+//   port: 5432,
+//   ssl: {
+//     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
+//   },
+// });
 const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
@@ -330,7 +330,6 @@ app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
 app.post('/saveproduct', async (req, res) => {
   const productData = req.body.productData;
   const productDetails = req.body.productDetails;
-
   const client = await pool.connect();
   try {
     // Start a transaction to ensure data consistency
@@ -342,7 +341,6 @@ app.post('/saveproduct', async (req, res) => {
       values: [productData.User_id, productData.Description, productData.product_image],
     };
     const productResult = await client.query(productQuery);
-
     const productId = productResult.rows[0].product_id;
 
     // Insert all product details using a loop

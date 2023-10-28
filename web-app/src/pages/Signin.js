@@ -19,14 +19,14 @@ function Signin() {
     };
 
     console.log (userData)
-    Axios.post('http://localhost:8080/signin', userData)
+    Axios.post('https://pimniyom-api.onrender.com/signin', userData)
       .then(response => {
-        console.log(response)
         if (response.status === 200) {
+          console.log("response.data")
           console.log(response.data)
           const userData = {
-            email: response.data.result[0].Email,
-            user_id: response.data.result[0].User_id,
+            email: response.data.result[0].email,
+            user_id: response.data.result[0].user_id,
             status: "success"
           }
           sessionStorage.setItem('userData', JSON.stringify(userData));

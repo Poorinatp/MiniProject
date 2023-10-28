@@ -13,7 +13,7 @@ const TestUpload = ( ) => {
         formData.append('image', inputFile);
 
         axios
-        .post('http://localhost:8080/saveimage', formData)
+        .post('https://pimniyom-api.onrender.com/saveimage', formData)
         .then((response) => {})
     }
     

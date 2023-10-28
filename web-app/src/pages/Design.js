@@ -499,6 +499,7 @@ const Design = () => {
         if (!session) {
           navigate('/signin');
         } else {
+            console.log(session.user_id)
             const inputElements = document.querySelectorAll('input');
 
             inputElements.forEach(inputElement => {

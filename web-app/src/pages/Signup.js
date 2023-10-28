@@ -33,7 +33,7 @@ function Signup() {
 		Zipcode,
 	  };
   
-	  Axios.post('http://localhost:8080/signup', { user: userData, address: addressData })
+	  Axios.post('https://pimniyom-api.onrender.com/signup', { user: userData, address: addressData })
 		.then((response) => {
 		  console.log(response);
 		  if (response.status === 200) {

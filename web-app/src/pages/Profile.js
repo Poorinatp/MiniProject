@@ -18,7 +18,7 @@ function Profile() {
     if (!sessionStorage.getItem('userData')){
       navigate('/signin');
     }
-    Axios.get('http://localhost:8080/profile/'+ username.user_id)
+    Axios.get('https://pimniyom-api.onrender.com/profile/'+ username.user_id)
       .then((response) => {
         setUserList(response.data[0]);
         console.log(response.data[0]);
@@ -27,7 +27,7 @@ function Profile() {
         console.error('Error fetching user data:', error);
       });
 
-      Axios.get('http://localhost:8080/user/orders/'+ username.user_id)
+      Axios.get('https://pimniyom-api.onrender.com/user/orders/'+ username.user_id)
       .then((response) => {
         setmyHistory(response.data);
         setmyDesignList(response.data);
@@ -58,7 +58,7 @@ function Profile() {
   }
   
   const handleSaveClick = () => {
-    Axios.put('http://localhost:8080/user'+ userList.User_id, userList)
+    Axios.put('https://pimniyom-api.onrender.com/user'+ userList.User_id, userList)
       .then(response => {
         console.log(response);
         setEditMode(false);
