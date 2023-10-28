@@ -46,7 +46,7 @@ const OptionTab = ({
 
     useEffect(()=>{
         axios
-        .get("http://localhost:8080/picture")
+        .get("https://pimniyom-api.onrender.com/picture")
         .then((response) => {
             setImgname(response.data)
             setFilteredImages(response.data)
@@ -405,7 +405,7 @@ const Design = () => {
         
         if (product_id) {
             axios
-                .get(`http://localhost:8080/products-with-details/${product_id}`)
+                .get(`https://pimniyom-api.onrender.com/products-with-details/${product_id}`)
                 .then((response) => {
                     if (response.status === 200) {
                         const textDetailData = response.data
@@ -520,7 +520,7 @@ const Design = () => {
                     formData.append('image', blob, fileName);
             
                     axios
-                        .post('http://localhost:8080/saveimage', formData)
+                        .post('https://pimniyom-api.onrender.com/saveimage', formData)
                         .then((response) => {
                             const imageDescriptions = imageData.map((image) => image.imagename.replace(/\.png$/, '')).join(' ');
                             const productData = {
@@ -562,7 +562,7 @@ const Design = () => {
                                 productDetails.push(productDetailData);
                             });
                             axios
-                                .post('http://localhost:8080/saveproduct', { productData, productDetails })
+                                .post('https://pimniyom-api.onrender.com/saveproduct', { productData, productDetails })
                                 .then((response) => {
                                     if (response.status==200) {
                                         setProductId(response.data.insertId)
@@ -599,7 +599,7 @@ const Design = () => {
                 status: "ยังไม่ชำระเงิน",
             }
             axios
-                .post('http://localhost:8080/createpayment', { paymentData })
+                .post('https://pimniyom-api.onrender.com/createpayment', { paymentData })
                 .then((response) => {
                     if(response.status==200) {
                         setPaymentId(response.data.insertId)
@@ -634,7 +634,7 @@ const Design = () => {
             formData.append('image', fileInput, fileName);
     
             axios
-                .post('http://localhost:8080/savereceipt', formData)
+                .post('https://pimniyom-api.onrender.com/savereceipt', formData)
                 .then((response) => {
                     const orderData = {
                         Product_id: productId,
@@ -644,7 +644,7 @@ const Design = () => {
                         Total_item: totalItem
                     }
                     axios
-                        .post('http://localhost:8080/createorder', { orderData })
+                        .post('https://pimniyom-api.onrender.com/createorder', { orderData })
                         .then((response) => {
                             if(response.status==200) {
                                 navigate("/profile")
