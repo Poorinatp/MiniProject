@@ -35,7 +35,7 @@ const DesignLab = ({
   
     const canvas = canvasRef.current;
   
-    const onMouseDown = (e) => {
+    const onStart = (e) => {
       const textContainer = e.target.closest('.text-container');
       const imgContainer = e.target.closest('.img-container');
   
@@ -57,11 +57,11 @@ const DesignLab = ({
       }
     };
   
-    const onMouseUp = (e) => {
+    const onEnd = (e) => {
       isClicked.current = false;
     };
   
-    const onMouseMove = (e) => {
+    const onMove = (e) => {
       if (!isClicked.current) return;
   
       const nextX = e.clientX - coords.current.startX + coords.current.lastX;
@@ -71,20 +71,20 @@ const DesignLab = ({
       currentContainer.style.left = `${nextX}px`;
     };
   
-    canvas.addEventListener("mousedown", onMouseDown);
-    canvas.addEventListener("pointerdown", onMouseDown);
-    window.addEventListener("mouseup", onMouseUp);
-    window.addEventListener("pointerup", onMouseUp);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("pointermove", onMouseMove);
+    canvas.addEventListener("mousedown", onStart);
+    canvas.addEventListener("touchstart", onStart);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchend", onEnd);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onMove);
   
     const cleanup = () => {
-      canvas.removeEventListener("mousedown", onMouseDown);
-      canvas.removeEventListener("pointerdown", onMouseDown);
-      window.removeEventListener("mouseup", onMouseUp);
-      window.removeEventListener("pointerup", onMouseUp);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("pointermove", onMouseMove);
+      canvas.removeEventListener("mousedown", onStart);
+      canvas.removeEventListener("touchstart", onStart);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchend", onEnd);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onMove);
     };
     return cleanup;
   }, [currentContainer, textData]);
