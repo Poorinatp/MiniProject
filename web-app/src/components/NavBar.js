@@ -1,4 +1,4 @@
-import { NavLink, Navigate, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./NavBar.css";
 import { useEffect, useState } from "react";
 
@@ -33,7 +33,7 @@ const NavBar = () => {
   return (
     <nav>
       <NavLink to="/" className="logo-link">
-        <img className="navimg" src="/image/logo.png" alt="logo" />
+        <img className="navimg" src="/image/logo.png"/>
       </NavLink>
       <div className="auth-links">
         {isLogin ? (

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateLeft, faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faPlus, faMinus, faUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
 
 const DesignLab = ({ 
   textData, 
@@ -148,7 +148,7 @@ const DesignLab = ({
   };
   
   return (
-    <div className="grid-item-1 lab">
+    <div className="grid-item-1">
       <div className="container-1"
       id="container"
       ref={canvasRef}
@@ -164,7 +164,7 @@ const DesignLab = ({
         }
       }}
       >
-        <img src={`../image/tshirt${tshirtcolor}.png`} alt="t-shirt" className="tshirt" />
+        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt" />
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
@@ -174,7 +174,7 @@ const DesignLab = ({
           <div
             id={`textcontainer${text.id}`}
             key={`textcontainer${text.id}`}
-            className="text-container"
+            className="text-container no-select"
             style={{
               top: text.x,
               left: text.y,
@@ -182,9 +182,21 @@ const DesignLab = ({
           >
             <FontAwesomeIcon
               icon={faXmark}
-              className="remove-icon"
+              className="remove-icon no-select"
               id={`remove-btn-${text.id}`}
               onClick={() => handleRemoveText(index)}
+              style={{
+                display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faUpDownLeftRight}
+              className="move-icon no-select"
+              id={`move-btn-${text.id}`}
+              onClick={(e) => {
+                handleItemClick(index, e);
+                setIsImageSelected(false);
+              }}
               style={{
                 display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
               }}
@@ -207,7 +219,7 @@ const DesignLab = ({
               value={text.value}
               onClick={(e) => {
                 handleItemClick(index, e);
-                setIsImageSelected(false)
+                setIsImageSelected(false);
               }}
               onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
@@ -226,7 +238,7 @@ const DesignLab = ({
             <div
               id={`imgbox${image.id}`}
               key={`imgbox${image.id}`}
-              className="img-container"
+              className="img-container no-select"
               style={{
                 top: image.x,
                 left: image.y,
@@ -235,7 +247,7 @@ const DesignLab = ({
             >
               <FontAwesomeIcon
                 icon={faXmark}
-                className="remove-icon"
+                className="remove-icon no-select"
                 id={`remove-btn-${image.id}`}
                 onClick={() => handleRemoveImage(index)}
                 style={{
@@ -244,7 +256,7 @@ const DesignLab = ({
               />
               <FontAwesomeIcon
                 icon={faMinus}
-                className="decrease-icon"
+                className="decrease-icon no-select"
                 id={`decrease-btn-${image.id}`}
                 onClick={() => handleResizeImage("decrease", index)}
                 style={{
@@ -260,9 +272,20 @@ const DesignLab = ({
                   display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
                 }}
               />
+              <FontAwesomeIcon
+                icon={faUpDownLeftRight}
+                className="move-icon no-select"
+                id={`move-btn-${image.id}`}
+                onClick={(e) => {
+                  handleItemClick(index, e);
+                  setIsImageSelected(true);
+                }}
+                style={{
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
+                }}
+              />
               <img
                 src={`../picture/${image.imagename}`}
-                alt="Display Image"
                 className="display-image"
                 style={{ 
                   width: image.width,
