@@ -72,13 +72,19 @@ const DesignLab = ({
     };
   
     canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("pointerdown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("pointerup", onMouseUp);
     window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("pointermove", onMouseMove);
   
     const cleanup = () => {
       canvas.removeEventListener("mousedown", onMouseDown);
+      canvas.removeEventListener("pointerdown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("pointerup", onMouseUp);
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("pointermove", onMouseMove);
     };
     return cleanup;
   }, [currentContainer, textData]);
