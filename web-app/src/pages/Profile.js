@@ -133,7 +133,7 @@ function Profile() {
               {myDesignList.map((myDesign, key) => {
                 return (
                   <article className="card-body" key={key}>
-                    <img id="img-design" src={myDesign.product_image} alt="myDesign" />
+                    <img id="img-design" src={myDesign.product_image}/>
                     <p id="data-his">Detail: {myDesign.Description}</p>
                   </article>
                 );
@@ -146,7 +146,7 @@ function Profile() {
                         {myHistory.map((myHistory, key) => {
                           return (
                             <article className="card-body" key={key}>
-                              <img id="img-his" src={myHistory.product_image} alt="myDesign" />
+                              <img id="img-his" src={myHistory.product_image}/>
                               <p id="data-his">Order_id: {myHistory.Order_id}</p>
                               <p id="data-his">Detail: {myHistory.Description}</p>
                               <p id="data-his">

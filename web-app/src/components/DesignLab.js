@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateLeft, faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 
 const DesignLab = ({ 
   textData, 
@@ -148,7 +148,7 @@ const DesignLab = ({
   };
   
   return (
-    <div className="grid-item-1 lab">
+    <div className="grid-item-1">
       <div className="container-1"
       id="container"
       ref={canvasRef}
@@ -164,7 +164,7 @@ const DesignLab = ({
         }
       }}
       >
-        <img src={`../image/tshirt${tshirtcolor}.png`} alt="t-shirt" className="tshirt" />
+        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt" />
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
@@ -262,7 +262,6 @@ const DesignLab = ({
               />
               <img
                 src={`../picture/${image.imagename}`}
-                alt="Display Image"
                 className="display-image"
                 style={{ 
                   width: image.width,

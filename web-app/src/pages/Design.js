@@ -20,16 +20,16 @@ const OptionTab = ({
     tshirtcolor,
     setTshirtColor,
     tshirtsize,
-    setTshirtSize, 
+    setTshirtSize,
+    filteredImages,
     handleFontChange, 
     handleSizeChange, 
     handleColorChange,
+    handleSearch
 }) => {
     const [selectedOption, setSelectedOption] = useState("Product");
     const size = Array.from({ length: 50 }, (_, i) => (i + 12) * 2);
     const [searchImg, setsearchImg] = useState("");
-    const [imgname, setImgname] = useState([]);
-    const [filteredImages, setFilteredImages] = useState([]);
     const [openOption, setOpenOption] = useState(false);
     const [isFontFamilyDropdownOpen, setFontFamilyDropdownOpen] = useState(false);
     const [isFontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false);
@@ -44,23 +44,13 @@ const OptionTab = ({
     }
     };
 
-    useEffect(()=>{
-        axios
-        .get("http://localhost:8080/picture")
-        .then((response) => {
-            setImgname(response.data)
-            setFilteredImages(response.data)
-        })
-        .catch((error) => {});
-    },[])
-
     const handleOptionChange = (option) => {
         setSelectedOption(option);
     };
 
     const handleAddText = () => {
         const newObject = {
-            id: textData.length==0?1:textData[textData.length-1].id+1, 
+            id: textData.length===0?1:textData[textData.length-1].id+1, 
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
@@ -74,7 +64,7 @@ const OptionTab = ({
     };
     const handleAddImage = (image) => {
         const newObject = {
-            id: imageData.length==0?1:imageData[imageData.length-1].id+1,
+            id: imageData.length===0?1:imageData[imageData.length-1].id+1,
             type: "image",
             width: "100px", 
             x: "0px", 
@@ -82,14 +72,6 @@ const OptionTab = ({
             imagename: image,
         }
         setImageData((prevObjects) => [...prevObjects, newObject]);
-    };
-
-    const handleSearch = (query) => {
-        const lowerQuery = query.toLowerCase();
-        const filtered = imgname.filter((name) =>
-          name.toLowerCase().includes(lowerQuery)
-        );
-        setFilteredImages(filtered);
     };
 
     return(
@@ -231,7 +213,7 @@ const OptionTab = ({
                         </div>
                         <div className="show-container">
                             {filteredImages.map((name, index)=>(
-                                <img className="img-img" key={index} src={`../picture/${name}`} alt={`image${index}`} onClick={e=>handleAddImage(name)} />
+                                <img className="img-img" key={index} src={`../picture/${name}`} onClick={e=>handleAddImage(name)} />
                             ))}
                         </div>
                     </div>}
@@ -305,7 +287,7 @@ const CheckoutPopup = ({
         {openQr&&
             <div>
                 <h1 className="payment-warn">Please pay via QR-code within {formatTime(timeLeft)}</h1>
-                <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr-code"/>
+                <img className="payment-qr" src="../image/paymentQR.jpg"/>
                 
                 <h1 className="input-warn">Upload receipt here ...</h1>
                 <div className="input-file-container">
@@ -329,7 +311,6 @@ const CheckoutPopup = ({
                     <img
                         className="uploaded-receipt"
                         src={uploadedReceipt}
-                        alt="uploaded-receipt"
                     />
                     </div>
                 )}
@@ -384,6 +365,10 @@ const Design = () => {
 
     const [uploadedReceipt, setUploadedReceipt] = useState(null);
     const [uploadedReceiptFile, setUploadedReceiptFile] = useState(null);
+
+
+    const [imgname, setImgname] = useState([]);
+    const [filteredImages, setFilteredImages] = useState([]);
 
     const findNewWidth = (fontSize, fontFamily, value) => {
         const offset = 20;
@@ -452,6 +437,13 @@ const Design = () => {
                 });
             })
             .catch((error) => {});
+        axios
+            .get("http://localhost:8080/picture")
+            .then((response) => {
+                setImgname(response.data)
+                setFilteredImages(response.data)
+            })
+            .catch((error) => {});
     }, []);
 
     useEffect(() => {
@@ -500,8 +492,9 @@ const Design = () => {
           navigate('/signin');
         } else {
             const inputElements = document.querySelectorAll('input');
-
+            
             inputElements.forEach(inputElement => {
+                console.log(inputElement)
                 const paragraphElement = document.createElement('p');
 
                 paragraphElement.textContent = inputElement.value;
@@ -646,7 +639,7 @@ const Design = () => {
                     axios
                         .post('http://localhost:8080/createorder', { orderData })
                         .then((response) => {
-                            if(response.status==200) {
+                            if(response.status===200) {
                                 navigate("/profile")
                             }
                         })
@@ -655,6 +648,15 @@ const Design = () => {
                 .catch((error)=>{});
         }
     }
+
+
+    const handleSearch = (query) => {
+        const lowerQuery = query.toLowerCase();
+        const filtered = imgname.filter((name) =>
+          name.toLowerCase().includes(lowerQuery)
+        );
+        setFilteredImages(filtered);
+    };
 
     return(
         <>
@@ -673,9 +675,11 @@ const Design = () => {
                     setTshirtColor={setTshirtColor}
                     tshirtsize={tshirtsize}
                     setTshirtSize={setTshirtSize}
+                    filteredImages={filteredImages}
                     handleFontChange={handleFontChange}
                     handleSizeChange={handleSizeChange}
                     handleColorChange={handleColorChange}
+                    handleSearch={handleSearch}
                 />
                 {/* <DesignLab/> */}
                 <DesignLab
