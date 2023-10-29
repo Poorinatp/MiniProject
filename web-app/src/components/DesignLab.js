@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faPlus, faMinus, faUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
 
 const DesignLab = ({ 
   textData, 
@@ -174,7 +174,7 @@ const DesignLab = ({
           <div
             id={`textcontainer${text.id}`}
             key={`textcontainer${text.id}`}
-            className="text-container"
+            className="text-container no-select"
             style={{
               top: text.x,
               left: text.y,
@@ -182,9 +182,21 @@ const DesignLab = ({
           >
             <FontAwesomeIcon
               icon={faXmark}
-              className="remove-icon"
+              className="remove-icon no-select"
               id={`remove-btn-${text.id}`}
               onClick={() => handleRemoveText(index)}
+              style={{
+                display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faUpDownLeftRight}
+              className="move-icon no-select"
+              id={`move-btn-${text.id}`}
+              onClick={(e) => {
+                handleItemClick(index, e);
+                setIsImageSelected(false);
+              }}
               style={{
                 display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
               }}
@@ -207,7 +219,7 @@ const DesignLab = ({
               value={text.value}
               onClick={(e) => {
                 handleItemClick(index, e);
-                setIsImageSelected(false)
+                setIsImageSelected(false);
               }}
               onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
@@ -226,7 +238,7 @@ const DesignLab = ({
             <div
               id={`imgbox${image.id}`}
               key={`imgbox${image.id}`}
-              className="img-container"
+              className="img-container no-select"
               style={{
                 top: image.x,
                 left: image.y,
@@ -235,7 +247,7 @@ const DesignLab = ({
             >
               <FontAwesomeIcon
                 icon={faXmark}
-                className="remove-icon"
+                className="remove-icon no-select"
                 id={`remove-btn-${image.id}`}
                 onClick={() => handleRemoveImage(index)}
                 style={{
@@ -244,7 +256,7 @@ const DesignLab = ({
               />
               <FontAwesomeIcon
                 icon={faMinus}
-                className="decrease-icon"
+                className="decrease-icon no-select"
                 id={`decrease-btn-${image.id}`}
                 onClick={() => handleResizeImage("decrease", index)}
                 style={{
@@ -256,6 +268,18 @@ const DesignLab = ({
                 className="increase-icon"
                 id={`increase-btn-${image.id}`}
                 onClick={() => handleResizeImage("increase", index)}
+                style={{
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faUpDownLeftRight}
+                className="move-icon no-select"
+                id={`move-btn-${image.id}`}
+                onClick={(e) => {
+                  handleItemClick(index, e);
+                  setIsImageSelected(true);
+                }}
                 style={{
                   display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
                 }}

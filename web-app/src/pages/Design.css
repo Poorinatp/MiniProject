@@ -1,3 +1,13 @@
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
 .grid-container-1 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -258,7 +268,6 @@
   position: absolute;
   background-color: transparent;
   overflow: hidden;
-  border: 1px solid red;
 }
 
 .text-container {
@@ -310,12 +319,28 @@
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
   display: none;
+  background-color: white;
 }
 
+.move-icon {
+  position: absolute;
+  top: calc(0% - 15px);
+  left: calc(100% + 15px);
+  color: gray; 
+  border: none;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: none;
+  background-color: white;
+}
 .decrease-icon {
   position: absolute;
   top: calc(0% - 15px); 
-  left: calc(100% + 15px); 
+  left: calc(100% + 35px); 
   color: gray; 
   border: none;
   border-radius: 50%;
@@ -331,7 +356,7 @@
 .increase-icon {
   position: absolute;
   top: calc(0% - 15px); 
-  left: calc(100% + 35px); 
+  left: calc(100% + 55px); 
   color: gray; 
   border: none;
   border-radius: 50%;
