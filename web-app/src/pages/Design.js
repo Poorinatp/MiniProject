@@ -3,9 +3,8 @@ import DesignLab from "../components/DesignLab"
 import NavBar from "../components/NavBar";
 import "./Design.css"
 import axios from "axios";
-import DesignLab2 from "../components/DesignLab2";
 import { useNavigate, useParams } from "react-router-dom";
-import { faMagnifyingGlass, faUpload } from "@fortawesome/free-solid-svg-icons"
+import { faAngleDown, faAngleUp, faMagnifyingGlass, faUpload } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import html2canvas from 'html2canvas';
 
@@ -16,31 +15,34 @@ const OptionTab = ({
     setImageData, 
     isSelected, 
     setIsSelected,
-    isSelectedImage,
+    isImageSelected,
     fonts,
     tshirtcolor,
     setTshirtColor,
     tshirtsize,
-    setTshirtSize, 
+    setTshirtSize,
+    filteredImages,
     handleFontChange, 
     handleSizeChange, 
     handleColorChange,
+    handleSearch
 }) => {
-    const [selectedOption, setSelectedOption] = useState("product");
+    const [selectedOption, setSelectedOption] = useState("Product");
     const size = Array.from({ length: 50 }, (_, i) => (i + 12) * 2);
     const [searchImg, setsearchImg] = useState("");
-    const [imgname, setImgname] = useState([]);
-    const [filteredImages, setFilteredImages] = useState([]);
+    const [openOption, setOpenOption] = useState(false);
+    const [isFontFamilyDropdownOpen, setFontFamilyDropdownOpen] = useState(false);
+    const [isFontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false);
 
-    useEffect(()=>{
-        axios
-        .get("http://localhost:8080/picture")
-        .then((response) => {
-            setImgname(response.data)
-            setFilteredImages(response.data)
-        })
-        .catch((error) => {});
-    },[])
+    const toggleDropdown = (type) => {
+    if (type === 'fontFamily') {
+        setFontFamilyDropdownOpen(!isFontFamilyDropdownOpen);
+        setFontSizeDropdownOpen(false);
+    } else if (type === 'fontSize') {
+        setFontSizeDropdownOpen(!isFontSizeDropdownOpen);
+        setFontFamilyDropdownOpen(false);
+    }
+    };
 
     const handleOptionChange = (option) => {
         setSelectedOption(option);
@@ -48,7 +50,7 @@ const OptionTab = ({
 
     const handleAddText = () => {
         const newObject = {
-            id: textData.length==0?1:textData[textData.length-1].id+1, 
+            id: textData.length===0?1:textData[textData.length-1].id+1, 
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
@@ -62,7 +64,7 @@ const OptionTab = ({
     };
     const handleAddImage = (image) => {
         const newObject = {
-            id: imageData.length==0?1:imageData[imageData.length-1].id+1,
+            id: imageData.length===0?1:imageData[imageData.length-1].id+1,
             type: "image",
             width: "100px", 
             x: "0px", 
@@ -72,39 +74,36 @@ const OptionTab = ({
         setImageData((prevObjects) => [...prevObjects, newObject]);
     };
 
-    const handleSearch = (query) => {
-        const lowerQuery = query.toLowerCase();
-        const filtered = imgname.filter((name) =>
-          name.toLowerCase().includes(lowerQuery)
-        );
-        setFilteredImages(filtered);
-    };
-
     return(
         <div className="grid-item">
-            <div className="grid-container-2">
+            <div className="dropdown" onClick={e=>setOpenOption(previous=>!previous)}>
+                <p className="dropdown-option">{selectedOption}</p>
+                <FontAwesomeIcon className="dropdown-icon" icon={openOption?faAngleUp:faAngleDown} />
+            </div>
+            <div className="grid-container-2" style={{display:openOption&&"grid"}}>
                 <div className="grid-item-2 option-tab">
                     <button
-                    className={selectedOption === "product" ? "active" : ""}
-                    onClick={() => handleOptionChange("product")}
+                    className={selectedOption === "Product" ? "active" : ""}
+                    onClick={() => handleOptionChange("Product")}
                     >
                     Product
                     </button>
                     <button
-                    className={selectedOption === "text" ? "active" : ""}
-                    onClick={() => handleOptionChange("text")}
+                    className={selectedOption === "Text" ? "active" : ""}
+                    onClick={() => handleOptionChange("Text")}
                     >
                     Text
                     </button>
                     <button
-                    className={selectedOption === "image" ? "active" : ""}
-                    onClick={() => handleOptionChange("image")}
+                    className={selectedOption === "Image" ? "active" : ""}
+                    onClick={() => handleOptionChange("Image")}
                     >
                     Image
                     </button>
+                    
                 </div>
                 {/* Render content based on selectedOption */}
-                {selectedOption === "product" && 
+                {selectedOption === "Product" && 
                 <div className="grid-item-3 option-content">
                     <div>
                         <p>Select T-shirt Color</p>
@@ -121,22 +120,22 @@ const OptionTab = ({
                         </select>
                     </div>
                 </div>}
-                {selectedOption === "text" && 
+                {selectedOption === "Text" && 
                 <div className="grid-item-3 option-content">        
                     <div className="text-list-wrap">
-                        {textData.map((text, index)=>{
+                        {/* {textData.map((text, index)=>{
                             return(
                                 <p 
                                     key={"p"+index}
                                     className="text-list"
                                     style={{ 
-                                        padding: isSelected[index]&&(!isSelectedImage)? "0px 9px":"0px 10px",
+                                        padding: isSelected[index]&&(!isSelected)? "0px 9px":"0px 10px",
                                         backgroundColor: isSelected[index]&&(!isSelectedImage)? "mediumseagreen": "transparent", 
                                         border: isSelected[index]&&(!isSelectedImage)? "1px solid gray": "none", 
                                         borderRadius: "20px",
                                         cursor: "pointer"
                                     }}
-                                    onClick={(e)=>{
+                                    onClick={()=>{
                                         const updatedSelection = Array(textData.length).fill(false);
                                         updatedSelection[index] = !updatedSelection[index];
                                         setIsSelected(updatedSelection);
@@ -145,33 +144,40 @@ const OptionTab = ({
                                     {index+1}: {text.value}
                                 </p>
                             )
-                        })}
-                        <button onClick={handleAddText}>Create New Object</button>
+                        })} */}
+                        <button className="design-btn" onClick={handleAddText}>Create New Text</button>
                     </div>
-                    {(isSelected.some((selected) => selected === true)&&(!isSelectedImage))&&
+                    {(isSelected.some((selected) => selected === true)&&(!isImageSelected))&&
                         <div className="text-option">
-                            <p>Font Family</p>
-                            <select value={textData[isSelected.findIndex((selected) => selected === true)].fontFamily} onChange={(e) => handleFontChange(e, isSelected.findIndex((selected) => selected === true))}>
-                                {fonts.map((fontName) => (
-                                    <option key={fontName} value={fontName}>
+                            <div className="custom-dropdown">
+                                <p>Font Family</p>
+                                <div className="selected-option" onClick={() => toggleDropdown('fontFamily')}>
+                                    {textData[isSelected.findIndex((selected) => selected === true)].fontFamily}
+                                </div>
+                                <ul className={`dropdown-options ${isFontFamilyDropdownOpen ? 'open' : ''}`}>
+                                    {fonts.map((fontName) => (
+                                    <li key={fontName} value={fontName} onClick={(e) => handleFontChange(fontName, isSelected.findIndex((selected) => selected === true))}>
                                         {fontName}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <p>Font Size</p>
-                            <select value={textData[isSelected.findIndex((selected) => selected === true)].fontSize} onChange={(e) => handleSizeChange(e, isSelected.findIndex((selected) => selected === true))}>
-                            {size.map((fontSizeOption) => (
-                                <option key={fontSizeOption} value={`${fontSizeOption}px`}>
-                                {fontSizeOption}px
-                                </option>
-                            ))}
-                            </select>
-
-                            <p>Font Color</p>
+                                    </li>
+                                    ))}
+                                </ul>
+                                <p>Font Size</p>
+                                <div className="selected-option" onClick={() => toggleDropdown('fontSize')}>
+                                    {textData[isSelected.findIndex((selected) => selected === true)].fontSize}
+                                </div>
+                                <ul className={`dropdown-options ${isFontSizeDropdownOpen ? 'open' : ''}`}>
+                                    {size.map((fontSizeOption) => (
+                                    <li key={fontSizeOption} onClick={(e) => handleSizeChange(fontSizeOption, isSelected.findIndex((selected) => selected === true))}>
+                                        {fontSizeOption}px
+                                    </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <p>Text Color</p>
                             <div className="colorpicker">
                                 <input
                                 type="color"
+                                className="colorselectinput"
                                 value={textData[isSelected.findIndex((selected) => selected === true)].fontColor}
                                 onChange={(e) => handleColorChange(e, isSelected.findIndex((selected) => selected === true))}
                                 />
@@ -186,14 +192,13 @@ const OptionTab = ({
                         </div>
                     }
                 </div>}
-                {selectedOption === "image" && 
+                {selectedOption === "Image" && 
                     <div className="grid-item-4 option-content">
                         <div className="search-container">
                         <FontAwesomeIcon
                             icon={faMagnifyingGlass}
                             className="search-icon"
                             id={`search-btn`}
-                            
                         />
                         <input
                             type="search"
@@ -208,7 +213,7 @@ const OptionTab = ({
                         </div>
                         <div className="show-container">
                             {filteredImages.map((name, index)=>(
-                                <img className="img-img" key={index} src={`../picture/${name}`} alt={`image${index}`} onClick={e=>handleAddImage(name)} />
+                                <img className="img-img" key={index} src={`../picture/${name}`} onClick={e=>handleAddImage(name)} />
                             ))}
                         </div>
                     </div>}
@@ -282,7 +287,7 @@ const CheckoutPopup = ({
         {openQr&&
             <div>
                 <h1 className="payment-warn">Please pay via QR-code within {formatTime(timeLeft)}</h1>
-                <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr-code"/>
+                <img className="payment-qr" src="../image/paymentQR.jpg"/>
                 
                 <h1 className="input-warn">Upload receipt here ...</h1>
                 <div className="input-file-container">
@@ -306,7 +311,6 @@ const CheckoutPopup = ({
                     <img
                         className="uploaded-receipt"
                         src={uploadedReceipt}
-                        alt="uploaded-receipt"
                     />
                     </div>
                 )}
@@ -326,16 +330,14 @@ const CheckoutPopup = ({
 
 const Design = () => {
     const [textData, setTextData] = useState([
-        {id: 1, type: "text", value: "hi", fontFamily: "Basic-Regular", width:"50px", fontSize: "24px", fontColor: "black", x: "0px", y: "0px"},
-        {id: 2, type: "text", value: "mynameis", fontFamily: "Basic-Regular", width:"120px", fontSize: "36px", fontColor: "red", x: "50px", y: "50px"},
-        {id: 3, type: "text", value: "poom", fontFamily: "Basic-Regular", width:"100px", fontSize: "24px", fontColor: "blue", x: "100px", y: "100px"}
+        {id: 1, type: "text", value: "Type text here", fontFamily: "Basic-Regular", width:"160px", fontSize: "24px", fontColor: "black", x: "30px", y: "25px"},
     ]);      
     const [imageData, setImageData] = useState([
-        {id: 1, type: "image", width:"100px", x: "0px", y: "0px", imagename:"แมวบนโซฟาสีเขียว.png"}
+        {id: 1, type: "image", width:"200px", x: "60px", y: "0px", imagename:"แมวบนโซฟาสีเขียว.png"}
     ]);
 
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
-    const [isSelectedImage, setIsSelectedImage] = useState(false);
+    const [isImageSelected, setIsImageSelected] = useState(false);
 
     const { product_id } = useParams();
     const session =  JSON.parse(sessionStorage.getItem('userData'));
@@ -364,32 +366,36 @@ const Design = () => {
     const [uploadedReceipt, setUploadedReceipt] = useState(null);
     const [uploadedReceiptFile, setUploadedReceiptFile] = useState(null);
 
+
+    const [imgname, setImgname] = useState([]);
+    const [filteredImages, setFilteredImages] = useState([]);
+
+    const findNewWidth = (fontSize, fontFamily, value) => {
+        const offset = 20;
+        const minWidth = 10;
+      
+        const span = document.createElement('span');
+        span.style.display = 'inline-block';
+        span.style.fontFamily = fontFamily
+        span.style.fontSize = `${fontSize}px`;
+        span.innerHTML = value.replace(/ /g, '&nbsp');
+      
+        document.body.appendChild(span);
+        let newWidth = Math.max(minWidth, span.offsetWidth + offset);
+        document.body.removeChild(span);
+        return newWidth;
+    }
+
     useEffect(() => {
-        // Fetch the list of fonts from the server using Axios
         
         if (product_id) {
-            // Fetch data based on the product_id
             axios
                 .get(`http://localhost:8080/products-with-details/${product_id}`)
                 .then((response) => {
-                    // Handle the response data here
                     if (response.status === 200) {
-                        // Update your state or perform other actions with the data
                         const textDetailData = response.data
                         .filter((item) => item.Font_family !== "")
-                        .map((item) => {
-                            const span = document.createElement('span');
-                            const offset = 10;
-                            const minWidth = 100;
-                            span.style.display = 'inline-block'; // Change to inline-block to measure width accurately
-                            span.style.fontFamily = item.Font_family;
-                            span.style.fontSize = `${item.Font_size}px`;
-                            span.innerHTML = item.text_value.replace(/ /g, '&nbsp');
-                            document.body.appendChild(span);
-                            let Width = Math.max(minWidth, span.offsetWidth + offset);
-                            document.body.removeChild(span);
-
-                            return ({
+                        .map((item) => ({
                             id: item.id,
                             type: "text",
                             value: item.text_value,
@@ -398,8 +404,8 @@ const Design = () => {
                             fontColor: item.Font_color,
                             x: item.location_text.split(';')[0].trim(),
                             y: item.location_text.split(';')[1].trim(),
-                            width: Width
-                        })})
+                            width: findNewWidth(item.Font_size, item.Font_family, item.text_value)
+                        }));
                         const imageDetailData = response.data
                         .filter((item) => item.Font_family === "")
                         .map((item) => ({
@@ -431,6 +437,13 @@ const Design = () => {
                 });
             })
             .catch((error) => {});
+        axios
+            .get("http://localhost:8080/picture")
+            .then((response) => {
+                setImgname(response.data)
+                setFilteredImages(response.data)
+            })
+            .catch((error) => {});
     }, []);
 
     useEffect(() => {
@@ -441,15 +454,17 @@ const Design = () => {
     }, [timeLeft, paymentTimer]);
 
       
-    const handleFontChange = (event, index) => {
+    const handleFontChange = (value, index) => {
         const newTextElements = [...textData];
-        newTextElements[index].fontFamily = event.target.value;
+        newTextElements[index].fontFamily = value;
+        newTextElements[index].width = findNewWidth(newTextElements[index].fontSize, value, newTextElements[index].value);
         setTextData(newTextElements);
     };
     
-    const handleSizeChange = (event, index) => {
+    const handleSizeChange = (value, index) => {
         const newTextElements = [...textData];
-        newTextElements[index].fontSize = event.target.value;
+        newTextElements[index].fontSize = value;
+        newTextElements[index].width = findNewWidth(value, newTextElements[index].fontFamily, newTextElements[index].value);
         setTextData(newTextElements);
     };
     
@@ -477,8 +492,9 @@ const Design = () => {
           navigate('/signin');
         } else {
             const inputElements = document.querySelectorAll('input');
-
+            
             inputElements.forEach(inputElement => {
+                console.log(inputElement)
                 const paragraphElement = document.createElement('p');
 
                 paragraphElement.textContent = inputElement.value;
@@ -623,7 +639,7 @@ const Design = () => {
                     axios
                         .post('http://localhost:8080/createorder', { orderData })
                         .then((response) => {
-                            if(response.status==200) {
+                            if(response.status===200) {
                                 navigate("/profile")
                             }
                         })
@@ -632,6 +648,15 @@ const Design = () => {
                 .catch((error)=>{});
         }
     }
+
+
+    const handleSearch = (query) => {
+        const lowerQuery = query.toLowerCase();
+        const filtered = imgname.filter((name) =>
+          name.toLowerCase().includes(lowerQuery)
+        );
+        setFilteredImages(filtered);
+    };
 
     return(
         <>
@@ -644,30 +669,34 @@ const Design = () => {
                     setImageData={setImageData}
                     isSelected={isSelected}
                     setIsSelected={setIsSelected}
-                    isSelectedImage={isSelectedImage}
+                    isImageSelected={isImageSelected}
                     fonts={fonts}
                     tshirtcolor={tshirtcolor}
                     setTshirtColor={setTshirtColor}
                     tshirtsize={tshirtsize}
                     setTshirtSize={setTshirtSize}
+                    filteredImages={filteredImages}
                     handleFontChange={handleFontChange}
                     handleSizeChange={handleSizeChange}
                     handleColorChange={handleColorChange}
+                    handleSearch={handleSearch}
                 />
                 {/* <DesignLab/> */}
                 <DesignLab
                     textData={textData}
                     isSelected={isSelected}
+                    isImageSelected={isImageSelected}
                     imageData={imageData}
                     tshirtcolor={tshirtcolor}
                     tshirtsize={tshirtsize}
                     setImageData={setImageData}
                     setTextData={setTextData}
                     setIsSelected={setIsSelected}
-                    setIsSelectedImage={setIsSelectedImage}
+                    setIsImageSelected={setIsImageSelected}
                     setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
                     handleSaveDesign={handleSaveDesign}
                     handleCheckoutClick={handleCheckoutClick}
+                    findNewWidth={findNewWidth}
                 />
             </div>
             {isCheckoutPopupOpen && (

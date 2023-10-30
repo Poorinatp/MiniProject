@@ -1,30 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateLeft, faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faPlus, faMinus, faUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
 
 const DesignLab = ({ 
   textData, 
   setTextData,
   imageData, 
   setImageData, 
-  isSelected, 
+  isSelected,
+  isImageSelected, 
   tshirtcolor,
   tshirtsize,
   setIsSelected,
-  setIsSelectedImage,
+  setIsImageSelected,
   handleSaveDesign,
-  handleCheckoutClick
+  handleCheckoutClick,
+  findNewWidth
  }) => {
   const canvasRef = useRef(null);
   const isClicked = useRef(false);
   const [currentContainer, setCurrentContainer] = useState(null);
-
+  
   const coords = useRef({
     startX: 0,
     startY: 0,
     lastX: 0,
     lastY: 0
   });
+
+  const borderColor = tshirtcolor==="black"?"white":"black"
 
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
@@ -68,39 +72,31 @@ const DesignLab = ({
     };
   
     canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("pointerdown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("pointerup", onMouseUp);
     window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("pointermove", onMouseMove);
   
     const cleanup = () => {
       canvas.removeEventListener("mousedown", onMouseDown);
+      canvas.removeEventListener("pointerdown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("pointerup", onMouseUp);
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("pointermove", onMouseMove);
     };
     return cleanup;
   }, [currentContainer, textData]);
-
 
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
     const value = e.target.value;
     const fontSize = parseInt(updatedTextData[index].fontSize, 10);
-    const offset = 10; // Adjust this value as needed
-    const minWidth = 100; // Adjust this value as the minimum width
-  
-    const span = document.createElement('span');
-    span.style.display = 'inline-block'; // Change to inline-block to measure width accurately
-    span.style.fontFamily = updatedTextData[index].fontFamily;
-    span.style.fontSize = `${fontSize}px`;
-    span.innerHTML = value.replace(/ /g, '&nbsp'); // Prevent whitespace collapse
-  
-    document.body.appendChild(span);
-  
-    let newWidth = Math.max(minWidth, span.offsetWidth + offset);
-  
-    document.body.removeChild(span);
-  
+    const fontFamily = updatedTextData[index].fontFamily;
+    
     updatedTextData[index].value = value;
-    updatedTextData[index].width = `${newWidth}px`;
+    updatedTextData[index].width = `${findNewWidth(fontSize, fontFamily, value)}px`;
     setTextData(updatedTextData);
   };
   
@@ -111,11 +107,15 @@ const DesignLab = ({
   
     const canvas = document.getElementById("canvas");
     const allInputs = canvas.querySelectorAll('input');
-  
-    // Set styles for all input elements
+    const allImages = canvas.querySelectorAll('img');
+
     allInputs.forEach((input) => {
       input.style.border = "none";
       input.style.padding = "6px";
+    });
+    allImages.forEach((img) => {
+      img.style.border = "none";
+      img.style.padding = "6px";
     });
   
     setCurrentContainer(e.target);
@@ -154,13 +154,12 @@ const DesignLab = ({
   };
   
   return (
-    <div className="grid-item-1 lab">
+    <div className="grid-item-1">
       <div className="container-1"
       id="container"
       ref={canvasRef}
       onClick={(e) => {
         if (currentContainer) {
-          // Check if the clicked element is not the currentContainer or its descendant
           if (!currentContainer.contains(e.target)) {
             currentContainer.style.border = "none";
             currentContainer.style.padding = "6px";
@@ -171,7 +170,7 @@ const DesignLab = ({
         }
       }}
       >
-        <img src={`../image/tshirt${tshirtcolor}.png`} alt="t-shirt" className="tshirt" />
+        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt" />
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
@@ -181,7 +180,7 @@ const DesignLab = ({
           <div
             id={`textcontainer${text.id}`}
             key={`textcontainer${text.id}`}
-            className="text-container"
+            className="text-container no-select"
             style={{
               top: text.x,
               left: text.y,
@@ -189,11 +188,23 @@ const DesignLab = ({
           >
             <FontAwesomeIcon
               icon={faXmark}
-              className="remove-icon"
+              className="remove-icon no-select"
               id={`remove-btn-${text.id}`}
               onClick={() => handleRemoveText(index)}
               style={{
-                display: ( isSelected[index] && text.type === "text" ) ? 'block' : 'none',
+                display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faUpDownLeftRight}
+              className="move-icon no-select"
+              id={`move-btn-${text.id}`}
+              onClick={(e) => {
+                handleItemClick(index, e);
+                setIsImageSelected(false);
+              }}
+              style={{
+                display: ( isSelected[index] && !isImageSelected ) ? 'block' : 'none',
               }}
             />
             <input
@@ -202,8 +213,8 @@ const DesignLab = ({
               className="text-input"
               style={{
                 width: text.width,
-                padding: (isSelected[index]&&text.type==="text")? "4px":"6px",
-                border: (isSelected[index]&&text.type==="text")? "2px dashed black": "none", 
+                padding: ( isSelected[index]&& !isImageSelected )? "4px":"6px",
+                border: ( isSelected[index]&& !isImageSelected )? "2px dashed black": "none", 
                 fontFamily: text.fontFamily,
                 fontSize: text.fontSize,
                 color: text.fontColor,
@@ -214,7 +225,7 @@ const DesignLab = ({
               value={text.value}
               onClick={(e) => {
                 handleItemClick(index, e);
-                setIsSelectedImage(false)
+                setIsImageSelected(false);
               }}
               onMouseEnter={(e) => {
                 e.target.style.border = "2px dashed black";
@@ -233,7 +244,7 @@ const DesignLab = ({
             <div
               id={`imgbox${image.id}`}
               key={`imgbox${image.id}`}
-              className="img-container"
+              className="img-container no-select"
               style={{
                 top: image.x,
                 left: image.y,
@@ -242,20 +253,20 @@ const DesignLab = ({
             >
               <FontAwesomeIcon
                 icon={faXmark}
-                className="remove-icon"
+                className="remove-icon no-select"
                 id={`remove-btn-${image.id}`}
                 onClick={() => handleRemoveImage(index)}
                 style={{
-                  display: ( isSelected[index] && image.type === "image" ) ? 'block' : 'none',
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
                 }}
               />
               <FontAwesomeIcon
                 icon={faMinus}
-                className="decrease-icon"
+                className="decrease-icon no-select"
                 id={`decrease-btn-${image.id}`}
                 onClick={() => handleResizeImage("decrease", index)}
                 style={{
-                  display: ( isSelected[index] && image.type === "image" ) ? 'block' : 'none',
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
                 }}
               />
               <FontAwesomeIcon
@@ -264,20 +275,33 @@ const DesignLab = ({
                 id={`increase-btn-${image.id}`}
                 onClick={() => handleResizeImage("increase", index)}
                 style={{
-                  display: ( isSelected[index] && image.type === "image" ) ? 'block' : 'none',
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faUpDownLeftRight}
+                className="move-icon no-select"
+                id={`move-btn-${image.id}`}
+                onClick={(e) => {
+                  handleItemClick(index, e);
+                  setIsImageSelected(true);
+                }}
+                style={{
+                  display: ( isSelected[index] && isImageSelected ) ? 'block' : 'none',
                 }}
               />
               <img
                 src={`../picture/${image.imagename}`}
-                alt="Display Image"
                 className="display-image"
                 style={{ 
-                  width: image.width
+                  width: image.width,
+                  padding: (isSelected[index]&&isImageSelected )? "4px":"6px",
+                  border: (isSelected[index]&&isImageSelected )? "2px dashed black": "none", 
                  }}
                 draggable="false"
                 onClick={(e) => {
                   handleItemClick(index, e);
-                  setIsSelectedImage(true)
+                  setIsImageSelected(true)
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.border = "2px dashed black";
@@ -295,8 +319,8 @@ const DesignLab = ({
         </div>
       </div>
       <div className="btn-group">
-          <button className="save-btn" onClick={handleSaveDesign}>Save</button>
-          <button className="checkout-btn" onClick={handleCheckoutClick}>Check Out</button>
+          <button className="save-btn design-btn" onClick={handleSaveDesign}>Save</button>
+          <button className="checkout-btn design-btn" onClick={handleCheckoutClick}>Check Out</button>
       </div>
     </div>
   );
