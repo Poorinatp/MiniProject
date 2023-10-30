@@ -72,19 +72,19 @@ const DesignLab = ({
     };
   
     canvas.addEventListener("mousedown", onStart);
-    canvas.addEventListener("pointerdown", onStart, false);
+    canvas.addEventListener("pointerdown", onStart);
     window.addEventListener("mouseup", onEnd);
-    window.addEventListener("pointerup", onEnd, false);
+    window.addEventListener("pointerup", onEnd);
     window.addEventListener("mousemove", onMove);
-    window.addEventListener("pointermove", onMove, false);
+    window.addEventListener("pointermove", onMove);
   
     const cleanup = () => {
       canvas.removeEventListener("mousedown", onStart);
-      canvas.removeEventListener("pointerdown", onStart, false);
+      canvas.removeEventListener("pointerdown", onStart);
       window.removeEventListener("mouseup", onEnd);
-      window.removeEventListener("pointerup", onEnd, false);
+      window.removeEventListener("pointerup", onEnd);
       window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("pointermove", onMove, false);
+      window.removeEventListener("pointermove", onMove);
     };
     return cleanup;
   }, [currentContainer, textData]);
@@ -237,6 +237,7 @@ const DesignLab = ({
                   e.target.style.padding = "6px";
                 }
               }}
+              onDragStart={e=>false}
             />
           </div>
         ))}
@@ -313,6 +314,7 @@ const DesignLab = ({
                     e.target.style.padding = "6px";
                   }
                 }}
+                onDragStart={e=>false}
               />
             </div>
           ))}
