@@ -425,7 +425,14 @@ const Design = () => {
                 })
                 .catch((error) =>{});
         }else{
+            if(sessionStorage.getItem('textData')&&sessionStorage.getItem('imageData')){
+                const sessionTextData=JSON.parse(sessionStorage.getItem('textData'))
+                const sessionImageData=JSON.parse(sessionStorage.getItem('imageData'))
+                setTextData(sessionTextData)
+                setImageData(sessionImageData)
+            }else{
 
+            }
         }
         axios
             .get("http://localhost:8080/fonts")
@@ -489,20 +496,20 @@ const Design = () => {
 
     const handleSaveDesign = () => {
         if (!session) {
-          navigate('/signin');
+            alert("Prior to save a design, you are required to log in.");
+            sessionStorage.setItem('textData', JSON.stringify(textData));
+            sessionStorage.setItem('imageData', JSON.stringify(imageData));
+            navigate('/signin');
         } else {
             const inputElements = document.querySelectorAll('input');
             
             inputElements.forEach(inputElement => {
-                console.log(inputElement)
                 const paragraphElement = document.createElement('p');
 
                 paragraphElement.textContent = inputElement.value;
                 paragraphElement.style.cssText = inputElement.style.cssText;
                 
                 inputElement.parentNode.replaceChild(paragraphElement, inputElement);
-            
-                console.log(inputElement)
             });
 
             const container = document.getElementById('container');
@@ -576,6 +583,9 @@ const Design = () => {
 
     const handlePayment = () => {
         if (!session) {
+            alert("You must log in before proceeding with the payment.");
+            sessionStorage.setItem('textData', JSON.stringify(textData));
+            sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
         } else {
             handleSaveDesign()
