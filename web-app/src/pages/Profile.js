@@ -4,7 +4,7 @@ import Axios from 'axios';
 import './Profile.css';
 import NavBar from '../components/NavBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash,faPen } from '@fortawesome/free-solid-svg-icons';
 
 function Profile() {
   const [userList, setUserList] = useState([]);
@@ -78,13 +78,14 @@ function Profile() {
       });
   };
   
-
-  
-  
-  const handleSaveClick = () => {
-    Axios.put('http://localhost:8080/update/'+ userList.User_id, userList)
+  const handleEditProduct = (product_id) => {
+    navigate(`/design/${product_id}`)
+  };
+    
+  function handleSaveClick() {
+    Axios.put('http://localhost:8080/update/' + userList.User_id, userList)
       .then(response => {
-        console.log(response.data.messege)
+        console.log(response.data.messege);
         console.log(response);
         setEditMode(false);
       })
@@ -92,6 +93,8 @@ function Profile() {
         console.log(error);
       });
   }
+
+
   return (
     <>
     <NavBar/> 
@@ -163,10 +166,13 @@ function Profile() {
                     <img id="img-design" src={myDesignList.product_image} alt="myDesign" />
                     <p id="data-his">Created_at: {createdDate}</p>
                     <p id="data-his">Product_id: {myDesignList.Product_id}</p>
-
-                    <button className='deletebtn' onClick={() => handleDelete(myDesignList.Product_id)}>
-                      <FontAwesomeIcon icon={faTrash} style={{ color: '#002d7a' }} />
+                    <button  className='editbtn' onClick={handleEditProduct}>
+                      <FontAwesomeIcon icon={faPen} size='2xs' style={{color: "#254683",}} />
                     </button>
+                    <button className='deletebtn' onClick={() => handleDelete(myDesignList.Product_id)}>
+                      <FontAwesomeIcon icon={faTrash} size='2xs' style={{ color: '#254683 ' }} />
+                    </button>
+
                   </article>
                 );
               })}

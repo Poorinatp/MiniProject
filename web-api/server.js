@@ -199,11 +199,7 @@ app.post('/signin', (req, res) => {
 
   app.get('/user/product/:id', function(req, res) {
     const userId = parseInt(req.params.id); // Parse the ID parameter from the URL
-    const sqlQuery = `
-        SELECT 
-          *    
-        FROM product 
-        WHERE product.User_id = ?`;
+    const sqlQuery = `SELECT * FROM product WHERE product.User_id = ? AND status = 'able';`;
 
     connection.query(sqlQuery, [userId], function(error, results) {
         if (error) {
@@ -264,15 +260,26 @@ app.get('/user/orders/:id', function(req, res) {
 
 app.delete('/delete/:productId', function (req, res) {
   const product_id = req.params.productId;
-  console.log(product_id)
+  console.log(product_id);
+
   connection.query('DELETE FROM product_detail WHERE Product_id = ?', [product_id], function (error, results) {
     if (error) {
       console.error('Error deleting product_detail:', error);
-      res.status(500).send({ error: 'Error deleting product_detail'+ error.message });
+      res.status(500).send({ error: 'Error deleting product_detail: ' + error.message });
     } else if (results.affectedRows > 0) {
-      res.status(200).send({ message: 'Product deleted successfully'+ error.message });
+      res.status(200).send({ message: 'Product_detail deleted successfully' });
+
+      // Update the status in the "product" table to "Disable"
+      connection.query('UPDATE product SET status = ? WHERE Product_id = ?', ['disable', product_id], function (updateError, updateResults) {
+        if (updateError) {
+          console.error('Error updating product status:', updateError);
+          res.status(500).send({ error: 'Error updating product status: ' + updateError.message });
+        } else {
+          console.log('Product status updated to Disable');
+        }
+      });
     } else {
-      res.status(401).send({ message: 'Product not found' + error.message});
+      res.status(401).send({ message: 'Product_detail not found' });
     }
   });
 });
