@@ -78,7 +78,7 @@ function Signup() {
 					<br/>
                    
 				<input 
-					type="tel" 
+					type="text" 
 					id="Telephone"
 					placeholder="+66XX-XXX-XXXX"
 					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
@@ -98,12 +98,12 @@ function Signup() {
 				<input
 					type="Password"
 					id="Password"
-					placeholder="Your Password"
+					placeholder="must have A-Z,a-z and 0-9"
 					pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
 					value={Password}
 					onChange={e => { setPassword(e.target.value) }}
 					required 
-					maxlength="10"
+					maxLength="10"
 					/>
 					<br />
 							
@@ -140,6 +140,7 @@ function Signup() {
 					placeholder="Zip-code"
 					pattern="[0-9]{5}"
 					onChange={e =>{setZipcode(e.target.value)}}
+					maxLength={5}
                     required/> 
 					<br/>
 

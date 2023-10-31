@@ -31,9 +31,10 @@ function Signin() {
           }
           sessionStorage.setItem('userData', JSON.stringify(userData));
           console.log(userData)
+          alert("login success")
           navigate('/design');
         } else {
-          alert('เข้าสู่ระบบล้มเหลว');
+          alert("login success")
         }
       })
       .catch(error => {

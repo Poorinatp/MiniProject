@@ -302,15 +302,19 @@ app.get('/picture', (req, res) => {
 
 app.post('/saveimage', uploadShirtDesign.single('image'), (req, res) => {
   if (!req.file) {
+    console.log(req.file)
     res.status(400).send('No image file')
   }
+  console.log(req.file)
   res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
 app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
   if (!req.file) {
+  console.log(req.file)
     res.status(400).send('No image file')
   }
+  console.log(req.file)
   res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
