@@ -3,6 +3,8 @@ import {useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 import NavBar from '../components/NavBar';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash,faPen } from '@fortawesome/free-solid-svg-icons';
 
 const Profile = ({apihost}) => {
   const [userList, setUserList] = useState([]);
@@ -11,8 +13,8 @@ const Profile = ({apihost}) => {
   const username =  JSON.parse(sessionStorage.getItem('userData'));
   const [activeTab, setActiveTab] = useState('mydesign'); 
   const [editMode, setEditMode] = useState(false);
+  
   const navigate = useNavigate();
-
   useEffect(() => {
     // Make the Axios GET request
     if (!sessionStorage.getItem('userData')){
@@ -27,11 +29,19 @@ const Profile = ({apihost}) => {
         console.error('Error fetching user data:', error);
       });
 
-      Axios.get(`${apihost}/user/orders/`+ username.user_id)
+      Axios.get(`${apihost}/user/product/`+ username.user_id)
       .then((response) => {
         setmyHistory(response.data);
         setmyDesignList(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
 
+      Axios.get(`${apihost}/user/orders/`+ username.user_id)
+      .then((response) => {
+        setmyHistory(response.data);
         console.log(response.data);
       })
       .catch((error) => {
@@ -43,9 +53,7 @@ const Profile = ({apihost}) => {
     setActiveTab(tabName);
   };
 
-  const handleCancelClick = () => {
-    setEditMode(false);
-  }
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserList(prevState => ({
@@ -56,10 +64,29 @@ const Profile = ({apihost}) => {
   const handleEditClick = () => {
     setEditMode(true);
   }
+  const handleCancelClick = () => {
+    setEditMode(false);
+  }
+  const handleDelete = (product_id) => {
+    Axios.delete(`${apihost}/delete/${product_id}`)
+      .then(() => {
+        // Filter out the deleted product from myDesignList
+        setmyDesignList((prevList) => prevList.filter((item) => item.Product_id !== product_id));
+        alert('Product Deleted!');
+      })
+      .catch((error) => {
+        console.error('Error deleting product_detail:', error);
+      });
+  };
   
-  const handleSaveClick = () => {
-    Axios.put('http://localhost:8080/user'+ userList.User_id, userList)
+  const handleEditProduct = (product_id) => {
+    navigate(`/design/${product_id}`)
+  };
+    
+  function handleSaveClick() {
+    Axios.put(`${apihost}/update/` + userList.User_id, userList)
       .then(response => {
+        console.log(response.data.messege);
         console.log(response);
         setEditMode(false);
       })
@@ -67,6 +94,8 @@ const Profile = ({apihost}) => {
         console.log(error);
       });
   }
+
+
   return (
     <>
     <NavBar/> 
@@ -77,21 +106,22 @@ const Profile = ({apihost}) => {
               {editMode ? (
             <div>
               <label>First Name:</label>
-              <input type="text" name="fname" value={userList.Firstname} onChange={handleInputChange} />
+              <input type="text" name="Firstname" value={userList.Firstname} onChange={handleInputChange} />
               <br />
               <label>Last Name:</label>
-              <input type="text" name="lname" value={userList.Lastname} onChange={handleInputChange} />
+              <input type="text" name="Lastname" value={userList.Lastname} onChange={handleInputChange} />
               <br />
               <label>Address:</label>
-              <input type="text" name="address" value={userList.Address} onChange={handleInputChange} />
+              <input type="text" name="Address" value={userList.Address} onChange={handleInputChange} />
               <br />
               <label>Phone:</label>
-              <input type="text" name="phone" value={userList.Telephone} onChange={handleInputChange} />
+              <input type="tel" name="Telephone" value={userList.Telephone} onChange={handleInputChange} />
               <br />
               <label>Zipcode:</label>
-              <input type="text" name="zipcode" value={userList.Zipcode} onChange={handleInputChange} />
+              <input type="text" name="Zipcode" value={userList.Zipcode} onChange={handleInputChange} />
               <br />
-              <input type="text" name="country" value={userList.Country} onChange={handleInputChange} />
+              <label>Country:</label>
+              <input type="text" name="Country" value={userList.Country} onChange={handleInputChange} />
               <br />
               <button className='CancelButton' onClick={handleCancelClick}>Cancel</button>
               <button onClick={handleSaveClick}>Save</button>
@@ -130,11 +160,20 @@ const Profile = ({apihost}) => {
         <section className="Design-card" id="mydesign">
           {activeTab === 'mydesign' && (
             <p className="tab-pane-design" >
-              {myDesignList.map((myDesign, key) => {
+              {myDesignList.map((myDesignList, key) => {
+                const createdDate = myDesignList.Created_at.split("T")[0]; 
                 return (
                   <article className="card-body" key={key}>
-                    <img id="img-design" src={myDesign.product_image}/>
-                    <p id="data-his">Detail: {myDesign.Description}</p>
+                    <img id="img-design" src={myDesignList.product_image} alt="myDesign" />
+                    <p id="data-his">Created_at: {createdDate}</p>
+                    <p id="data-his">Product_id: {myDesignList.Product_id}</p>
+                    <button  className='editbtn' onClick={handleEditProduct}>
+                      <FontAwesomeIcon icon={faPen} size='2xs' style={{color: "#254683",}} />
+                    </button>
+                    <button className='deletebtn' onClick={() => handleDelete(myDesignList.Product_id)}>
+                      <FontAwesomeIcon icon={faTrash} size='2xs' style={{ color: '#254683 ' }} />
+                    </button>
+
                   </article>
                 );
               })}
