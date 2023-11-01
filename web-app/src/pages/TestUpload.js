@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-const TestUpload = ( ) => {
+const TestUpload = ({apihost}) => {
     const [inputFile, setInputFile] = useState(null);
 
     const handleChange = (e) => {
@@ -13,7 +13,7 @@ const TestUpload = ( ) => {
         formData.append('image', inputFile);
 
         axios
-        .post('https://pimniyom-api.onrender.com/saveimage', formData)
+        .post(`${apihost}/saveimage`, formData)
         .then((response) => {})
     }
     

@@ -5,7 +5,7 @@ import NavBar from '../components/NavBar';
 import Axios from "axios";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
-function Signup() {
+const Signup = ({apihost}) => {
 	const [Firstname, setFirstname] = useState('');
 	const [Lastname, setLastname] = useState('');
 	const [Telephone, setTel] = useState('');
@@ -32,8 +32,8 @@ function Signup() {
 		Country,
 		Zipcode,
 	  };
-  
-	  Axios.post('https://pimniyom-api.onrender.com/signup', { user: userData, address: addressData })
+	  console.log("apihost = "+apihost)
+	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
 		  console.log(response);
 		  if (response.status === 200) {

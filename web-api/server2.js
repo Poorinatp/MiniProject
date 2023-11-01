@@ -26,26 +26,26 @@ app.use(bodyParser.json());
 const port = 8090;
 
 // Create a PostgreSQL connection pool
-// const pool = new Pool({
-//   user: 'phimniyom_db_user',
-//   host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
-//   database: 'phimniyom_db',
-//   password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
-//   port: 5432,
-//   ssl: {
-//     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
-//   },
-// });
 const pool = new Pool({
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: process.env.PGPORT,
+  user: 'phimniyom_db_user',
+  host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
+  database: 'phimniyom_db',
+  password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
+  port: 5432,
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
 });
+// const pool = new Pool({
+//   user: process.env.PGUSER,
+//   host: process.env.PGHOST,
+//   database: process.env.PGDATABASE,
+//   password: process.env.PGPASSWORD,
+//   port: process.env.PGPORT,
+//   ssl: {
+//     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
+//   },
+// });
 
 const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -187,8 +187,8 @@ app.post('/signup', async (req, res) => {
 
       // Insert user data into the "user" table
       const userInsertQuery = {
-        text: 'INSERT INTO "user" (email, password) VALUES ($1, $2) RETURNING user_id',
-        values: [userData.email, userData.password],
+        text: 'INSERT INTO "user" (email, password, firstname, lastname, telephone) VALUES ($1, $2, $3, $4, $5) RETURNING user_id',
+        values: [userData.Email, userData.Password, userData.Firstname, userData.Lastname, userData.Telephone],
       };
       const userInsertResult = await client.query(userInsertQuery);
 
@@ -198,7 +198,7 @@ app.post('/signup', async (req, res) => {
       // Link the user_id and insert address data into the "user_address" table
       const addressInsertQuery = {
         text: 'INSERT INTO user_address (user_id, address, city, zipcode, country) VALUES ($1, $2, $3, $4, $5)',
-        values: [user_id, addressData.address, addressData.city, addressData.zipcode, addressData.country],
+        values: [user_id, addressData.Address, addressData.City, addressData.Zipcode, addressData.Country],
       };
       await client.query(addressInsertQuery);
 
@@ -206,12 +206,13 @@ app.post('/signup', async (req, res) => {
       res.status(200).send('User registration successful');
     } catch (error) {
       await client.query('ROLLBACK');
-      res.status(500).send('User registration failed');
+      console.log(error)
+      res.status(500).send('User registration failed 2');
     } finally {
       client.release();
     }
   } catch (error) {
-    res.status(500).send('User registration failed');
+    res.status(500).send('User registration failed 1');
   }
 });
 

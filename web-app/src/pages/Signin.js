@@ -5,7 +5,7 @@ import NavBar from '../components/NavBar';
 import Axios from "axios";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
-function Signin() {
+function Signin ({apihost}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ function Signin() {
     };
 
     console.log (userData)
-    Axios.post('https://pimniyom-api.onrender.com/signin', userData)
+    Axios.post(`${apihost}/signin`, userData)
       .then(response => {
         if (response.status === 200) {
           console.log("response.data")

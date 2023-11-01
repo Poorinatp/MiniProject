@@ -4,7 +4,7 @@ import Axios from 'axios';
 import './Profile.css';
 import NavBar from '../components/NavBar';
 
-function Profile() {
+function Profile({apihost}) {
   const [userList, setUserList] = useState([]);
   const [myDesignList, setmyDesignList] = useState([]);
   const [myHistory, setmyHistory] = useState([]);
@@ -18,7 +18,7 @@ function Profile() {
     if (!sessionStorage.getItem('userData')){
       navigate('/signin');
     }
-    Axios.get('https://pimniyom-api.onrender.com/profile/'+ username.user_id)
+    Axios.get(`${apihost}/profile/`+ username.user_id)
       .then((response) => {
         setUserList(response.data[0]);
         console.log(response.data[0]);
@@ -27,7 +27,7 @@ function Profile() {
         console.error('Error fetching user data:', error);
       });
 
-      Axios.get('https://pimniyom-api.onrender.com/user/orders/'+ username.user_id)
+      Axios.get(`${apihost}/user/orders/`+ username.user_id)
       .then((response) => {
         setmyHistory(response.data);
         setmyDesignList(response.data);
@@ -58,7 +58,7 @@ function Profile() {
   }
   
   const handleSaveClick = () => {
-    Axios.put('https://pimniyom-api.onrender.com/user'+ userList.User_id, userList)
+    Axios.put(`${apihost}/user`+ userList.User_id, userList)
       .then(response => {
         console.log(response);
         setEditMode(false);
