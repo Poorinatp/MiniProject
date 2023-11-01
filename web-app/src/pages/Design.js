@@ -328,7 +328,7 @@ const CheckoutPopup = ({
     );
 };
 
-const Design = () => {
+const Design = ({apihost}) => {
     const [textData, setTextData] = useState([
         {id: 1, type: "text", value: "Type text here", fontFamily: "Basic-Regular", width:"160px", fontSize: "24px", fontColor: "black", x: "30px", y: "25px"},
     ]);      
@@ -390,7 +390,7 @@ const Design = () => {
         
         if (product_id) {
             axios
-                .get(`http://localhost:8080/products-with-details/${product_id}`)
+                .get(`${apihost}/products-with-details/${product_id}`)
                 .then((response) => {
                     if (response.status === 200) {
                         const textDetailData = response.data
@@ -435,7 +435,7 @@ const Design = () => {
             }
         }
         axios
-            .get("http://localhost:8080/fonts")
+            .get(`${apihost}/fonts`)
             .then((response) => {
                 setFonts(response.data);
                 response.data.forEach((fontName) => {
@@ -445,7 +445,7 @@ const Design = () => {
             })
             .catch((error) => {});
         axios
-            .get("http://localhost:8080/picture")
+            .get(`${apihost}/picture`)
             .then((response) => {
                 setImgname(response.data)
                 setFilteredImages(response.data)
@@ -520,7 +520,7 @@ const Design = () => {
                     formData.append('image', blob, fileName);
             
                     axios
-                        .post('http://localhost:8080/saveimage', formData)
+                        .post(`${apihost}/saveimage`, formData)
                         .then((response) => {
                             const imageDescriptions = imageData.map((image) => image.imagename.replace(/\.png$/, '')).join(' ');
                             const productData = {
@@ -562,7 +562,7 @@ const Design = () => {
                                 productDetails.push(productDetailData);
                             });
                             axios
-                                .post('http://localhost:8080/saveproduct', { productData, productDetails })
+                                .post(`${apihost}/saveproduct`, { productData, productDetails })
                                 .then((response) => {
                                     if (response.status==200) {
                                         setProductId(response.data.insertId)
@@ -602,7 +602,7 @@ const Design = () => {
                 status: "ยังไม่ชำระเงิน",
             }
             axios
-                .post('http://localhost:8080/createpayment', { paymentData })
+                .post(`${apihost}/createpayment`, { paymentData })
                 .then((response) => {
                     if(response.status==200) {
                         setPaymentId(response.data.insertId)
@@ -637,7 +637,7 @@ const Design = () => {
             formData.append('image', fileInput, fileName);
     
             axios
-                .post('http://localhost:8080/savereceipt', formData)
+                .post(`${apihost}/savereceipt`, formData)
                 .then((response) => {
                     const orderData = {
                         Product_id: productId,
@@ -647,7 +647,7 @@ const Design = () => {
                         Total_item: totalItem
                     }
                     axios
-                        .post('http://localhost:8080/createorder', { orderData })
+                        .post(`${apihost}/createorder`, { orderData })
                         .then((response) => {
                             if(response.status===200) {
                                 navigate("/profile")

@@ -150,6 +150,7 @@ app.post('/signin', (req, res) => {
     // Insert user data into the "user" table
     connection.query('INSERT INTO user SET ?', userData, (userInsertError, userResult) => {
       if (userInsertError) {
+        console.log(userInsertError)
         res.status(500).send('User registration failed');
         return;
       }
@@ -157,6 +158,7 @@ app.post('/signin', (req, res) => {
       // Retrieve the last inserted user ID
       connection.query('SELECT LAST_INSERT_ID() as user_id', (idQueryError, idResult) => {
         if (idQueryError) {
+          console.log(idQueryError)
           res.status(500).send('User registration failed');
           return;
         }
@@ -165,6 +167,7 @@ app.post('/signin', (req, res) => {
         addressData.user_id = idResult[0].user_id;
         connection.query('INSERT INTO user_address SET ?', addressData, (addressInsertError) => {
           if (addressInsertError) {
+            console.log(addressInsertError)
             res.status(500).send('User registration failed');
           } else {
             res.status(200).send('User registration successful');

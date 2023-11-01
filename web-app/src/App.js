@@ -9,18 +9,19 @@ import TestUpload from './pages/TestUpload';
 
 
 function App() {
+  //const apihost = 'https://pimniyom-api.onrender.com';
+  const apihost = 'http://localhost:8080';
+  //const apihost = 'http://localhost:8090';
   return (
     <BrowserRouter>
-    
-		
       <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/signIn" element={<Signin/>}/>
-        <Route path="/signUp" element={<Signup/>}/>
-        <Route path="/design/:product_id" element={<Design />} />
-        <Route path="/design" element={<Design />} />
-        <Route path="/profile" element={<Profile/>}/>
-        <Route path="/test" element={<TestUpload/>}/>
+        <Route path="/" element={<Home apihost={apihost}/>}/>
+        <Route path="/signIn" element={<Signin apihost={apihost}/>}/>
+        <Route path="/signUp" element={<Signup apihost={apihost}/>}/>
+        <Route path="/design/:product_id" element={<Design apihost={apihost}/>} />
+        <Route path="/design" element={<Design apihost={apihost}/>} />
+        <Route path="/profile" element={<Profile apihost={apihost}/>}/>
+        <Route path="/test" element={<TestUpload apihost={apihost}/>}/>
       </Routes>
     </BrowserRouter>
   

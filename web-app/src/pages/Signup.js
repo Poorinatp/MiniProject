@@ -5,7 +5,7 @@ import NavBar from '../components/NavBar';
 import Axios from "axios";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
-function Signup() {
+const Signup = ({apihost}) => {
 	const [Firstname, setFirstname] = useState('');
 	const [Lastname, setLastname] = useState('');
 	const [Telephone, setTel] = useState('');
@@ -22,7 +22,7 @@ function Signup() {
 	  const userData = {
 		Firstname,
 		Lastname,
-		Telephone,
+		Telephone:Telephone.split('-').join(''),
 		Email,
 		Password,
 	  };
@@ -33,7 +33,7 @@ function Signup() {
 		Zipcode,
 	  };
   
-	  Axios.post('http://localhost:8080/signup', { user: userData, address: addressData })
+	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
 		  console.log(response);
 		  if (response.status === 200) {
@@ -48,6 +48,15 @@ function Signup() {
 		});
 	};
 
+	const handleTelDisplay = () => {
+		const rawText = [...Telephone.split('-').join('')]
+        const telephoneNumber = []
+        rawText.forEach((t, i) => {
+            if (i % 3 === 0 && i !== 0 && i !== 9) telephoneNumber.push('-')
+            telephoneNumber.push(t)
+        })
+        return telephoneNumber.join('')
+	}
 	
 	return(
         <>
@@ -78,12 +87,15 @@ function Signup() {
 					<br/>
                    
 				<input 
-					type="tel" 
+					type="text" 
 					id="Telephone"
 					placeholder="+66XX-XXX-XXXX"
+					value={handleTelDisplay()}
 					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
 					onChange={e =>{setTel(e.target.value)}}
-                    required/> 
+                    required
+					maxLength="12"
+				/> 
 					<br/>
 
 				<input 
@@ -103,7 +115,7 @@ function Signup() {
 					value={Password}
 					onChange={e => { setPassword(e.target.value) }}
 					required 
-					maxlength="10"
+					maxLength="10"
 					/>
 					<br />
 							
