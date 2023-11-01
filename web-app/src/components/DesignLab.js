@@ -13,7 +13,7 @@ const DesignLab = ({
   tshirtsize,
   setIsSelected,
   setIsImageSelected,
-  handleSaveDesign,
+  handleSaveClick,
   handleCheckoutClick,
   findNewWidth
  }) => {
@@ -319,7 +319,7 @@ const DesignLab = ({
         </div>
       </div>
       <div className="btn-group">
-          <button className="save-btn design-btn" onClick={handleSaveDesign}>Save</button>
+          <button className="save-btn design-btn" onClick={handleSaveClick}>Save</button>
           <button className="checkout-btn design-btn" onClick={handleCheckoutClick}>Check Out</button>
       </div>
     </div>

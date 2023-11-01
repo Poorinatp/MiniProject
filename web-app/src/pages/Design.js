@@ -494,7 +494,13 @@ const Design = ({apihost}) => {
         setIsCheckoutPopupOpen(false);
     };
 
-    const handleSaveDesign = () => {
+    const handleSaveClick = () => {
+        handleSaveDesign()
+        alert("design saved success")
+        navigate("/profile")
+    }
+
+    const handleSaveDesign = async () => {
         if (!session) {
             alert("Prior to save a design, you are required to log in.");
             sessionStorage.setItem('textData', JSON.stringify(textData));
@@ -513,84 +519,79 @@ const Design = ({apihost}) => {
             });
 
             const container = document.getElementById('container');
-            html2canvas(container).then((canvas) => {
-                canvas.toBlob((blob) => {
-                    const formData = new FormData();
-                    const fileName = `${session.user_id}_${Date.now()}.png`;
-                    formData.append('image', blob, fileName);
-            
-                    axios
-                        .post(`${apihost}/saveimage`, formData)
-                        .then((response) => {
-                            const imageDescriptions = imageData.map((image) => image.imagename.replace(/\.png$/, '')).join(' ');
-                            const productData = {
-                                User_id: session.user_id,
-                                Description: imageDescriptions,
-                                product_image: response.data,
-                            };
-                
-                            const productDetails = [];
-                            textData.forEach((item) => {
-                                const textContainer = document.getElementById(`textcontainer${item.id}`)
-                                const productDetailData = {
-                                    Product_id: null,
-                                    Font_size: parseInt(item.fontSize),
-                                    Font_family: item.fontFamily,
-                                    Font_color: item.fontColor,
-                                    location_img: '',
-                                    img_width: '',
-                                    img: '',
-                                    location_text: `${textContainer.style.top};${textContainer.style.left}`,
-                                    text_value: item.value,
-                                };
-                                productDetails.push(productDetailData);
-                            });
-                
-                            imageData.forEach((item) => {
-                                const imgbox = document.getElementById(`imgbox${item.id}`)
-                                const productDetailData = {
-                                    Product_id: null,
-                                    Font_size: 0,
-                                    Font_family: '',
-                                    Font_color: '',
-                                    location_img: `${imgbox.style.top};${imgbox.style.left}`,
-                                    img_width: item.width,
-                                    img: item.imagename,
-                                    location_text: '',
-                                    text_value: '',
-                                };
-                                productDetails.push(productDetailData);
-                            });
-                            axios
-                                .post(`${apihost}/saveproduct`, { productData, productDetails })
-                                .then((response) => {
-                                    if (response.status==200) {
-                                        setProductId(response.data.insertId)
-
-                                    }
-                                })
-                            .catch((error) => {
-
-                            });
-                        })
-                    .catch((error) => {
-                        
-                    });
-                }, 'image/png');
+            const canvas = await html2canvas(container);
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(resolve, 'image/png');
             });
+            const formData = new FormData();
+            const fileName = `${session.user_id}_${Date.now()}.png`;
+            formData.append('image', blob, fileName);
+
+            try {
+                const response = await axios.post(`${apihost}/saveimage`, formData);
+                const imageDescriptions = imageData.map(image => image.imagename.replace(/\.png$/, '')).join(' ');
+                const productData = {
+                    User_id: session.user_id,
+                    Description: imageDescriptions,
+                    product_image: response.data,
+                    status: "enable"
+                };
+
+                const productDetails = [];
+                textData.forEach(item => {
+                    const textContainer = document.getElementById(`textcontainer${item.id}`);
+                    const productDetailData = {
+                        Product_id: null,
+                        Font_size: parseInt(item.fontSize),
+                        Font_family: item.fontFamily,
+                        Font_color: item.fontColor,
+                        location_img: '',
+                        img_width: '',
+                        img: '',
+                        location_text: `${textContainer.style.top};${textContainer.style.left}`,
+                        text_value: item.value,
+                    };
+                    productDetails.push(productDetailData);
+                });
+
+                imageData.forEach(item => {
+                    const imgbox = document.getElementById(`imgbox${item.id}`);
+                    const productDetailData = {
+                        Product_id: null,
+                        Font_size: 0,
+                        Font_family: '',
+                        Font_color: '',
+                        location_img: `${imgbox.style.top};${imgbox.style.left}`,
+                        img_width: item.width,
+                        img: item.imagename,
+                        location_text: '',
+                        text_value: '',
+                    };
+                    productDetails.push(productDetailData);
+                });
+
+                const productResponse = await axios.post(`${apihost}/saveproduct`, { productData, productDetails });
+
+                if (productResponse.status === 200) {
+                    setProductId(productResponse.data.insertId);
+                }
+            }
+            catch (error) {
+                
+            }
         }
     };
 
-    const handlePayment = () => {
+    const handlePayment = async () => {
         if (!session) {
             alert("You must log in before proceeding with the payment.");
             sessionStorage.setItem('textData', JSON.stringify(textData));
             sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
         } else {
-            handleSaveDesign()
-            setOpenQr(true)
-            setTimeLeft(180)
+            handleSaveDesign();
+            setOpenQr(true);
+            setTimeLeft(180);
             setPaymentTimer(
                 setInterval(() => {
                     setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
@@ -601,19 +602,17 @@ const Design = ({apihost}) => {
                 Amount: totalPrice,
                 status: "ยังไม่ชำระเงิน",
             }
-            axios
-                .post(`${apihost}/createpayment`, { paymentData })
-                .then((response) => {
-                    if(response.status==200) {
-                        setPaymentId(response.data.insertId)
-                    } else {
-
-                    }
-                    
-                })
-                .catch((error) => {
-
-                });
+            try {
+                const response = await axios.post(`${apihost}/createpayment`, { paymentData });
+    
+                if (response.status === 200) {
+                    setPaymentId(response.data.insertId);
+                } else {
+                    setPaymentId(null);
+                }
+            } catch (error) {
+                
+            }
         }
     }
 
@@ -629,36 +628,34 @@ const Design = ({apihost}) => {
         }
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (paymentId) {
             const formData = new FormData();
             const fileInput = uploadedReceiptFile;
             const fileName = `${session.user_id}_receipt_${Date.now()}.png`;
             formData.append('image', fileInput, fileName);
     
-            axios
-                .post(`${apihost}/savereceipt`, formData)
-                .then((response) => {
-                    const orderData = {
-                        Product_id: productId,
-                        Payment_id: paymentId,
-                        Color: tshirtcolor,
-                        Size: tshirtsize,
-                        Total_item: totalItem
-                    }
-                    axios
-                        .post(`${apihost}/createorder`, { orderData })
-                        .then((response) => {
-                            if(response.status===200) {
-                                navigate("/profile")
-                            }
-                        })
-                        .catch((error) => {});
-                })
-                .catch((error)=>{});
+            try {
+                const response = await axios.post(`${apihost}/savereceipt`, formData);
+                const orderData = {
+                    Product_id: productId,
+                    Payment_id: paymentId,
+                    Color: tshirtcolor,
+                    Size: tshirtsize,
+                    Total_item: totalItem
+                };
+    
+                const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
+    
+                if (orderResponse.status === 200) {
+                    alert("receipt uploaded success");
+                    navigate("/profile");
+                }
+            } catch (error) {
+                
+            }
         }
     }
-
 
     const handleSearch = (query) => {
         const lowerQuery = query.toLowerCase();
@@ -704,7 +701,7 @@ const Design = ({apihost}) => {
                     setIsSelected={setIsSelected}
                     setIsImageSelected={setIsImageSelected}
                     setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
-                    handleSaveDesign={handleSaveDesign}
+                    handleSaveClick={handleSaveClick}
                     handleCheckoutClick={handleCheckoutClick}
                     findNewWidth={findNewWidth}
                 />
