@@ -2,16 +2,18 @@ import "./Home.css"
 import {useNavigate} from 'react-router-dom';
 import React from "react";
 import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
  
 const Home = () => {
+	
 	const navigate = useNavigate();
-
 	const navigateToDesign =()=>{
 		navigate('/design')
 	}
 
 	return (
+		<>
 		<main >
 			<NavBar/>
 			<div className="container1">
@@ -25,6 +27,11 @@ const Home = () => {
 				<button className="btn-home" onClick={navigateToDesign}>start Do it!</button>
 			</div>
 		</main>
+		<Footer/>
+
+		</>
+		
+		
 	  );
 	};
 export default Home;
