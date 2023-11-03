@@ -41,6 +41,7 @@ header h1 {
 .Signup input[type="text"],
 .Signup input[type="tel"],
 .Signup input[type="email"],
+.Signup input[type="password"],
 textarea {
   width: 100%;
   padding: 10px;
@@ -80,8 +81,9 @@ textarea {
 }
 @media screen and (max-width: 800px) {
   .Signup{
-    max-width: 400px;
+    max-width: 380px;
     max-height: fit-content;
+    padding: 5px;
 
   }
 

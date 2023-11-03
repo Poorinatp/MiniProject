@@ -13,12 +13,14 @@
 
 nav {
   font-size: 1rem;
+  background-color: #ffffff90;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
   width: 100%;
+  
 }
 
 .navimg {
@@ -27,8 +29,12 @@ nav {
 }
 
 .nav-active {
-  color: #ffffff70;
+  color: #C39200;
   font-weight: bold;
+}
+
+.nav-home nav{
+  background-color: transparent;
 }
 
 @keyframes slideToLeft {
@@ -80,7 +86,7 @@ nav {
   transform: scale(1.1)
 }
 
-@media screen and (min-width: 840px) {
+@media screen and (min-width:800px) {
   .menu {
     display: inline-block;
   }

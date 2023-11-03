@@ -8,6 +8,7 @@ import { faAngleDown, faAngleUp, faMagnifyingGlass, faUpload } from "@fortawesom
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import html2canvas from 'html2canvas';
 
+
 const OptionTab = ({
     textData, 
     setTextData,
@@ -742,6 +743,7 @@ const Design = ({apihost}) => {
                     />
                 </>
             )}
+            
         </>
     )
 }
