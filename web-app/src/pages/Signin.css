@@ -37,8 +37,8 @@ header h1 {
 
 
 /* Style for the inputs and textarea */
-input[type="email"],
-input[type="password"],
+.Signin input[type="email"],
+.Signin input[type="password"],
 textarea {
   width: 100%;
   padding: 8px;
@@ -83,8 +83,8 @@ textarea {
     padding: 10px; 
     border-radius: 15px; 
   } 
-  input[type="email"],
-  input[type="password"],
+  .Signin input[type="email"],
+  .Signin input[type="password"],
   textarea {
     font-size: 15px; 
   }

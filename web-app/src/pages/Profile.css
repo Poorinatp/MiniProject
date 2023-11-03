@@ -1,68 +1,173 @@
-.author{
-    padding: 3%;
-    margin-top: 3%;
-    margin-bottom: 3%;
-    border-radius: 0.5rem;
-    width: 100%;
-}
-.Design-card,.History-card{
-    padding: 3%;
-    margin-top: 3%;
-    margin-bottom: 3%;
-    border-radius: 0.5rem;
-    background: #ffffffc1;
-    width: 100%;
-}
-
-.author-card{
-    padding: 3%;
-    margin-top: 3%;
-    margin-bottom: 3%;
-    border-radius: 0.5rem;
-    background: #fff;
-}
-#menu-P{
-    display: inline;
-    float: left;
-}
-#menu-A{
-    display: block;
-    padding: 8px;
-    background-color: #dddddd;
-}
-#img-design, #img-his {
-    width: 150px;
+.profile {
+    margin: 0;
+    padding: 10px;
     display: flex;
-    margin-top: 10px;
-    justify-content: center;
-    align-items: center; 
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-#data-his{
-    padding: 0px;
-    text-align:center ;
-    color: black;
+.profile-container {
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.profile-contents {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    width: 100%;
+    padding: 10px;
+}
+
+.profile-contents-name {
     font-size: medium;
-    background: none;
+    font-weight: bold;
+    margin-left: 10px;
 }
-.tab-pane-history ,.tab-pane-design{
+
+.profile-contents-value {
+    font-size: small;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border: none;
+    border-radius: 30px;
+    margin: 10px 0px;
+    overflow: hidden;
+    outline: none;
+}
+
+.profile-contents button {
+    font-size: medium;
+    cursor: pointer;
+    padding: 5px 20px;
+    background-color: grey;
+    color: black;
+    border: none;
+    font-weight: bold;
+    border-radius: 30px;
+    margin-right: 10px;
+}
+
+.profile-contents button:hover {
+    background-color: lightgray;
+    color: white;
+}
+.design-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between; 
+    flex-direction: column;
+    border-radius: 10px;
+    gap: 10px;
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.design-menu { 
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.design-menu-option {
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.design-menu-option:hover {
+    opacity: 50%;
+}
+
+.contents {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    height: 800px;
+    overflow: scroll;
+}
+
+.card-contents {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    grid-gap: 30px;
+    padding: 10px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-body img {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-body p {
+    font-size: small;
+    text-align: center;
+}
+
+.card-body .icon-btn {
+    width: 20px;
+    height: 20px;
+}
+
+@media screen and (min-width: 767px) {
+    .card-contents {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card-body p,
+    .profile-contents-name,
+    .profile-contents button {
+        font-size: large;
+    }
     
+    .card-body .icon-btn {
+        width: 25px;
+        height: 25px;
+    }
+
+    .profile-contents-value {
+        font-size: medium;
+    }
 }
-.card-body{
-    width: 250px;
-    margin: 30px;
-    border: black;
-    background-color: rgb(255, 255, 255);
-}
-.deletebtn{
-    background: none;
-    border: none;
-}
-.editbtn{
-    background: none;
-    border: none;
-    margin-right: 12px;
+
+@media screen and (min-width: 1023px) {
+    .card-contents {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .card-body p,
+    .profile-contents-name,
+    .profile-contents button {
+        font-size: xx-large;
+    }
+    
+    .card-body .icon-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .profile-contents-value {
+        font-size: x-large;
+    }
 }

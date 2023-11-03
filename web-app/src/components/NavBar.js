@@ -27,7 +27,7 @@ const NavBar = () => {
   return (
     <nav className="no-select">
       <NavLink to="/" className="logo-link">
-        <img className="navimg" src="/image/logo.png"/>
+        <img className="navimg" src="/image/logo.png" alt="logo"/>
       </NavLink>
       <div className="auth-links">
         {isLogin ? (
@@ -55,6 +55,12 @@ const NavBar = () => {
         ) : (
           <div className="menu">
             <NavLink
+              to="/design"
+              className={({ isActive }) => (isActive ? activeClassName : undefined)}
+            >
+              Design
+            </NavLink>
+            <NavLink
               to="/signup"
               className={({ isActive }) => (isActive ? activeClassName : undefined)}
             >
@@ -70,15 +76,15 @@ const NavBar = () => {
         )}
       </div>
       <div className="ham-menu">
-          <FontAwesomeIcon
-            icon={faBars}
-            className="icon-btn"
-            id={`ham-icon`}
-            onClick={() => setOpenHamMenu(!openHamMenu)}
-            style={{
-              display:openHamMenu?"none":"block"
-            }}
-          />
+        <FontAwesomeIcon
+          icon={faBars}
+          className="icon-btn"
+          id={`ham-icon`}
+          onClick={() => setOpenHamMenu(!openHamMenu)}
+          style={{
+            opacity:openHamMenu?"0%":"100%"
+          }}
+        />
       </div>
       <div 
       className="menu-list"
@@ -97,7 +103,12 @@ const NavBar = () => {
         />
         {!isLogin ?
         <>
-          
+          <NavLink
+            to="/design"
+            className={({ isActive }) => (isActive ? activeClassName : undefined)}
+          >
+            Design
+          </NavLink>
           <NavLink
             to="/signup"
             className={({ isActive }) => (isActive ? activeClassName : undefined)}

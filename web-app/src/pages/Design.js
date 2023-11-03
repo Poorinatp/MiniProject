@@ -54,7 +54,7 @@ const OptionTab = ({
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
-            fontSize:"10px", 
+            fontSize:"24px", 
             fontColor:"black", 
             x:"0px", 
             y:"0px"
@@ -213,7 +213,7 @@ const OptionTab = ({
                         </div>
                         <div className="show-container">
                             {filteredImages.map((name, index)=>(
-                                <img className="img-img" key={index} src={`../picture/${name}`} onClick={e=>handleAddImage(name)} />
+                                <img className="img-img" key={index} src={`../picture/${name}`} alt="img-img" onClick={e=>handleAddImage(name)} />
                             ))}
                         </div>
                     </div>}
@@ -287,7 +287,7 @@ const CheckoutPopup = ({
         {openQr&&
             <div>
                 <h1 className="payment-warn">Please pay via QR-code within {formatTime(timeLeft)}</h1>
-                <img className="payment-qr" src="../image/paymentQR.jpg"/>
+                <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr"/>
                 
                 <h1 className="input-warn">Upload receipt here ...</h1>
                 <div className="input-file-container">
@@ -311,12 +311,13 @@ const CheckoutPopup = ({
                     <img
                         className="uploaded-receipt"
                         src={uploadedReceipt}
+                        alt="uploaded-receipt" 
                     />
                     </div>
                 )}
             </div>
         }
-        {timeLeft==0&&
+        {timeLeft===0&&
             <h1 className="payment-warn">Payment unsuccessfully please try agian. {formatTime(timeLeft)}</h1>
         }
         <div className="btn-group">
@@ -387,7 +388,6 @@ const Design = ({apihost}) => {
     }
 
     useEffect(() => {
-        
         if (product_id) {
             axios
                 .get(`${apihost}/products-with-details/${product_id}`)
@@ -451,7 +451,7 @@ const Design = ({apihost}) => {
                 setFilteredImages(response.data)
             })
             .catch((error) => {});
-    }, []);
+    }, [apihost, product_id]);
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -495,9 +495,11 @@ const Design = ({apihost}) => {
     };
 
     const handleSaveClick = () => {
-        handleSaveDesign()
-        alert("design saved success")
-        navigate("/profile")
+        const result = handleSaveDesign();
+        if (result===true) {
+            alert("design saved success");
+            navigate("/profile");
+        }
     }
 
     const handleSaveDesign = async () => {
@@ -506,6 +508,7 @@ const Design = ({apihost}) => {
             sessionStorage.setItem('textData', JSON.stringify(textData));
             sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
+            return false
         } else {
             const inputElements = document.querySelectorAll('input');
             
@@ -513,8 +516,9 @@ const Design = ({apihost}) => {
                 const paragraphElement = document.createElement('p');
 
                 paragraphElement.textContent = inputElement.value;
+                paragraphElement.className = inputElement.className;
+                paragraphElement.style = inputElement.style;
                 paragraphElement.style.cssText = inputElement.style.cssText;
-                
                 inputElement.parentNode.replaceChild(paragraphElement, inputElement);
             });
 
@@ -575,9 +579,11 @@ const Design = ({apihost}) => {
                 if (productResponse.status === 200) {
                     setProductId(productResponse.data.insertId);
                 }
+                return true
             }
             catch (error) {
-                
+                alert("error 1"+error)
+                return false
             }
         }
     };
@@ -589,7 +595,10 @@ const Design = ({apihost}) => {
             sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
         } else {
-            handleSaveDesign();
+            const result = handleSaveDesign();
+            if (result===true) {
+                
+            }
             setOpenQr(true);
             setTimeLeft(180);
             setPaymentTimer(
@@ -637,19 +646,20 @@ const Design = ({apihost}) => {
     
             try {
                 const response = await axios.post(`${apihost}/savereceipt`, formData);
-                const orderData = {
-                    Product_id: productId,
-                    Payment_id: paymentId,
-                    Color: tshirtcolor,
-                    Size: tshirtsize,
-                    Total_item: totalItem
-                };
-    
-                const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
-    
-                if (orderResponse.status === 200) {
-                    alert("receipt uploaded success");
-                    navigate("/profile");
+                if (response.status === 200) {
+                    const orderData = {
+                        Product_id: productId,
+                        Payment_id: paymentId,
+                        Color: tshirtcolor,
+                        Size: tshirtsize,
+                        Total_item: totalItem
+                    };
+                    const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
+        
+                    if (orderResponse.status === 200) {
+                        alert("receipt uploaded success");
+                        navigate("/profile");
+                    }
                 }
             } catch (error) {
                 

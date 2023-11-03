@@ -62,7 +62,6 @@ const Signup = ({apihost}) => {
         <>
 		<NavBar/>
 		<form className='Signup' onSubmit={handleSubmit}>
-			
 				<header>
 					<h1>SIGN UP</h1>
 				</header>

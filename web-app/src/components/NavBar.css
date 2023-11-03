@@ -19,6 +19,7 @@ nav {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
+  width: 100%;
 }
 
 .navimg {
@@ -43,6 +44,7 @@ nav {
 }
 
 .menu-list {
+  display: flex;
   position: fixed;
   top: 0;
   right: 0;
@@ -54,7 +56,6 @@ nav {
   z-index: 1000;
   animation: slideToLeft 0.5s;
   padding: 20px 10px;
-  transition-delay: 1s;
 }
 
 .menu-list a,
@@ -63,25 +64,26 @@ nav {
 }
 
 .ham-menu {
-  display: block;
+  display: inline-block
 }
 
 .icon-btn {
   cursor: pointer;
+  margin: 0%;
+  padding: 0%;
   width: 30px;
   height: 30px;
-  padding: 10px;
-  transition: 0.5s;
+  transition: 0.3s;
 }
 
 .icon-btn:hover,
 .logo-link:hover {
-  opacity: 50%;
+  transform: scale(1.1)
 }
 
-@media screen and (min-width: 420px) {
+@media screen and (min-width: 840px) {
   .menu {
-    display: block;
+    display: inline-block;
   }
   .ham-menu {
     display: none;
