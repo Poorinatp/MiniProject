@@ -9,9 +9,9 @@ import TestUpload from './pages/TestUpload';
 
 
 function App() {
-  //const apihost = 'https://pimniyom-api.onrender.com';
+  const apihost = 'https://pimniyom-api.onrender.com';
   //const apihost = 'http://localhost:8080';
-  const apihost = 'http://localhost:8090';
+  //const apihost = 'http://localhost:8090';
   return (
     <BrowserRouter>
       <Routes>
