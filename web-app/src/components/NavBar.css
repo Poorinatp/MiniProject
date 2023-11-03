@@ -7,6 +7,10 @@
   font-family: 'Poppins', sans-serif;
 }
 
+.menu {
+  display: none;
+}
+
 nav {
   font-size: 1rem;
   background-color: #ffffff70;
@@ -15,6 +19,7 @@ nav {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
+  width: 100%;
 }
 
 .navimg {
@@ -22,16 +27,65 @@ nav {
   width: auto;
 }
 
-.auth-links {
-  display: flex;
-  align-items: center;
-}
-
-.auth-links a {
-  margin-left: 15px; /* Add some spacing between the links */
-}
-
 .nav-active {
-  color: rgb(56, 158, 136);
+  color: #ffffff70;
   font-weight: bold;
+}
+
+@keyframes slideToLeft {
+  0% {
+    transform: translateX(50%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.menu-list {
+  display: flex;
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #00000070;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 50%;
+  height: 100%;
+  z-index: 1000;
+  animation: slideToLeft 0.5s;
+  padding: 20px 10px;
+}
+
+.menu-list a,
+.menu-list .icon-btn {
+  color: white;
+}
+
+.ham-menu {
+  display: inline-block
+}
+
+.icon-btn {
+  cursor: pointer;
+  margin: 0%;
+  padding: 0%;
+  width: 30px;
+  height: 30px;
+  transition: 0.3s;
+}
+
+.icon-btn:hover,
+.logo-link:hover {
+  transform: scale(1.1)
+}
+
+@media screen and (min-width: 840px) {
+  .menu {
+    display: inline-block;
+  }
+  .ham-menu {
+    display: none;
+  }
 }

@@ -13,7 +13,7 @@ const DesignLab = ({
   tshirtsize,
   setIsSelected,
   setIsImageSelected,
-  handleSaveDesign,
+  handleSaveClick,
   handleCheckoutClick,
   findNewWidth
  }) => {
@@ -27,8 +27,6 @@ const DesignLab = ({
     lastX: 0,
     lastY: 0
   });
-
-  const borderColor = tshirtcolor==="black"?"white":"black"
 
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
@@ -87,7 +85,7 @@ const DesignLab = ({
       window.removeEventListener("pointermove", onMove);
     };
     return cleanup;
-  }, [currentContainer, textData]);
+  }, [currentContainer, textData, isSelected]);
 
   const handleTextChange = (index, e) => {
     const updatedTextData = [...textData];
@@ -170,7 +168,7 @@ const DesignLab = ({
         }
       }}
       >
-        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt" />
+        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt" alt="tshirt"/>
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
@@ -294,6 +292,7 @@ const DesignLab = ({
               <img
                 src={`../picture/${image.imagename}`}
                 className="display-image"
+                alt="display-img"
                 style={{ 
                   width: image.width,
                   padding: (isSelected[index]&&isImageSelected )? "4px":"6px",
@@ -321,7 +320,7 @@ const DesignLab = ({
         </div>
       </div>
       <div className="btn-group">
-          <button className="save-btn design-btn" onClick={handleSaveDesign}>Save</button>
+          <button className="save-btn design-btn" onClick={handleSaveClick}>Save</button>
           <button className="checkout-btn design-btn" onClick={handleCheckoutClick}>Check Out</button>
       </div>
     </div>

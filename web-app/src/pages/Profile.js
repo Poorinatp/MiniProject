@@ -3,14 +3,17 @@ import {useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 import NavBar from '../components/NavBar';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash,faPen } from '@fortawesome/free-solid-svg-icons';
 
-function Profile({apihost}) {
+const Profile = ({apihost}) => {
   const [userList, setUserList] = useState([]);
   const [myDesignList, setmyDesignList] = useState([]);
   const [myHistory, setmyHistory] = useState([]);
   const username =  JSON.parse(sessionStorage.getItem('userData'));
   const [activeTab, setActiveTab] = useState('mydesign'); 
   const [editMode, setEditMode] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,33 +22,35 @@ function Profile({apihost}) {
       navigate('/signin');
     }
     Axios.get(`${apihost}/profile/`+ username.user_id)
-      .then((response) => {
-        setUserList(response.data[0]);
-        console.log(response.data[0]);
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
+    .then((response) => {
+      setUserList(response.data[0]);
+    })
+    .catch((error) => {
+      console.error('Error fetching user data:', error);
+    });
 
-      Axios.get(`${apihost}/user/orders/`+ username.user_id)
-      .then((response) => {
-        setmyHistory(response.data);
-        setmyDesignList(response.data);
+    Axios.get(`${apihost}/user/product/`+ username.user_id)
+    .then((response) => {
+      setmyDesignList(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching user product data:', error);
+    });
 
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
-  }, []);
+    Axios.get(`${apihost}/user/orders/`+ username.user_id)
+    .then((response) => {
+      setmyHistory(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching user order data:', error);
+    });
+  }, [apihost,navigate,username.user_id]);
 
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
   };
 
-  const handleCancelClick = () => {
-    setEditMode(false);
-  }
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserList(prevState => ({
@@ -56,116 +61,156 @@ function Profile({apihost}) {
   const handleEditClick = () => {
     setEditMode(true);
   }
+  const handleCancelClick = () => {
+    setEditMode(false);
+  }
+  const handleDelete = (product_id) => {
+    Axios.delete(`${apihost}/delete/${product_id}`)
+      .then(() => {
+        // Filter out the deleted product from myDesignList
+        setmyDesignList((prevList) => prevList.filter((item) => item.product_id !== product_id));
+        alert('Product Deleted!');
+      })
+      .catch((error) => {
+        console.error('Error deleting product_detail:', error);
+      });
+  };
   
-  const handleSaveClick = () => {
-    Axios.put(`${apihost}/user`+ userList.User_id, userList)
+  const handleEditProduct = (product_id) => {
+    navigate(`/design/${product_id}`)
+  };
+    
+  function handleSaveClick() {
+    console.log(userList)
+    Axios.put(`${apihost}/update/` + userList.user_id, userList)
       .then(response => {
-        console.log(response);
+        alert("Edit Profile Success")
         setEditMode(false);
       })
       .catch(error => {
         console.log(error);
       });
   }
+
+
   return (
     <>
     <NavBar/> 
-    <main className="author">
-      
+    <div className="profile">
         {userList &&(
-            <article>
+            <div className='profile-container'>
               {editMode ? (
-            <div>
-              <label>First Name:</label>
-              <input type="text" name="fname" value={userList.Firstname} onChange={handleInputChange} />
-              <br />
-              <label>Last Name:</label>
-              <input type="text" name="lname" value={userList.Lastname} onChange={handleInputChange} />
-              <br />
-              <label>Address:</label>
-              <input type="text" name="address" value={userList.Address} onChange={handleInputChange} />
-              <br />
-              <label>Phone:</label>
-              <input type="text" name="phone" value={userList.Telephone} onChange={handleInputChange} />
-              <br />
-              <label>Zipcode:</label>
-              <input type="text" name="zipcode" value={userList.Zipcode} onChange={handleInputChange} />
-              <br />
-              <input type="text" name="country" value={userList.Country} onChange={handleInputChange} />
-              <br />
-              <button className='CancelButton' onClick={handleCancelClick}>Cancel</button>
-              <button onClick={handleSaveClick}>Save</button>
-            </div>
-          ) : 
-          <article className="card-body-name" >
-              <p >ID: {userList.User_id}</p>
-              <p>Name: {userList.Firstname} {userList.Lastname}</p>
-              <p>Email: {userList.Email}</p>
-              <button onClick={handleEditClick}>Edit</button>
-            </article>
+              <div className="profile-contents">
+                <p className='profile-contents-name'>First Name:</p>
+                <input className='profile-contents-value' type="text" name="firstname" value={userList.firstname} onChange={e=>handleInputChange(e)} />
+                <p className='profile-contents-name'>Last Name:</p>
+                <input className='profile-contents-value' type="text" name="lastname" value={userList.lastname} onChange={e=>handleInputChange(e)} />
+                <p className='profile-contents-name'>Address:</p>
+                <input className='profile-contents-value' type="text" name="address" value={userList.address} onChange={e=>handleInputChange(e)} />
+                <p className='profile-contents-name'>Phone:</p>
+                <input className='profile-contents-value' type="tel" name="telephone" value={userList.telephone} onChange={e=>handleInputChange(e)} />
+                <p className='profile-contents-name'>Zipcode:</p>
+                <input className='profile-contents-value' type="text" name="zipcode" value={userList.zipcode} onChange={e=>handleInputChange(e)} />
+                <p className='profile-contents-name'>City:</p>
+                <input className='profile-contents-value' type="text" name="city" value={userList.city} onChange={e=>handleInputChange(e)} />
+                <p className='profile-contents-name'>Country:</p>
+                <input className='profile-contents-value' type="text" name="country" value={userList.country} onChange={e=>handleInputChange(e)} />
+                <button onClick={handleCancelClick}>Cancel</button>
+                <button onClick={handleSaveClick}>Save</button>
+              </div>
+              ) : 
+              <div className='profile-contents'>
+                  <p className='profile-contents-name'>ID:</p>
+                  <p className='profile-contents-value'>{userList.user_id}</p>
+                  <p className='profile-contents-name'>Name:</p>
+                  <p className='profile-contents-value'>{userList.firstname} {userList.lastname}</p>
+                  <p className='profile-contents-name'>Email:</p>
+                  <p className='profile-contents-value'>{userList.email}</p>
+                  <button onClick={handleEditClick}>Edit</button>
+              </div>
             } 
-            </article>
+          </div>
         )}
       
 
 
-      <section>
-        <ul className="menu">
-          <li><a
-            id="menu-P"
-            className={activeTab === 'mydesign' ? 'active' : ''}
+      <div className='design-container'>
+        <div className="design-menu">
+          <p
+            className='design-menu-option'
+            style={{
+              color:activeTab==='mydesign'?"rgb(56, 158, 136)":"black",
+              backgroundColor:activeTab==='mydesign'&&"white"
+            }}
             onClick={() => handleTabClick('mydesign')}
           >
           Design
-          </a></li>
-          <li><a
-            id="menu-P"
-            className={activeTab === 'myhistory' ? 'active' : ''}
+          </p>
+          <p
+            style={{
+              color:activeTab==='mydesign'?"black":"rgb(56, 158, 136)",
+              backgroundColor:activeTab!=='mydesign'&&"white"
+            }}
+            className='design-menu-option'
             onClick={() => handleTabClick('myhistory')}
           >
           History
-          </a></li>
-        </ul>
+          </p>
+        </div>
 
-        <section className="Design-card" id="mydesign">
+        <div className="contents">
           {activeTab === 'mydesign' && (
-            <p className="tab-pane-design" >
-              {myDesignList.map((myDesign, key) => {
+            <div className="card-contents" >
+              {myDesignList.map((myDesignList, key) => {
+                const createdDate = myDesignList.created_at.split("T")[0]; 
                 return (
-                  <article className="card-body" key={key}>
-                    <img id="img-design" src={myDesign.product_image}/>
-                    <p id="data-his">Detail: {myDesign.Description}</p>
-                  </article>
+                  <div className="card-body" key={key}>
+                    <img src={myDesignList.product_image} alt="myDesign" />
+                    <p>Created_at: {createdDate}</p>
+                    <p>Product_id: {myDesignList.product_id}</p>
+                    <div className='btn-group'>
+                      <FontAwesomeIcon
+                        className='icon-btn'
+                        icon={faPen}
+                        onClick={() => handleEditProduct(myDesignList.product_id)}
+                      />
+                      <FontAwesomeIcon
+                      className='icon-btn'
+                      icon={faTrash}
+                      onClick={() => handleDelete(myDesignList.product_id)}
+                      />
+                    </div>
+                  </div>
                 );
               })}
-            </p>
+            </div>
           )}
 
           {activeTab === 'myhistory' && (
-                      <p className="tab-pane-history" >
-                        {myHistory.map((myHistory, key) => {
-                          return (
-                            <article className="card-body" key={key}>
-                              <img id="img-his" src={myHistory.product_image}/>
-                              <p id="data-his">Order_id: {myHistory.Order_id}</p>
-                              <p id="data-his">Detail: {myHistory.Description}</p>
-                              <p id="data-his">
-                                Color: {myHistory.Color}
-                                <br />
-                                Size: {myHistory.Size}
-                                <br />
-                                Total: {myHistory.Total_Item}
-                                <br />
-                                Price: {myHistory.Amount} บาท
-                              </p>
-                            </article>
-                          );
-                        })}
-                      </p>
-                    )}
-        </section>
-      </section>
-    </main>
+            <div className="card-contents" >
+              {myHistory.map((myHistory, key) => {
+                return (
+                  <div className="card-body" key={key}>
+                    <img src={myHistory.product_image} alt='img-his'/>
+                    <p>Order_id: {myHistory.order_id}</p>
+                    <p>Detail: {myHistory.description}</p>
+                    <p>
+                      Color: {myHistory.color}
+                      <br />
+                      Size: {myHistory.size}
+                      <br />
+                      Total: {myHistory.total_Item}
+                      <br />
+                      Price: {myHistory.amount} บาท
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
     </>
   );
 }

@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 // Set server port
 const port = 8090;
 
-// Create a PostgreSQL connection pool
+//Create a PostgreSQL connection pool
 const pool = new Pool({
   user: 'phimniyom_db_user',
   host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
@@ -221,7 +221,11 @@ app.get('/profile/:id', async (req, res) => {
 
   try {
     const query = {
-      text: 'SELECT user_id, email, firstname, lastname, telephone FROM "user" WHERE user_id = $1',
+      text: 'SELECT u.User_id, u.Email, u.Firstname, u.Lastname, u.Telephone,\
+      ua.Address, ua.Zipcode, ua.City, ua.Country\
+      FROM "user" AS u\
+      JOIN user_address AS ua ON u.User_id = ua.User_id\
+      WHERE u.User_id = $1',
       values: [user_id],
     };
 
@@ -234,6 +238,80 @@ app.get('/profile/:id', async (req, res) => {
     }
   } catch (error) {
     res.status(500).send({ error: 'Error querying table' });
+  }
+});
+
+app.get('/user/product/:id', async (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  try {
+    const query = {
+      text: `
+        SELECT *
+        FROM product
+        WHERE User_id = $1 AND status = 'enable';
+      `,
+      values: [userId],
+    };
+
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      res.send(result.rows);
+    } else {
+      res.status(404).send({ message: 'No products found for this user' });
+    }
+  } catch (error) {
+    res.status(500).send({ error: 'Error querying table' });
+  }
+});
+
+app.put('/update/:id', async (req, res) => {
+  const user_id = parseInt(req.params.id);
+  const { firstname, lastname, telephone, address, zipcode, city, country } = req.body;
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Update the "user" table
+    const updateUserQuery = {
+      text: `
+        UPDATE "user"
+        SET Firstname = $1, Lastname = $2, Telephone = $3
+        WHERE User_id = $4
+      `,
+      values: [firstname, lastname, telephone, user_id],
+    };
+
+    await client.query(updateUserQuery);
+
+    // Update the "user_address" table
+    const updateAddressQuery = {
+      text: `
+        UPDATE user_address
+        SET Address = $1, Zipcode = $2, City = $3, Country = $4
+        WHERE User_id = $5
+        RETURNING Address, Zipcode, City, Country
+      `,
+      values: [address, zipcode, city, country, user_id],
+    };
+
+    const result = await client.query(updateAddressQuery);
+
+    await client.query('COMMIT');
+
+    if (result.rowCount > 0) {
+      res.status(200).send({ message: 'Customer updated successfully' });
+    } else {
+      res.status(404).send({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    await client.query('ROLLBACK');
+    res.status(500).send({ message: 'Error updating customer data: ' + error.message });
+  } finally {
+    client.release();
   }
 });
 
@@ -270,31 +348,37 @@ app.get('/user/orders/:id', async (req, res) => {
   }
 });
 
-app.put('/user/:username', async (req, res) => {
-  const User_id = parseInt(req.params.username);
-  const { Firstname, Lastname, Telephone, Address, Zipcode, City, Country } = req.body;
+app.delete('/delete/:productId', async (req, res) => {
+  const product_id = req.params.productId;
 
   try {
-    const query = {
-      text: `
-        UPDATE "user"
-        SET Firstname = $1, Lastname = $2, Telephone = $3
-        FROM user_address
-        WHERE "user".user_id = $4
-        AND user_address.user_id = $4
-      `,
-      values: [Firstname, Lastname, Telephone, User_id],
+    // First, delete the product_detail record
+    const deleteDetailQuery = {
+      text: 'DELETE FROM product_detail WHERE Product_id = $1',
+      values: [product_id],
     };
 
-    const result = await pool.query(query);
+    const deleteDetailResult = await pool.query(deleteDetailQuery);
 
-    if (result.rowCount > 0) {
-      res.status(200).send({ message: 'Customer updated successfully' });
+    if (deleteDetailResult.rowCount > 0) {
+      // Next, update the status in the "product" table to "Disable"
+      const updateProductStatusQuery = {
+        text: 'UPDATE product SET status = $1 WHERE Product_id = $2',
+        values: ['disable', product_id],
+      };
+
+      const updateProductStatusResult = await pool.query(updateProductStatusQuery);
+
+      if (updateProductStatusResult.rowCount > 0) {
+        res.status(200).send({ message: 'Product_detail deleted successfully' });
+      } else {
+        res.status(500).send({ error: 'Error updating product status' });
+      }
     } else {
-      res.status(404).send({ message: 'Customer not found' });
+      res.status(404).send({ message: 'Product_detail not found' });
     }
   } catch (error) {
-    res.status(500).send({ message: 'Error updating customer data' });
+    res.status(500).send({ error: 'Error deleting product_detail: ' + error.message });
   }
 });
 
@@ -338,8 +422,8 @@ app.post('/saveproduct', async (req, res) => {
 
     // Insert product data into the "product" table
     const productQuery = {
-      text: 'INSERT INTO product (User_id, Description, product_image) VALUES ($1, $2, $3) RETURNING product_id',
-      values: [productData.User_id, productData.Description, productData.product_image],
+      text: 'INSERT INTO product (User_id, Description, product_image, status) VALUES ($1, $2, $3, $4) RETURNING product_id',
+      values: [productData.User_id, productData.Description, productData.product_image, productData.status],
     };
     const productResult = await client.query(productQuery);
     const productId = productResult.rows[0].product_id;

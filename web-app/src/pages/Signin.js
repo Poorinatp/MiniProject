@@ -5,7 +5,7 @@ import NavBar from '../components/NavBar';
 import Axios from "axios";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
-function Signin ({apihost}) {
+const Signin = ({apihost}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();

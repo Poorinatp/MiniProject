@@ -22,7 +22,7 @@ const Signup = ({apihost}) => {
 	  const userData = {
 		Firstname,
 		Lastname,
-		Telephone,
+		Telephone:Telephone.split('-').join(''),
 		Email,
 		Password,
 	  };
@@ -32,7 +32,7 @@ const Signup = ({apihost}) => {
 		Country,
 		Zipcode,
 	  };
-	  console.log("apihost = "+apihost)
+  
 	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
 		  console.log(response);
@@ -48,12 +48,20 @@ const Signup = ({apihost}) => {
 		});
 	};
 
+	const handleTelDisplay = () => {
+		const rawText = [...Telephone.split('-').join('')]
+        const telephoneNumber = []
+        rawText.forEach((t, i) => {
+            if (i % 3 === 0 && i !== 0 && i !== 9) telephoneNumber.push('-')
+            telephoneNumber.push(t)
+        })
+        return telephoneNumber.join('')
+	}
 	
 	return(
         <>
 		<NavBar/>
 		<form className='Signup' onSubmit={handleSubmit}>
-			
 				<header>
 					<h1>SIGN UP</h1>
 				</header>
@@ -78,12 +86,15 @@ const Signup = ({apihost}) => {
 					<br/>
                    
 				<input 
-					type="tel" 
+					type="text" 
 					id="Telephone"
 					placeholder="+66XX-XXX-XXXX"
+					value={handleTelDisplay()}
 					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
 					onChange={e =>{setTel(e.target.value)}}
-                    required/> 
+                    required
+					maxLength="12"
+				/> 
 					<br/>
 
 				<input 
@@ -103,7 +114,7 @@ const Signup = ({apihost}) => {
 					value={Password}
 					onChange={e => { setPassword(e.target.value) }}
 					required 
-					maxlength="10"
+					maxLength="10"
 					/>
 					<br />
 							
