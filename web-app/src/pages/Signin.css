@@ -75,7 +75,8 @@ textarea {
   justify-content: center;
   text-decoration: underline;
 }
-@media screen and (max-width: 800px) {
+
+@media screen and (min-width:401px) and  (max-width: 800px) {
   .Signin{
     max-width: 400px;
     max-height: fit-content;
@@ -86,7 +87,22 @@ textarea {
   .Signin input[type="email"],
   .Signin input[type="password"],
   textarea {
-    font-size: 15px; 
+    font-size: 1rem; 
+  }
+  
+}
+@media screen and (max-width: 400px) {
+  .Signin{
+    max-width: 320px;
+    max-height: fit-content;
+    margin: 100px auto;
+    padding: 10px; 
+    border-radius: 15px; 
+  } 
+  .Signin input[type="email"],
+  .Signin input[type="password"],
+  textarea {
+    font-size: 1rem; 
   }
   
 }
