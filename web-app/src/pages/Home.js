@@ -2,6 +2,7 @@ import "./Home.css"
 import {useNavigate} from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 import Axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
@@ -62,10 +63,7 @@ const Home = ({apihost}) => {
             </article>
 		</main>
 		<Footer/>
-
 		</>
-		
-		
 	  );
 	};
 export default Home;
