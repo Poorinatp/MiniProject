@@ -18,7 +18,7 @@ const Home = () => {
 		<main >
 			<NavBar/>
 			<div className="container1">
-				<SlideShow/>
+				{/* <SlideShow/> */}
 				<section>
 					<h1>PHIMNIYOM</h1>
 					<p className="sm">🌟 Unleash Your Creativity 🎨 Embrace Your Style 💫<br/>
