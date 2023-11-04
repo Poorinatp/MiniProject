@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import React from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
+import SlideShow from "../components/SlideShow";
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
  
 const Home = () => {
@@ -17,6 +18,7 @@ const Home = () => {
 		<main >
 			<NavBar/>
 			<div className="container1">
+				<SlideShow/>
 				<section>
 					<h1>PHIMNIYOM</h1>
 					<p className="sm">🌟 Unleash Your Creativity 🎨 Embrace Your Style 💫<br/>
