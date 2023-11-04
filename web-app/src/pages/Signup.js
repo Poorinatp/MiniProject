@@ -3,6 +3,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import  "./Signup.css";
 import NavBar from '../components/NavBar';
 import Axios from "axios";
+import Swal from 'sweetalert2';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
 const Signup = ({apihost}) => {
@@ -35,16 +36,15 @@ const Signup = ({apihost}) => {
   
 	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
-		  console.log(response);
 		  if (response.status === 200) {
-			console.log('Signup successful');
+			Swal.fire('Signup success. Please login.', '', 'error');
 			navigate('/signin');
 		  } else {
-			alert('Signup failed');
+			Swal.fire('Signup failed. Please try again.', '', 'error');
 		  }
 		})
 		.catch((error) => {
-		  console.error('Error sending request:', error);
+			Swal.fire('Signup failed. Please try again.', '', 'error');
 		});
 	};
 

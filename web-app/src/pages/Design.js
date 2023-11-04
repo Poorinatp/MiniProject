@@ -496,126 +496,120 @@ const Design = ({apihost}) => {
         setIsCheckoutPopupOpen(false);
     };
 
-    const handleSaveClick = () => {
-        const result = handleSaveDesign();
-        if (result===true) {
-            alert("design saved success");
-            navigate("/profile");
-        }
-    }
+    const saveDesign = async () => {
+        if (!session) {
+            Swal.fire('Prior to save a design, you are required to log in.', '', 'warning');
+            sessionStorage.setItem('textData', JSON.stringify(textData));
+            sessionStorage.setItem('imageData', JSON.stringify(imageData));
+            navigate('/signin');
+            return false
+        } else {
+            const inputElements = document.querySelectorAll('input');
+            
+            inputElements.forEach(inputElement => {
+                const paragraphElement = document.createElement('p');
 
-    const handleSaveDesign = async () => {
-        const result = await Swal.fire({
+                paragraphElement.textContent = inputElement.value;
+                paragraphElement.className = inputElement.className;
+                paragraphElement.style = inputElement.style;
+                paragraphElement.style.cssText = inputElement.style.cssText;
+                inputElement.parentNode.replaceChild(paragraphElement, inputElement);
+            });
+
+            const container = document.getElementById('container');
+            const canvas = await html2canvas(container);
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(resolve, 'image/png');
+            });
+            const formData = new FormData();
+            const fileName = `${session.user_id}_${Date.now()}.png`;
+            formData.append('image', blob, fileName);
+
+            try {
+                const response = await axios.post(`${apihost}/saveimage`, formData);
+                const imageDescriptions = imageData.map(image => image.imagename.replace(/\.png$/, '')).join(' ');
+                const productData = {
+                    User_id: session.user_id,
+                    Description: imageDescriptions,
+                    product_image: response.data,
+                    status: "enable"
+                };
+
+                const productDetails = [];
+                textData.forEach(item => {
+                    const textContainer = document.getElementById(`textcontainer${item.id}`);
+                    const productDetailData = {
+                        Product_id: null,
+                        Font_size: parseInt(item.fontSize),
+                        Font_family: item.fontFamily,
+                        Font_color: item.fontColor,
+                        location_img: '',
+                        img_width: '',
+                        img: '',
+                        location_text: `${textContainer.style.top};${textContainer.style.left}`,
+                        text_value: item.value,
+                    };
+                    productDetails.push(productDetailData);
+                });
+
+                imageData.forEach(item => {
+                    const imgbox = document.getElementById(`imgbox${item.id}`);
+                    const productDetailData = {
+                        Product_id: null,
+                        Font_size: 0,
+                        Font_family: '',
+                        Font_color: '',
+                        location_img: `${imgbox.style.top};${imgbox.style.left}`,
+                        img_width: item.width,
+                        img: item.imagename,
+                        location_text: '',
+                        text_value: '',
+                    };
+                    productDetails.push(productDetailData);
+                });
+
+                const productResponse = await axios.post(`${apihost}/saveproduct`, { productData, productDetails });
+
+                if (productResponse.status === 200) {
+                    setProductId(productResponse.data.insertId);
+                    Swal.fire('Design saved', '', 'success');
+                    return true
+                }
+                return false
+            }
+            catch (error) {
+                Swal.fire('error'+error, '', 'error');
+                return false
+            }
+        }
+    };
+
+    const handleSaveClick = async () => {
+        const results = await Swal.fire({
             title: 'Do you want to save ?',
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: 'Save',
             denyButtonText: `Don't save`,
         });
-        if (result.isConfirmed) {
-            Swal.fire('saved', '', 'info');
-            if (!session) {
-                alert("Prior to save a design, you are required to log in.");
-                sessionStorage.setItem('textData', JSON.stringify(textData));
-                sessionStorage.setItem('imageData', JSON.stringify(imageData));
-                navigate('/signin');
-                return false
-            } else {
-                const inputElements = document.querySelectorAll('input');
-                
-                inputElements.forEach(inputElement => {
-                    const paragraphElement = document.createElement('p');
-    
-                    paragraphElement.textContent = inputElement.value;
-                    paragraphElement.className = inputElement.className;
-                    paragraphElement.style = inputElement.style;
-                    paragraphElement.style.cssText = inputElement.style.cssText;
-                    inputElement.parentNode.replaceChild(paragraphElement, inputElement);
-                });
-    
-                const container = document.getElementById('container');
-                const canvas = await html2canvas(container);
-                const blob = await new Promise((resolve, reject) => {
-                    canvas.toBlob(resolve, 'image/png');
-                });
-                const formData = new FormData();
-                const fileName = `${session.user_id}_${Date.now()}.png`;
-                formData.append('image', blob, fileName);
-    
-                try {
-                    const response = await axios.post(`${apihost}/saveimage`, formData);
-                    const imageDescriptions = imageData.map(image => image.imagename.replace(/\.png$/, '')).join(' ');
-                    const productData = {
-                        User_id: session.user_id,
-                        Description: imageDescriptions,
-                        product_image: response.data,
-                        status: "enable"
-                    };
-    
-                    const productDetails = [];
-                    textData.forEach(item => {
-                        const textContainer = document.getElementById(`textcontainer${item.id}`);
-                        const productDetailData = {
-                            Product_id: null,
-                            Font_size: parseInt(item.fontSize),
-                            Font_family: item.fontFamily,
-                            Font_color: item.fontColor,
-                            location_img: '',
-                            img_width: '',
-                            img: '',
-                            location_text: `${textContainer.style.top};${textContainer.style.left}`,
-                            text_value: item.value,
-                        };
-                        productDetails.push(productDetailData);
-                    });
-    
-                    imageData.forEach(item => {
-                        const imgbox = document.getElementById(`imgbox${item.id}`);
-                        const productDetailData = {
-                            Product_id: null,
-                            Font_size: 0,
-                            Font_family: '',
-                            Font_color: '',
-                            location_img: `${imgbox.style.top};${imgbox.style.left}`,
-                            img_width: item.width,
-                            img: item.imagename,
-                            location_text: '',
-                            text_value: '',
-                        };
-                        productDetails.push(productDetailData);
-                    });
-    
-                    const productResponse = await axios.post(`${apihost}/saveproduct`, { productData, productDetails });
-    
-                    if (productResponse.status === 200) {
-                        setProductId(productResponse.data.insertId);
-                    }
-                    return true
-                    
-                }
-                catch (error) {
-                    alert("error 1"+error)
-                    return false
-                }
-                
+        if (results.isConfirmed) {
+            const result = await saveDesign();
+            if (result===true) {
+                navigate("/profile");
             }
-        }else if (result.isDenied) {
-            Swal.fire('Design not saved', '', 'info');
+        }else if (results.isDenied) {
+            Swal.fire('Design not saved', '', 'warning');
         }
-        
-    };
+    }
 
     const handlePayment = async () => {
         if (!session) {
-            alert("You must log in before proceeding with the payment.");
+            Swal.fire('You must log in before proceeding with the payment.', '', 'warning');
             sessionStorage.setItem('textData', JSON.stringify(textData));
             sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
         } else {
-            const result = handleSaveDesign();
-            if (result===true) {
-                
-            }
+            const result = await saveDesign();
             setOpenQr(true);
             setTimeLeft(180);
             setPaymentTimer(
@@ -674,12 +668,12 @@ const Design = ({apihost}) => {
                     const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
         
                     if (orderResponse.status === 200) {
-                        alert("receipt uploaded success");
+                        Swal.fire('Receipt uploaded', '', 'success');
                         navigate("/profile");
                     }
                 }
             } catch (error) {
-                
+                Swal.fire('Receipt not uploaded', '', 'error');
             }
         }
     }
