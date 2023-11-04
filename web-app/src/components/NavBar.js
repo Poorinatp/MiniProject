@@ -27,6 +27,8 @@ const NavBar = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('textData');
+    sessionStorage.removeItem('imageData');
     navigate("/signin")
     setIsLogin(false); // Set the login state to false.
   };
