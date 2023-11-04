@@ -79,7 +79,7 @@ textarea {
   justify-content: center;
   text-decoration: underline;
 }
-@media screen and (max-width: 800px) {
+@media screen and (min-width:401px) and  (max-width: 800px) {
   .Signup{
     max-width: 380px;
     max-height: fit-content;
@@ -90,8 +90,26 @@ textarea {
   .Signup input[type="text"],
   .Signup input[type="tel"],
   .Signup input[type="email"],
+  .Signup input[type="password"],
   textarea {
     font-size: 15px; 
+  }
+}
+
+@media screen and (max-width:400px){
+  .Signup{
+    max-width: 320px;
+    max-height: fit-content;
+    padding: 1rem;
+
+  }
+
+  .Signup input[type="text"],
+  .Signup input[type="tel"],
+  .Signup input[type="email"],
+  .Signup input[type="password"],
+  textarea {
+    font-size: 1rem; 
   }
 }
 
