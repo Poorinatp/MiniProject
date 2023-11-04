@@ -212,6 +212,17 @@ app.post('/signin', (req, res) => {
         }
     });
 });
+app.get('/product/admin', function(req, res) {
+  const sqlQuery = `SELECT product.* , user.Firstname FROM product INNER JOIN user ON product.User_id = user.User_id WHERE user.Firstname ='Admin' AND status = 'enable';`;
+  connection.query(sqlQuery, function(error, results) {
+      if (error) {
+          res.status(500).send({ error: 'Error querying table' });
+      } else {
+          res.send(results);
+      }
+  });
+});
+
 
 
 // update customer data from mysql database by id
