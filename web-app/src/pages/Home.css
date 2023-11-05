@@ -58,7 +58,7 @@ section>h1{
 
 section>p{
   color: #ffff;
-  font-size: 6vw;
+  font-size: 1.4rem;
   text-align: center;
   text-shadow: 10px 10px 20px #333;
   background-color: rgba(211, 211, 211, 0.392);
@@ -147,7 +147,7 @@ section>p{
 }
 
 .card-body-detail h1{
-  font-size: calc(60% + 1.3vw);
+  font-size: calc(60% + 1vw);
   color: white;
   font-family:Georgia, 'Times New Roman', Times, serif;
   font-style: italic;
