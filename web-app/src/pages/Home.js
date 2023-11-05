@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import Axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen } from '@fortawesome/free-solid-svg-icons';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
  
 const Home = ({apihost}) => {
@@ -22,13 +20,11 @@ const Home = ({apihost}) => {
 		Axios.get(`${apihost}/product/admin`)
 			.then((result) => {
 				setexDesignList(result.data);
-				console.log(result)
 			})
 			.catch((error) => {
 				console.error('Error fetching user data:', error);
 			});
-	}
-	)
+	},[])
 	return (
 		<>
 		<main >
@@ -44,23 +40,36 @@ const Home = ({apihost}) => {
 
 				<button className="btn-home" onClick={navigateToDesign}>start Do it!</button>
 			</div>
-			<article className="card-example" >
-              {exDesignList.map((exDesignList, key) => {
+			<div className="example-container" >
+              {exDesignList.map((example, index) => {
                 return (
-                  <section className="card-body-example" key={key}>
-                    <img src={exDesignList.product_image} alt='img-his'/>
-					<article className='btn-group'>
-                      <FontAwesomeIcon
-                        className='icon-btn'
-                        size='2xs'
-                        icon={faPen}
-                        onClick={() => handleEditProduct(exDesignList.Product_id)}
-                      />
-                    </article>
-                  </section>
+                  <div className="example-card" key={`example-card-${index}`}>
+					<div className="card-body-img"
+						style={{
+							gridColumn: index%2===0?"1/2":"2/3",
+							gridRow: "1/1",
+							transform: `perspective(1000px) rotateY(${index%2===0?30:-30}deg)`
+						}}
+						key={`card-body-img-${index}`}>
+                    	<img src={example.product_image} alt='img-example'/>
+					</div>
+					<div className="card-body-detail"
+						style={{
+							gridColumn: index%2===0?"2/3":"1/2",
+							gridRow: "1/1"
+						}}
+						key={`card-detail-${index}`}>
+						<h1 key={`card-detail-title-${index}`}>
+							This is an example of designs that we suggest you. Come and create your own creatively designed T-shirts and show the world who you are.
+						</h1>
+						<button key={`card-detail-btn-${index}`} onClick={() => handleEditProduct(example.Product_id)}>
+							Get Started
+						</button>
+					</div>
+                  </div>
                 );
               })}
-            </article>
+            </div>
 		</main>
 		<Footer/>
 		</>

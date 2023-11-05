@@ -58,8 +58,9 @@ section>h1{
 
 section>p{
   color: #ffff;
-  font-size: 1.4rem;
+  font-size: 6vw;
   text-align: center;
+  text-shadow: 10px 10px 20px #333;
   background-color: rgba(211, 211, 211, 0.392);
   border-radius: 10px;
   padding: 50px;
@@ -81,36 +82,88 @@ section>p{
   transform: translateY(-50%);
 } 
 
-.btn-home:hover {
+.btn-home:hover,
+.card-body-detail button:hover {
   background-color:black; 
   color: white;
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 
-} 
-.card-example {
-  display: flex;
-  grid-template-columns: repeat(3, 1fr);
-  padding: 10px;
-  gap: 10px;
-  width: 50%;
-  align-content: center;
 }
 
-.card-body-example {
+.example-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 10rem 0;
+  background: linear-gradient(90deg, #ffffff50, #00000050);
+  padding: 3rem 0;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.example-card {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+}
+
+.card-body-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px 50px;
+  overflow: hidden;
+  max-width: 100%;
+  margin: 0 auto;
+  transition: transform 0.3s;
+}
+
+.card-body-img:hover {
+  cursor: pointer;
+  animation: flipScale 1s forwards;
+}
+
+@keyframes flipScale {
+  100% {
+    transform: perspective(1000px) rotateY(0deg) scale(1.2);
+  }
+}
+
+.card-body-detail {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  background-color: white;
-  padding: 10px;
+  text-align: center;
+  max-width: 100%;
+  margin: 0 1rem;
+  gap: 1rem;
 }
-.card-body-example img {
+
+.card-body-img img {
   width: 100%;
-  align-items: center;
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 10px;
+  border-radius: 10px 50px;
+  transform: rotateY(-30deg);
+}
+
+.card-body-detail h1{
+  font-size: calc(60% + 1.3vw);
+  color: white;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-style: italic;
+}
+
+.card-body-detail button{
+  background-color: white;
+  color: black;
+  font-size: calc(40% + 1.3vw);
+  font-weight: bold;
+  font-style: italic;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  border: none;
+  outline: none;
+  border-radius: 2rem 1rem;
+  padding: 1rem;
 }
 
 @media screen and (min-width:1301px) {
@@ -123,9 +176,7 @@ section>p{
 }
 
 @media screen and (min-width:801px) and (max-width:1300px) {
-  .card-example {
-    grid-template-columns: repeat(3, 1fr);
-}
+  
   section>h1{
     font-size: 8rem;
   }
@@ -145,10 +196,7 @@ section>p{
 }
 
 @media screen and (max-width:800px) {
-  .card-example {
-    grid-template-columns: repeat(3, 1fr);
-    width: fit-content;
-}
+  
   section>h1{
     font-size: 3rem;
   }
