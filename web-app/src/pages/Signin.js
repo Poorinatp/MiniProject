@@ -19,12 +19,9 @@ const Signin = ({apihost}) => {
       password,
     };
 
-    console.log (userData)
     Axios.post(`${apihost}/signin`, userData)
       .then(response => {
         if (response.status === 200) {
-          console.log("response.data")
-          console.log(response.data)
           const userData = {
             email: response.data.result[0].email,
             user_id: response.data.result[0].user_id,

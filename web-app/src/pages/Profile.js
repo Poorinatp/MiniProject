@@ -32,7 +32,6 @@ const Profile = ({apihost}) => {
     Axios.get(`${apihost}/user/product/`+ username.user_id)
     .then((response) => {
       setmyDesignList(response.data);
-      console.log(response.data)
     })
     .catch((error) => {
       console.error('Error fetching user product data:', error);
@@ -139,7 +138,7 @@ const Profile = ({apihost}) => {
                 <p className='profile-contents-name'>City:</p>
                 <input className='profile-contents-value' type="text" name="city" value={userList.city} onChange={e=>handleInputChange(e)} />
                 <p className='profile-contents-name'>Country:</p>
-                <input className='profile-contents-value' type="text" name="Country" value={userList.Country} onChange={handleInputChange} />
+                <input className='profile-contents-value' type="text" name="country" value={userList.country} onChange={handleInputChange} />
                 <section className='btn-group'>
                 <button onClick={handleCancelClick}>Cancel</button>
                 <button onClick={handleSaveClick}>Save</button>
@@ -220,7 +219,7 @@ const Profile = ({apihost}) => {
               {myHistory.map((history, key) => {
                 return (
                   <section className="card-body" key={key}>
-                    <img src={`${apihost}/web-app/public${history.product_image}`} alt='img-his'/>
+                    <img src={`${apihost}${history.product_image}`} alt='img-his'/>
                     <p>Order_id: {history.order_id}</p>
                     <p>Detail: {history.description}</p>
                     <p>

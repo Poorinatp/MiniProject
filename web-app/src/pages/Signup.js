@@ -37,7 +37,7 @@ const Signup = ({apihost}) => {
 	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
 		  if (response.status === 200) {
-			Swal.fire('Signup success. Please login.', '', 'error');
+			Swal.fire('Signup success. Please login.', '', 'success');
 			navigate('/signin');
 		  } else {
 			Swal.fire('Signup failed. Please try again.', '', 'error');
@@ -101,7 +101,7 @@ const Signup = ({apihost}) => {
 					type="Email" 
 					id="Email"
 					placeholder="Your Email"
-					pattern="^[a-zA-Z0-9]+@(hotmail\.com|gmail\.com)$"
+					pattern="^[a-zA-Z0-9.]+@(hotmail\.com|gmail\.com)$"
 					onChange={e =>{setEmail(e.target.value)}}
                     required/> 
 					<br/>

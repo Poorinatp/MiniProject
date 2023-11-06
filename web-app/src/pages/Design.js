@@ -504,7 +504,6 @@ const Design = ({apihost}) => {
             navigate('/signin');
             return false
         } else {
-            console.log(session.user_id)
             const inputElements = document.querySelectorAll('input');
             
             inputElements.forEach(inputElement => {

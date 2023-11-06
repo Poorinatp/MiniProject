@@ -491,28 +491,15 @@ app.get('/picture', (req, res) => {
 
 app.post('/saveimage', uploadShirtDesign.single('image'), (req, res) => {
   if (!req.file) {
-    console.log("req")
-    console.log(req)
-    console.log("req.file")
-    console.log(req.file)
     res.status(400).send('No image file')
   }
-  console.log("req.file")
-  console.log(req.file)
-  console.log("req.file.path")
-  console.log(req.file.path)
   res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
 app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
   if (!req.file) {
-    console.log(req.file)
     res.status(400).send('No image file')
   }
-  console.log("req.file")
-  console.log(req.file)
-  console.log("req.file.path")
-  console.log(req.file.path)
   res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
@@ -520,10 +507,6 @@ app.post('/saveproduct', async (req, res) => {
   const productData = req.body.productData;
   const productDetails = req.body.productDetails;
   const client = await pool.connect();
-  console.log("productData")
-  console.log(productData)
-  console.log("productDetails")
-  console.log(productDetails)
   try {
     // Start a transaction to ensure data consistency
     await client.query('BEGIN');
