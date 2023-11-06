@@ -27,7 +27,7 @@ const port = 8090;
 
 //Create a PostgreSQL connection pool
 
-/* const pool = new Pool({
+const pool = new Pool({
   user: 'phimniyom_db_user',
   host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
   database: 'phimniyom_db',
@@ -36,8 +36,8 @@ const port = 8090;
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-}); */
-const pool = new Pool({
+});
+/* const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
@@ -46,7 +46,7 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-});
+}); */
 
 const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -147,6 +147,24 @@ app.get('/rootdirfiletree', (req, res) => {
     } else {
       res.json(fileTree);
     }
+  });
+});
+
+app.get('/list-shirt-designs', (req, res) => {
+  const shirtDesignsDir = path.join(__dirname, '../web-app/public/shirt-design');
+
+  fs.readdir(shirtDesignsDir, (err, files) => {
+    if (err) {
+      res.status(500).json({ error: 'Error reading shirt designs directory' });
+      return;
+    }
+
+    const shirtDesigns = files.filter((file) => {
+      const extname = path.extname(file).toLowerCase();
+      return extname === '.jpg' || extname === '.png' || extname === '.gif' || extname === '.jpeg';
+    });
+
+    res.json(shirtDesigns);
   });
 });
 
