@@ -396,20 +396,20 @@ const Design = ({apihost}) => {
                 .then((response) => {
                     if (response.status === 200) {
                         const textDetailData = response.data
-                        .filter((item) => item.Font_family !== "")
+                        .filter((item) => item.font_family !== "")
                         .map((item) => ({
                             id: item.id,
                             type: "text",
                             value: item.text_value,
-                            fontFamily: item.Font_family,
-                            fontSize: item.Font_size + 'px',
-                            fontColor: item.Font_color,
+                            fontFamily: item.font_family,
+                            fontSize: item.font_size + 'px',
+                            fontColor: item.font_color,
                             x: item.location_text.split(';')[0].trim(),
                             y: item.location_text.split(';')[1].trim(),
-                            width: findNewWidth(item.Font_size, item.Font_family, item.text_value)
+                            width: findNewWidth(item.font_size, item.font_family, item.text_value)
                         }));
                         const imageDetailData = response.data
-                        .filter((item) => item.Font_family === "")
+                        .filter((item) => item.font_family === "")
                         .map((item) => ({
                             id: item.id,
                             type: "image",

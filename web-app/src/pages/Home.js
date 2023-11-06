@@ -62,7 +62,7 @@ const Home = ({apihost}) => {
 						<h1 key={`card-detail-title-${index}`}>
 							This is an example of designs that we suggest you.<br/>Come and create your own creatively designed <br/> T-shirts and show the world who you are.
 						</h1>
-						<button key={`card-detail-btn-${index}`} onClick={() => handleEditProduct(example.Product_id)}>
+						<button key={`card-detail-btn-${index}`} onClick={() => handleEditProduct(example.product_id)}>
 							Get Started
 						</button>
 					</div>

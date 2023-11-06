@@ -26,16 +26,17 @@ app.use(bodyParser.json());
 const port = 8090;
 
 //Create a PostgreSQL connection pool
-// const pool = new Pool({
-//   user: 'phimniyom_db_user',
-//   host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
-//   database: 'phimniyom_db',
-//   password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
-//   port: 5432,
-//   ssl: {
-//     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
-//   },
-// });
+
+/* const pool = new Pool({
+  user: 'phimniyom_db_user',
+  host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
+  database: 'phimniyom_db',
+  password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
+  },
+}); */
 const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
@@ -49,7 +50,7 @@ const pool = new Pool({
 
 const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '../web-app/public/shirt-design');
+    cb(null, 'https://pimniyom.onrender.com/web-app/public/shirt-design');
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
@@ -58,7 +59,7 @@ const shirtDesignStorage = multer.diskStorage({
 
 const receiptStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '../web-app/public/receipts-uncheck'); // Set the destination folder for receipts
+    cb(null, 'https://pimniyom.onrender.com/web-app/public/receipts-uncheck');
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
@@ -134,6 +135,29 @@ app.get('/products-with-details/:productid', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Error querying table' });
+  }
+});
+
+app.get('/product/admin', async (req, res) => {
+  try {
+    const query = {
+      text: `
+        SELECT p.*, u.Firstname
+        FROM product p
+        INNER JOIN "user" u ON p.User_id = u.User_id
+        WHERE u.Firstname = 'Admin' AND p.status = 'enable';
+      `,
+    };
+
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      res.send(result.rows);
+    } else {
+      res.status(404).send({ message: 'No products found for admin' });
+    }
+  } catch (error) {
+    res.status(500).send({ error: 'Error querying table: ' + error.message });
   }
 });
 
@@ -400,15 +424,25 @@ app.get('/picture', (req, res) => {
 
 app.post('/saveimage', uploadShirtDesign.single('image'), (req, res) => {
   if (!req.file) {
+    console.log(req.file)
     res.status(400).send('No image file')
   }
+  console.log("req.file")
+  console.log(req.file)
+  console.log("req.file.path")
+  console.log(req.file.path)
   res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
 app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
   if (!req.file) {
+    console.log(req.file)
     res.status(400).send('No image file')
   }
+  console.log("req.file")
+  console.log(req.file)
+  console.log("req.file.path")
+  console.log(req.file.path)
   res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
@@ -416,6 +450,10 @@ app.post('/saveproduct', async (req, res) => {
   const productData = req.body.productData;
   const productDetails = req.body.productDetails;
   const client = await pool.connect();
+  console.log("productData")
+  console.log(productData)
+  console.log("productDetails")
+  console.log(productDetails)
   try {
     // Start a transaction to ensure data consistency
     await client.query('BEGIN');
