@@ -50,7 +50,7 @@ const pool = new Pool({
 
 const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'https://pimniyom.onrender.com/web-app/public/shirt-design');
+    cb(null, '../web-app/public/shirt-design');
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
@@ -59,7 +59,7 @@ const shirtDesignStorage = multer.diskStorage({
 
 const receiptStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'https://pimniyom.onrender.com/web-app/public/receipts-uncheck');
+    cb(null, '../web-app/public/receipts-uncheck');
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
