@@ -134,6 +134,7 @@ app.get('/products-with-details/:productid', async (req, res) => {
       res.status(400).send({ message: 'Product not found!' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Error querying table' });
   }
 });
@@ -157,6 +158,7 @@ app.get('/product/admin', async (req, res) => {
       res.status(404).send({ message: 'No products found for admin' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: 'Error querying table: ' + error.message });
   }
 });
@@ -195,6 +197,7 @@ app.post('/signin', async (req, res) => {
       res.status(401).send({ message: 'Login failed' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: 'Database error' });
   }
 });
@@ -236,6 +239,7 @@ app.post('/signup', async (req, res) => {
       client.release();
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send('User registration failed 1');
   }
 });
@@ -261,6 +265,7 @@ app.get('/profile/:id', async (req, res) => {
       res.status(404).send({ message: 'User not found' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: 'Error querying table' });
   }
 });
@@ -286,6 +291,7 @@ app.get('/user/product/:id', async (req, res) => {
       res.status(404).send({ message: 'No products found for this user' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: 'Error querying table' });
   }
 });
@@ -332,6 +338,7 @@ app.put('/update/:id', async (req, res) => {
       res.status(404).send({ message: 'Customer not found' });
     }
   } catch (error) {
+    console.log(error)
     await client.query('ROLLBACK');
     res.status(500).send({ message: 'Error updating customer data: ' + error.message });
   } finally {
@@ -368,6 +375,7 @@ app.get('/user/orders/:id', async (req, res) => {
       res.status(404).send({ message: 'No orders found for this user' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: 'Error querying table' });
   }
 });
@@ -396,12 +404,14 @@ app.delete('/delete/:productId', async (req, res) => {
       if (updateProductStatusResult.rowCount > 0) {
         res.status(200).send({ message: 'Product_detail deleted successfully' });
       } else {
+        console.log(error)
         res.status(500).send({ error: 'Error updating product status' });
       }
     } else {
       res.status(404).send({ message: 'Product_detail not found' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: 'Error deleting product_detail: ' + error.message });
   }
 });
@@ -494,6 +504,7 @@ app.post('/saveproduct', async (req, res) => {
     await client.query('COMMIT');
     res.status(200).json({ message: 'Product and details saved successfully', insertId: productId });
   } catch (error) {
+    console.log(error)
     await client.query('ROLLBACK');
     res.status(500).json({ message: 'Error saving product and details' });
   } finally {
@@ -519,6 +530,7 @@ app.post('/createpayment', async (req, res) => {
       res.status(500).json({ message: 'Error creating payment' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Error creating payment' });
   }
 });
@@ -547,6 +559,7 @@ app.post('/createorder', async (req, res) => {
       res.status(500).json({ message: 'Error creating order' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Error creating order' });
   }
 });
