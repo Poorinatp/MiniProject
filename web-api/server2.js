@@ -21,6 +21,8 @@ app.use(cors());
 // Configure body parser to handle post requests
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, '../web-app/public')));
+
 
 // Set server port
 const port = 8090;

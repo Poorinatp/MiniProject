@@ -188,25 +188,25 @@ const Profile = ({apihost}) => {
         <section className="contents">
           {activeTab === 'mydesign' && (
             <article className="card-contents" >
-              {myDesignList.map((myDesignList, key) => {
-                const createdDate = myDesignList.created_at.split("T")[0]; 
+              {myDesignList.map((design, key) => {
+                const createdDate = design.created_at.split("T")[0]; 
                 return (
                   <section className="card-body" key={key}>
-                    <img src={`${apihost}/web-app/public/${myDesignList.product_image}`} alt="myDesign" />
+                    <img src={`${apihost}${design.product_image}`} alt="myDesign" />
                     <p>Created_at: {createdDate}</p>
-                    <p>Product_id: {myDesignList.Product_id}</p>
+                    <p>Product_id: {design.Product_id}</p>
                     <article className='btn-group'>
                       <FontAwesomeIcon
                         className='icon-btn'
                         size='2xs'
                         icon={faPen}
-                        onClick={() => handleEditProduct(myDesignList.product_id)}
+                        onClick={() => handleEditProduct(design.product_id)}
                       />
                       <FontAwesomeIcon
                       className='icon-btn'
                       size='2xs'
                       icon={faTrash}
-                      onClick={() => handleDelete(myDesignList.product_id)}
+                      onClick={() => handleDelete(design.product_id)}
                       />
                     </article>
                   </section>
@@ -217,20 +217,20 @@ const Profile = ({apihost}) => {
 
           {activeTab === 'myhistory' && (
             <article className="card-contents" >
-              {myHistory.map((myHistory, key) => {
+              {myHistory.map((history, key) => {
                 return (
                   <section className="card-body" key={key}>
-                    <img src={`${apihost}/web-app/public/${myHistory.product_image}`} alt='img-his'/>
-                    <p>Order_id: {myHistory.order_id}</p>
-                    <p>Detail: {myHistory.description}</p>
+                    <img src={`${apihost}/web-app/public${history.product_image}`} alt='img-his'/>
+                    <p>Order_id: {history.order_id}</p>
+                    <p>Detail: {history.description}</p>
                     <p>
-                      Color: {myHistory.color}
+                      Color: {history.color}
                       <br />
-                      Size: {myHistory.size}
+                      Size: {history.size}
                       <br />
-                      Total: {myHistory.total_Item}
+                      Total: {history.total_Item}
                       <br />
-                      Price: {myHistory.amount} บาท
+                      Price: {history.amount} บาท
                     </p>
                   </section>
                 );
