@@ -77,6 +77,32 @@ pool.on('error', (err) => {
 // Set PostgreSQL table names
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
 
+function listFilesAndDirectories(directory, callback) {
+  fs.readdir(directory, { withFileTypes: true }, (err, files) => {
+    if (err) {
+      return callback(err, null);
+    }
+
+    const fileTree = { directory, items: [] };
+
+    files.forEach((file) => {
+      const item = { name: file.name, isDirectory: file.isDirectory() };
+
+      if (file.isDirectory()) {
+        listFilesAndDirectories(path.join(directory, file.name), (err, subTree) => {
+          if (!err) {
+            item.items = subTree.items;
+          }
+        });
+      }
+
+      fileTree.items.push(item);
+    });
+
+    return callback(null, fileTree);
+  });
+}
+
 // Define root route
 app.get('/', (req, res) => {
   res.send('Hello World');
@@ -110,6 +136,17 @@ app.get('/all', (req, res) => {
         res.send(allData);
       }
     });
+  });
+});
+
+app.get('/rootdirfiletree', (req, res) => {
+  const rootDirectory = __dirname; // Get the root directory of your Node.js application
+  listFilesAndDirectories(rootDirectory, (err, fileTree) => {
+    if (err) {
+      res.status(500).json({ error: 'Error reading file tree' });
+    } else {
+      res.json(fileTree);
+    }
   });
 });
 

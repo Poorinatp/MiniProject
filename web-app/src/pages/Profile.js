@@ -192,7 +192,7 @@ const Profile = ({apihost}) => {
                 const createdDate = myDesignList.created_at.split("T")[0]; 
                 return (
                   <section className="card-body" key={key}>
-                    <img src={`${apihost}/web-app/public/${myHistory.product_image}`} alt="myDesign" />
+                    <img src={`${apihost}/web-app/public/${myDesignList.product_image}`} alt="myDesign" />
                     <p>Created_at: {createdDate}</p>
                     <p>Product_id: {myDesignList.Product_id}</p>
                     <article className='btn-group'>
