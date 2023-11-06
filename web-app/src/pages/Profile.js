@@ -192,7 +192,7 @@ const Profile = ({apihost}) => {
                 const createdDate = myDesignList.created_at.split("T")[0]; 
                 return (
                   <section className="card-body" key={key}>
-                    <img src={myDesignList.product_image} alt="myDesign" />
+                    <img src={`${apihost}/web-app/public/${myHistory.product_image}`} alt="myDesign" />
                     <p>Created_at: {createdDate}</p>
                     <p>Product_id: {myDesignList.Product_id}</p>
                     <article className='btn-group'>
@@ -220,7 +220,7 @@ const Profile = ({apihost}) => {
               {myHistory.map((myHistory, key) => {
                 return (
                   <section className="card-body" key={key}>
-                    <img src={myHistory.product_image} alt='img-his'/>
+                    <img src={`${apihost}/web-app/public/${myHistory.product_image}`} alt='img-his'/>
                     <p>Order_id: {myHistory.order_id}</p>
                     <p>Detail: {myHistory.description}</p>
                     <p>
