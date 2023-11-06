@@ -51,16 +51,16 @@ const pool = new Pool({
 const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     console.log("req")
-    console.log(req)
+    console.log(req? req:"no req")
     console.log("file")
-    console.log(file)
+    console.log(file? file:"no file")
     cb(null, 'https://pimniyom.onrender.com/web-app/public/shirt-design');
   },
   filename: (req, file, cb) => {
     console.log("req")
-    console.log(req)
+    console.log(req? req:"no req")
     console.log("file")
-    console.log(file)
+    console.log(file? file:"no file")
     cb(null, file.originalname);
   },
 });
