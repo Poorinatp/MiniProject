@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./NavBar.css";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,6 +9,13 @@ const NavBar = () => {
   const [isLogin, setIsLogin] = useState(false);
   const navigate = useNavigate();
   const [openHamMenu, setOpenHamMenu] = useState(false);
+  const location = useLocation();
+  const [isHome, setIsHome] = useState(false);
+
+  useEffect(() => {
+    setIsHome(location.pathname === "/");
+  }, [location.pathname]);
+
   useEffect(() => {
     const userIsLoggedIn = sessionStorage.getItem('userData');
     if (userIsLoggedIn) {
@@ -20,6 +27,8 @@ const NavBar = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('textData');
+    sessionStorage.removeItem('imageData');
     navigate("/signin")
     setIsLogin(false); // Set the login state to false.
   };
@@ -29,6 +38,7 @@ const NavBar = () => {
       <NavLink to="/" className="logo-link">
         <img className="navimg" src="/image/logo.png" alt="logo"/>
       </NavLink>
+
       <div className="auth-links">
         {isLogin ? (
           <div className="menu">

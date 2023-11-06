@@ -7,6 +7,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { faAngleDown, faAngleUp, faMagnifyingGlass, faUpload } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import html2canvas from 'html2canvas';
+import Swal from 'sweetalert2';
+
 
 const OptionTab = ({
     textData, 
@@ -494,17 +496,9 @@ const Design = ({apihost}) => {
         setIsCheckoutPopupOpen(false);
     };
 
-    const handleSaveClick = () => {
-        const result = handleSaveDesign();
-        if (result===true) {
-            alert("design saved success");
-            navigate("/profile");
-        }
-    }
-
-    const handleSaveDesign = async () => {
+    const saveDesign = async () => {
         if (!session) {
-            alert("Prior to save a design, you are required to log in.");
+            Swal.fire('Prior to save a design, you are required to log in.', '', 'warning');
             sessionStorage.setItem('textData', JSON.stringify(textData));
             sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
@@ -579,27 +573,44 @@ const Design = ({apihost}) => {
 
                 if (productResponse.status === 200) {
                     setProductId(productResponse.data.insertId);
+                    Swal.fire('Design saved', '', 'success');
+                    return true
                 }
-                return true
+                return false
             }
             catch (error) {
-                alert("error 1"+error)
+                Swal.fire('error'+error, '', 'error');
                 return false
             }
         }
     };
 
+    const handleSaveClick = async () => {
+        const results = await Swal.fire({
+            title: 'Do you want to save ?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            denyButtonText: `Don't save`,
+        });
+        if (results.isConfirmed) {
+            const result = await saveDesign();
+            if (result===true) {
+                navigate("/profile");
+            }
+        }else if (results.isDenied) {
+            Swal.fire('Design not saved', '', 'warning');
+        }
+    }
+
     const handlePayment = async () => {
         if (!session) {
-            alert("You must log in before proceeding with the payment.");
+            Swal.fire('You must log in before proceeding with the payment.', '', 'warning');
             sessionStorage.setItem('textData', JSON.stringify(textData));
             sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
         } else {
-            const result = handleSaveDesign();
-            if (result===true) {
-                
-            }
+            const result = await saveDesign();
             setOpenQr(true);
             setTimeLeft(180);
             setPaymentTimer(
@@ -658,12 +669,12 @@ const Design = ({apihost}) => {
                     const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
         
                     if (orderResponse.status === 200) {
-                        alert("receipt uploaded success");
+                        Swal.fire('Receipt uploaded', '', 'success');
                         navigate("/profile");
                     }
                 }
             } catch (error) {
-                
+                Swal.fire('Receipt not uploaded', '', 'error');
             }
         }
     }
@@ -743,6 +754,7 @@ const Design = ({apihost}) => {
                     />
                 </>
             )}
+            
         </>
     )
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import  "./Signin.css";
 import NavBar from '../components/NavBar';
 import Axios from "axios";
+import Swal from 'sweetalert2';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
 const Signin = ({apihost}) => {
@@ -30,14 +31,14 @@ const Signin = ({apihost}) => {
             status: "success"
           }
           sessionStorage.setItem('userData', JSON.stringify(userData));
-          console.log(userData)
+          Swal.fire('Login successful.', '', 'success');
           navigate('/design');
         } else {
-          alert('เข้าสู่ระบบล้มเหลว');
+          Swal.fire('Your email or password is incorrect.', '', 'error');
         }
       })
       .catch(error => {
-        console.error('ข้อผิดพลาดในการส่งคำขอ:', error);
+        Swal.fire('Your email or password is incorrect.', '', 'error');
       });
   }
 
