@@ -3,9 +3,10 @@ import {Link, useNavigate} from 'react-router-dom';
 import  "./Signup.css";
 import NavBar from '../components/NavBar';
 import Axios from "axios";
+import Swal from 'sweetalert2';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" ></meta>
 
-function Signup() {
+const Signup = ({apihost}) => {
 	const [Firstname, setFirstname] = useState('');
 	const [Lastname, setLastname] = useState('');
 	const [Telephone, setTel] = useState('');
@@ -22,7 +23,7 @@ function Signup() {
 	  const userData = {
 		Firstname,
 		Lastname,
-		Telephone,
+		Telephone:Telephone.split('-').join(''),
 		Email,
 		Password,
 	  };
@@ -33,27 +34,34 @@ function Signup() {
 		Zipcode,
 	  };
   
-	  Axios.post('http://localhost:8080/signup', { user: userData, address: addressData })
+	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
-		  console.log(response);
 		  if (response.status === 200) {
-			console.log('Signup successful');
+			Swal.fire('Signup success. Please login.', '', 'error');
 			navigate('/signin');
 		  } else {
-			alert('Signup failed');
+			Swal.fire('Signup failed. Please try again.', '', 'error');
 		  }
 		})
 		.catch((error) => {
-		  console.error('Error sending request:', error);
+			Swal.fire('Signup failed. Please try again.', '', 'error');
 		});
 	};
 
+	const handleTelDisplay = () => {
+		const rawText = [...Telephone.split('-').join('')]
+        const telephoneNumber = []
+        rawText.forEach((t, i) => {
+            if (i % 3 === 0 && i !== 0 && i !== 9) telephoneNumber.push('-')
+            telephoneNumber.push(t)
+        })
+        return telephoneNumber.join('')
+	}
 	
 	return(
         <>
 		<NavBar/>
 		<form className='Signup' onSubmit={handleSubmit}>
-			
 				<header>
 					<h1>SIGN UP</h1>
 				</header>
@@ -81,9 +89,12 @@ function Signup() {
 					type="text" 
 					id="Telephone"
 					placeholder="+66XX-XXX-XXXX"
+					value={handleTelDisplay()}
 					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
 					onChange={e =>{setTel(e.target.value)}}
-                    required/> 
+                    required
+					maxLength="12"
+				/> 
 					<br/>
 
 				<input 

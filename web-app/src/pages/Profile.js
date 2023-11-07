@@ -5,8 +5,8 @@ import './Profile.css';
 import NavBar from '../components/NavBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash,faPen } from '@fortawesome/free-solid-svg-icons';
-
-function Profile() {
+import Swal from 'sweetalert2';
+const Profile = ({apihost}) => {
   const [userList, setUserList] = useState([]);
   const [myDesignList, setmyDesignList] = useState([]);
   const [myHistory, setmyHistory] = useState([]);
@@ -15,38 +15,37 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   
   const navigate = useNavigate();
+
   useEffect(() => {
     // Make the Axios GET request
     if (!sessionStorage.getItem('userData')){
       navigate('/signin');
     }
-    Axios.get('http://localhost:8080/profile/'+ username.user_id)
-      .then((response) => {
-        setUserList(response.data[0]);
-        console.log(response.data[0]);
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
+    Axios.get(`${apihost}/profile/`+ username.user_id)
+    .then((response) => {
+      setUserList(response.data[0]);
+    })
+    .catch((error) => {
+      console.error('Error fetching user data:', error);
+    });
 
-      Axios.get('http://localhost:8080/user/product/'+ username.user_id)
-      .then((response) => {
-        setmyDesignList(response.data);
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
+    Axios.get(`${apihost}/user/product/`+ username.user_id)
+    .then((response) => {
+      setmyDesignList(response.data);
+      console.log(response.data)
+    })
+    .catch((error) => {
+      console.error('Error fetching user data:', error);
+    });
 
-      Axios.get('http://localhost:8080/user/orders/'+ username.user_id)
-      .then((response) => {
-        setmyHistory(response.data);
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
-  }, []);
+    Axios.get(`${apihost}/user/orders/`+ username.user_id)
+    .then((response) => {
+      setmyHistory(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching user data:', error);
+    });
+  }, [apihost,navigate,username.user_id]);
 
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
@@ -66,13 +65,28 @@ function Profile() {
   const handleCancelClick = () => {
     setEditMode(false);
   }
+
+
   const handleDelete = (product_id) => {
-    Axios.delete(`http://localhost:8080/delete/${product_id}`)
-      .then(() => {
-        // Filter out the deleted product from myDesignList
+    Axios.delete(`${apihost}/delete/${product_id}`)
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
         setmyDesignList((prevList) => prevList.filter((item) => item.Product_id !== product_id));
-        alert('Product Deleted!');
-      })
+        Swal.fire(
+          'Deleted!',
+          'Your file has been deleted.',
+          'success'
+        )
+      }
+    })
       .catch((error) => {
         console.error('Error deleting product_detail:', error);
       });
@@ -83,12 +97,21 @@ function Profile() {
   };
     
   function handleSaveClick() {
-    Axios.put('http://localhost:8080/update/' + userList.User_id, userList)
-      .then(response => {
-        console.log(response.data.messege);
-        console.log(response);
+    Axios.put(`${apihost}/update/` + userList.User_id, userList)
+    Swal.fire({
+      title: 'Do you want to save the changes?',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Save',
+      denyButtonText: `Don't save`,
+    }).then((result) => {
+      if (result.isConfirmed) {
         setEditMode(false);
-      })
+        Swal.fire('Saved!', '', 'success')
+      } else if (result.isDenied) {
+        Swal.fire('Changes are not saved', '', 'info')
+      }
+    })
       .catch(error => {
         console.log(error);
       });
@@ -98,109 +121,120 @@ function Profile() {
   return (
     <>
     <NavBar/> 
-    <main className="author">
-      
+    <main className="profile">
         {userList &&(
-            <article>
+            <section className='profile-container'>
               {editMode ? (
-            <div>
-              <label>First Name:</label>
-              <input type="text" name="Firstname" value={userList.Firstname} onChange={handleInputChange} />
-              <br />
-              <label>Last Name:</label>
-              <input type="text" name="Lastname" value={userList.Lastname} onChange={handleInputChange} />
-              <br />
-              <label>Address:</label>
-              <input type="text" name="Address" value={userList.Address} onChange={handleInputChange} />
-              <br />
-              <label>Phone:</label>
-              <input type="tel" name="Telephone" value={userList.Telephone} onChange={handleInputChange} />
-              <br />
-              <label>Zipcode:</label>
-              <input type="text" name="Zipcode" value={userList.Zipcode} onChange={handleInputChange} />
-              <br />
-              <label>Country:</label>
-              <input type="text" name="Country" value={userList.Country} onChange={handleInputChange} />
-              <br />
-              <button className='CancelButton' onClick={handleCancelClick}>Cancel</button>
-              <button onClick={handleSaveClick}>Save</button>
-            </div>
-          ) : 
-          <article className="card-body-name" >
-              <p >ID: {userList.User_id}</p>
-              <p>Name: {userList.Firstname} {userList.Lastname}</p>
-              <p>Email: {userList.Email}</p>
-              <button onClick={handleEditClick}>Edit</button>
-            </article>
+              <article className="profile-contents">
+                <p className='profile-contents-name'>First Name:</p>
+                <input className='profile-contents-value' type="text" name="Firstname" value={userList.Firstname} onChange={handleInputChange} />
+                <p className='profile-contents-name'>Last Name:</p>
+                <input className='profile-contents-value' type="text" name="Lastname" value={userList.Lastname} onChange={handleInputChange} />
+                <p className='profile-contents-name'>Address:</p>
+                <input className='profile-contents-value' type="text" name="Address" value={userList.Address} onChange={handleInputChange} />
+                <p className='profile-contents-name'>Phone:</p>
+                <input className='profile-contents-value' type="tel" name="Telephone" value={userList.Telephone} onChange={handleInputChange} />
+                <p className='profile-contents-name'>Zipcode:</p>
+                <input className='profile-contents-value' type="text" name="Zipcode" value={userList.Zipcode} onChange={handleInputChange} />
+                <p className='profile-contents-name'>Country:</p>
+                <input className='profile-contents-value' type="text" name="Country" value={userList.Country} onChange={handleInputChange} />
+                <section className='btn-group'>
+                <button onClick={handleCancelClick}>Cancel</button>
+                <button onClick={handleSaveClick}>Save</button>
+                </section>
+              </article>
+              ) : 
+              <article className='profile-contents'>
+                  <p className='profile-contents-name'>ID:</p>
+                  <p className='profile-contents-value'>{userList.User_id}</p>
+                  <p className='profile-contents-name'>Name:</p>
+                  <p className='profile-contents-value'>{userList.Firstname} {userList.Lastname}</p>
+                  <p className='profile-contents-name'>Email:</p>
+                  <p className='profile-contents-value'>{userList.Email}</p>
+                  <button onClick={handleEditClick}>Edit</button>
+              </article>
             } 
-            </article>
+          </section>
         )}
       
 
 
-      <section>
-        <ul className="menu">
-          <li><a
-            id="menu-P"
-            className={activeTab === 'mydesign' ? 'active' : ''}
+      <section className='design-container'>
+        <nav className="design-menu">
+          <p
+            className='design-menu-option'
+            style={{
+              color:activeTab==='mydesign'?"rgb(56, 158, 136)":"black",
+              backgroundColor:activeTab==='mydesign'&&"white"
+            }}
             onClick={() => handleTabClick('mydesign')}
           >
           Design
-          </a></li>
-          <li><a
-            id="menu-P"
-            className={activeTab === 'myhistory' ? 'active' : ''}
+          </p>
+          <p
+            style={{
+              color:activeTab==='mydesign'?"black":"rgb(56, 158, 136)",
+              backgroundColor:activeTab!=='mydesign'&&"white"
+            }}
+            className='design-menu-option'
             onClick={() => handleTabClick('myhistory')}
           >
           History
-          </a></li>
-        </ul>
+          </p>
+        </nav>
 
-        <section className="Design-card" id="mydesign">
+        <section className="contents">
           {activeTab === 'mydesign' && (
-            <p className="tab-pane-design" >
+            <article className="card-contents" >
               {myDesignList.map((myDesignList, key) => {
                 const createdDate = myDesignList.Created_at.split("T")[0]; 
                 return (
-                  <article className="card-body" key={key}>
-                    <img id="img-design" src={myDesignList.product_image} alt="myDesign" />
-                    <p id="data-his">Created_at: {createdDate}</p>
-                    <p id="data-his">Product_id: {myDesignList.Product_id}</p>
-                    <button  className='editbtn' onClick={handleEditProduct}>
-                      <FontAwesomeIcon icon={faPen} size='2xs' style={{color: "#254683",}} />
-                    </button>
-                    <button className='deletebtn' onClick={() => handleDelete(myDesignList.Product_id)}>
-                      <FontAwesomeIcon icon={faTrash} size='2xs' style={{ color: '#254683 ' }} />
-                    </button>
-
-                  </article>
+                  <section className="card-body" key={key}>
+                    <img src={myDesignList.product_image} alt="myDesign" />
+                    <p>Created_at: {createdDate}</p>
+                    <p>Product_id: {myDesignList.Product_id}</p>
+                    <article className='btn-group'>
+                      <FontAwesomeIcon
+                        className='icon-btn'
+                        size='2xs'
+                        icon={faPen}
+                        onClick={() => handleEditProduct(myDesignList.Product_id)}
+                      />
+                      <FontAwesomeIcon
+                      className='icon-btn'
+                      size='2xs'
+                      icon={faTrash}
+                      onClick={() => handleDelete(myDesignList.Product_id)}
+                      />
+                    </article>
+                  </section>
                 );
               })}
-            </p>
+            </article>
           )}
 
           {activeTab === 'myhistory' && (
-                      <p className="tab-pane-history" >
-                        {myHistory.map((myHistory, key) => {
-                          return (
-                            <article className="card-body" key={key}>
-                              <img id="img-his" src={myHistory.product_image}/>
-                              <p id="data-his">Order_id: {myHistory.Order_id}</p>
-                              <p id="data-his">Detail: {myHistory.Description}</p>
-                              <p id="data-his">
-                                Color: {myHistory.Color}
-                                <br />
-                                Size: {myHistory.Size}
-                                <br />
-                                Total: {myHistory.Total_Item}
-                                <br />
-                                Price: {myHistory.Amount} บาท
-                              </p>
-                            </article>
-                          );
-                        })}
-                      </p>
-                    )}
+            <article className="card-contents" >
+              {myHistory.map((myHistory, key) => {
+                return (
+                  <section className="card-body" key={key}>
+                    <img src={myHistory.product_image} alt='img-his'/>
+                    <p>Order_id: {myHistory.Order_id}</p>
+                    <p>Detail: {myHistory.Description}</p>
+                    <p>
+                      Color: {myHistory.Color}
+                      <br />
+                      Size: {myHistory.Size}
+                      <br />
+                      Total: {myHistory.Total_Item}
+                      <br />
+                      Price: {myHistory.Amount} บาท
+                    </p>
+                  </section>
+                );
+              })}
+            </article>
+          )}
         </section>
       </section>
     </main>

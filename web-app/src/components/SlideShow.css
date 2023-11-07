@@ -1,0 +1,39 @@
+@keyframes slideToRight {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-200%);
+    }
+}
+
+.slide-show-container {
+    margin-top: 10px;
+    display: block;
+    overflow: hidden;
+    width: 100%;
+}
+
+.slide-show-page {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: black;
+    /* animation: slideToRight 2s; */
+    width: 100%;
+    padding: 10px;
+}
+
+.btn {
+    background-color: red;
+    padding: 10px;
+}
+.btn-icon {
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+}
+
+.slide-img {
+    width: 20%;
+}

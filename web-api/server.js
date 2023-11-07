@@ -150,6 +150,7 @@ app.post('/signin', (req, res) => {
     // Insert user data into the "user" table
     connection.query('INSERT INTO user SET ?', userData, (userInsertError, userResult) => {
       if (userInsertError) {
+        console.log(userInsertError)
         res.status(500).send('User registration failed');
         return;
       }
@@ -157,6 +158,7 @@ app.post('/signin', (req, res) => {
       // Retrieve the last inserted user ID
       connection.query('SELECT LAST_INSERT_ID() as user_id', (idQueryError, idResult) => {
         if (idQueryError) {
+          console.log(idQueryError)
           res.status(500).send('User registration failed');
           return;
         }
@@ -165,6 +167,7 @@ app.post('/signin', (req, res) => {
         addressData.user_id = idResult[0].user_id;
         connection.query('INSERT INTO user_address SET ?', addressData, (addressInsertError) => {
           if (addressInsertError) {
+            console.log(addressInsertError)
             res.status(500).send('User registration failed');
           } else {
             res.status(200).send('User registration successful');
@@ -198,8 +201,8 @@ app.post('/signin', (req, res) => {
   
 
   app.get('/user/product/:id', function(req, res) {
-    const userId = parseInt(req.params.id); // Parse the ID parameter from the URL
-    const sqlQuery = `SELECT * FROM product WHERE product.User_id = ? AND status = 'able';`;
+    const userId = parseInt(req.params.id);
+    const sqlQuery = `SELECT * FROM product WHERE product.User_id = ? AND status = 'enable';`;
 
     connection.query(sqlQuery, [userId], function(error, results) {
         if (error) {
@@ -209,6 +212,17 @@ app.post('/signin', (req, res) => {
         }
     });
 });
+app.get('/product/admin', function(req, res) {
+  const sqlQuery = `SELECT product.* , user.Firstname FROM product INNER JOIN user ON product.User_id = user.User_id WHERE user.Firstname ='Admin' AND status = 'enable';`;
+  connection.query(sqlQuery, function(error, results) {
+      if (error) {
+          res.status(500).send({ error: 'Error querying table' });
+      } else {
+          res.send(results);
+      }
+  });
+});
+
 
 
 // update customer data from mysql database by id
@@ -260,7 +274,6 @@ app.get('/user/orders/:id', function(req, res) {
 
 app.delete('/delete/:productId', function (req, res) {
   const product_id = req.params.productId;
-  console.log(product_id);
 
   connection.query('DELETE FROM product_detail WHERE Product_id = ?', [product_id], function (error, results) {
     if (error) {
@@ -275,7 +288,7 @@ app.delete('/delete/:productId', function (req, res) {
           console.error('Error updating product status:', updateError);
           res.status(500).send({ error: 'Error updating product status: ' + updateError.message });
         } else {
-          console.log('Product status updated to Disable');
+          res.status(200).send(updateResults)
         }
       });
     } else {
@@ -301,108 +314,142 @@ app.get('/picture', (req, res) => {
 });
 
 app.post('/saveimage', uploadShirtDesign.single('image'), (req, res) => {
-  if (!req.file) {
-    console.log(req.file)
-    res.status(400).send('No image file')
+  try {
+    if (!req.file) {
+      return res.status(400).send('No image file');
+    }
+    res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-  console.log(req.file)
-  res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
 app.post('/savereceipt', uploadReceipt.single('image'), (req, res) => {
-  if (!req.file) {
-  console.log(req.file)
-    res.status(400).send('No image file')
+  try {
+    if (!req.file) {
+      return res.status(400).send('No image file');
+    }
+    res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-  console.log(req.file)
-  res.status(200).send(req.file.path.replace(/^\.\.\/web-app\/public\//, '/'));
 });
 
-app.post('/saveproduct', (req, res) => {
-  const productData = req.body.productData;
-  const productDetails = req.body.productDetails;
+app.post('/saveproduct', async (req, res) => {
+  try {
+    const productData = req.body.productData;
+    const productDetails = req.body.productDetails;
 
-  // Insert into the product table
-  const productQuery = 'INSERT INTO product (User_id, Description, product_image) VALUES (?, ?, ?)';
-  const productValues = [
-    productData.User_id,
-    productData.Description,
-    productData.product_image,
-  ];
+    // Insert into the product table
+    const productQuery = 'INSERT INTO product (User_id, Description, product_image, status) VALUES (?, ?, ?, ?)';
+    const productValues = [
+      productData.User_id,
+      productData.Description,
+      productData.product_image,
+      productData.status
+    ];
 
-  connection.query(productQuery, productValues, (productError, productResults) => {
-    if (productError) {
-      return res.status(500).json({ message: 'Error inserting product data'+productError.message });
-    }
+    connection.query(productQuery, productValues, (productError, productResults) => {
+      if (productError) {
+        console.log(productError);
+        res.status(500).json({ message: 'Error inserting product data' + productError.message });
+      } else {
+        const productId = productResults.insertId;
 
-    const productId = productResults.insertId; // Get the ID of the inserted product
-    // Insert all product details using a loop
-    productDetails.forEach((productDetailData, index) => {
-      productDetailData.Product_id = productId;
-      const productDetailQuery = 'INSERT INTO product_detail (Product_id, Font_size, Font_family, Font_color, location_img, img_width, img, location_text, text_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-      const productDetailValues = [
-        productDetailData.Product_id,
-        productDetailData.Font_size,
-        productDetailData.Font_family,
-        productDetailData.Font_color,
-        productDetailData.location_img,
-        productDetailData.img_width,
-        productDetailData.img,
-        productDetailData.location_text,
-        productDetailData.text_value,
-      ];
-    
-      connection.query(productDetailQuery, productDetailValues, (productDetailError, productDetailResults) => {
-        if (productDetailError) {
-          return res.status(500).json({ message: `Error inserting product detail at index ${index}` + productDetailError.message });
-        }
-      });
+        const insertProductDetail = (index) => {
+          if (index < productDetails.length) {
+            const productDetailData = productDetails[index];
+            productDetailData.Product_id = productId;
+            const insertProductDetailQuery = 'INSERT INTO product_detail (Product_id, Font_size, Font_family, Font_color, location_img, img_width, img, location_text, text_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const productDetailValues = [
+              productDetailData.Product_id,
+              productDetailData.Font_size,
+              productDetailData.Font_family,
+              productDetailData.Font_color,
+              productDetailData.location_img,
+              productDetailData.img_width,
+              productDetailData.img,
+              productDetailData.location_text,
+              productDetailData.text_value,
+            ];
+
+            connection.query(insertProductDetailQuery, productDetailValues, (productDetailError) => {
+              if (productDetailError) {
+                console.log(productDetailError);
+                res.status(500).json({ message: `Error inserting product detail at index ${index}` + productDetailError.message });
+              } else {
+                insertProductDetail(index + 1); // Insert the next product detail
+              }
+            });
+          } else {
+            // All product details inserted, send a success response
+            res.status(200).json({ message: 'Product and details saved successfully', insertId: productId });
+          }
+        };
+
+        insertProductDetail(0); // Start inserting product details
+      }
     });
-
-    res.status(200).json({ message: 'Product and details saved successfully', insertId: productId });
-  });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
-app.post('/createpayment', (req, res) => {
-  const paymentData = req.body.paymentData;
+app.post('/createpayment', async (req, res) => {
+  try {
+    const paymentData = req.body.paymentData;
 
-  // Insert into the product table
-  const paymentQuery = 'INSERT INTO payment (User_id, Amount, status) VALUES (?, ?, ?)';
-  const paymentValues = [
-    paymentData.User_id,
-    paymentData.Amount,
-    paymentData.status,
-  ];
+    // Insert into the product table
+    const paymentQuery = 'INSERT INTO payment (User_id, Amount, status) VALUES (?, ?, ?)';
+    const paymentValues = [
+      paymentData.User_id,
+      paymentData.Amount,
+      paymentData.status,
+    ];
 
-  connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
-    if (paymentError) {
-      return res.status(400).json({ message: 'Error inserting payment data'+paymentError.message });
-    }
-    const paymentId = paymentResults.insertId;
-    res.status(200).json({ message: 'Payment created successfully', insertId: paymentId });
-  });
+    connection.query(paymentQuery, paymentValues, (paymentError, paymentResults) => {
+      if (paymentError) {
+        console.log(paymentError);
+        res.status(500).json({ message: 'Error inserting payment data' + paymentError.message });
+      } else {
+        const paymentId = paymentResults.insertId;
+        res.status(200).json({ message: 'Payment created successfully', insertId: paymentId });
+      }
+    });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
-app.post('/createorder', (req, res) => {
-  const orderData = req.body.orderData;
+app.post('/createorder', async (req, res) => {
+  try {
+    const orderData = req.body.orderData;
 
-  // Insert into the product table
-  const orderQuery = 'INSERT INTO orders (Product_id, Payment_id, Color, Size, Total_item) VALUES (?, ?, ?, ?, ?)';
-  const orderValues = [
-    orderData.Product_id,
-    orderData.Payment_id,
-    orderData.Color,
-    orderData.Size,
-    orderData.Total_item
-  ];
+    // Insert into the product table
+    const orderQuery = 'INSERT INTO orders (Product_id, Payment_id, Color, Size, Total_item) VALUES (?, ?, ?, ?, ?)';
+    const orderValues = [
+      orderData.Product_id,
+      orderData.Payment_id,
+      orderData.Color,
+      orderData.Size,
+      orderData.Total_item
+    ];
 
-  connection.query(orderQuery, orderValues, (orderError, orderResults) => {
-    if (orderError) {
-      return res.status(500).json({ message: 'Error inserting order data'+orderError.message });
-    }
-    const orderId = orderResults.insertId;
-    res.status(200).json({ message: 'Order created successfully', orderId: orderId });
-  });
+    connection.query(orderQuery, orderValues, (orderError, orderResults) => {
+      if (orderError) {
+        console.log(orderError);
+        res.status(500).json({ message: 'Error inserting order data' + orderError.message });
+      } else {
+        const orderId = orderResults.insertId;
+        res.status(200).json({ message: 'Order created successfully', orderId: orderId });
+      }
+    });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 // listen to port

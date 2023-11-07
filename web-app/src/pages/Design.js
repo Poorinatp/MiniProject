@@ -7,6 +7,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { faAngleDown, faAngleUp, faMagnifyingGlass, faUpload } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import html2canvas from 'html2canvas';
+import Swal from 'sweetalert2';
+
 
 const OptionTab = ({
     textData, 
@@ -54,7 +56,7 @@ const OptionTab = ({
             type: "text",
             value: "new text", 
             fontFamily:"Arial", 
-            fontSize:"10px", 
+            fontSize:"24px", 
             fontColor:"black", 
             x:"0px", 
             y:"0px"
@@ -213,7 +215,7 @@ const OptionTab = ({
                         </div>
                         <div className="show-container">
                             {filteredImages.map((name, index)=>(
-                                <img className="img-img" key={index} src={`../picture/${name}`} onClick={e=>handleAddImage(name)} />
+                                <img className="img-img" key={index} src={`../picture/${name}`} alt="img-img" onClick={e=>handleAddImage(name)} />
                             ))}
                         </div>
                     </div>}
@@ -287,7 +289,7 @@ const CheckoutPopup = ({
         {openQr&&
             <div>
                 <h1 className="payment-warn">Please pay via QR-code within {formatTime(timeLeft)}</h1>
-                <img className="payment-qr" src="../image/paymentQR.jpg"/>
+                <img className="payment-qr" src="../image/paymentQR.jpg" alt="payment-qr"/>
                 
                 <h1 className="input-warn">Upload receipt here ...</h1>
                 <div className="input-file-container">
@@ -311,12 +313,13 @@ const CheckoutPopup = ({
                     <img
                         className="uploaded-receipt"
                         src={uploadedReceipt}
+                        alt="uploaded-receipt" 
                     />
                     </div>
                 )}
             </div>
         }
-        {timeLeft==0&&
+        {timeLeft===0&&
             <h1 className="payment-warn">Payment unsuccessfully please try agian. {formatTime(timeLeft)}</h1>
         }
         <div className="btn-group">
@@ -328,7 +331,7 @@ const CheckoutPopup = ({
     );
 };
 
-const Design = () => {
+const Design = ({apihost}) => {
     const [textData, setTextData] = useState([
         {id: 1, type: "text", value: "Type text here", fontFamily: "Basic-Regular", width:"160px", fontSize: "24px", fontColor: "black", x: "30px", y: "25px"},
     ]);      
@@ -387,10 +390,9 @@ const Design = () => {
     }
 
     useEffect(() => {
-        
         if (product_id) {
             axios
-                .get(`http://localhost:8080/products-with-details/${product_id}`)
+                .get(`${apihost}/products-with-details/${product_id}`)
                 .then((response) => {
                     if (response.status === 200) {
                         const textDetailData = response.data
@@ -425,10 +427,17 @@ const Design = () => {
                 })
                 .catch((error) =>{});
         }else{
+            if(sessionStorage.getItem('textData')&&sessionStorage.getItem('imageData')){
+                const sessionTextData=JSON.parse(sessionStorage.getItem('textData'))
+                const sessionImageData=JSON.parse(sessionStorage.getItem('imageData'))
+                setTextData(sessionTextData)
+                setImageData(sessionImageData)
+            }else{
 
+            }
         }
         axios
-            .get("http://localhost:8080/fonts")
+            .get(`${apihost}/fonts`)
             .then((response) => {
                 setFonts(response.data);
                 response.data.forEach((fontName) => {
@@ -438,13 +447,13 @@ const Design = () => {
             })
             .catch((error) => {});
         axios
-            .get("http://localhost:8080/picture")
+            .get(`${apihost}/picture`)
             .then((response) => {
                 setImgname(response.data)
                 setFilteredImages(response.data)
             })
             .catch((error) => {});
-    }, []);
+    }, [apihost, product_id]);
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -487,100 +496,122 @@ const Design = () => {
         setIsCheckoutPopupOpen(false);
     };
 
-    const handleSaveDesign = () => {
+    const saveDesign = async () => {
         if (!session) {
-          navigate('/signin');
+            Swal.fire('Prior to save a design, you are required to log in.', '', 'warning');
+            sessionStorage.setItem('textData', JSON.stringify(textData));
+            sessionStorage.setItem('imageData', JSON.stringify(imageData));
+            navigate('/signin');
+            return false
         } else {
             const inputElements = document.querySelectorAll('input');
             
             inputElements.forEach(inputElement => {
-                console.log(inputElement)
                 const paragraphElement = document.createElement('p');
 
                 paragraphElement.textContent = inputElement.value;
+                paragraphElement.className = inputElement.className;
+                paragraphElement.style = inputElement.style;
                 paragraphElement.style.cssText = inputElement.style.cssText;
-                
                 inputElement.parentNode.replaceChild(paragraphElement, inputElement);
-            
-                console.log(inputElement)
             });
 
             const container = document.getElementById('container');
-            html2canvas(container).then((canvas) => {
-                canvas.toBlob((blob) => {
-                    const formData = new FormData();
-                    const fileName = `${session.user_id}_${Date.now()}.png`;
-                    formData.append('image', blob, fileName);
-            
-                    axios
-                        .post('http://localhost:8080/saveimage', formData)
-                        .then((response) => {
-                            const imageDescriptions = imageData.map((image) => image.imagename.replace(/\.png$/, '')).join(' ');
-                            const productData = {
-                                User_id: session.user_id,
-                                Description: imageDescriptions,
-                                product_image: response.data,
-                            };
-                
-                            const productDetails = [];
-                            textData.forEach((item) => {
-                                const textContainer = document.getElementById(`textcontainer${item.id}`)
-                                const productDetailData = {
-                                    Product_id: null,
-                                    Font_size: parseInt(item.fontSize),
-                                    Font_family: item.fontFamily,
-                                    Font_color: item.fontColor,
-                                    location_img: '',
-                                    img_width: '',
-                                    img: '',
-                                    location_text: `${textContainer.style.top};${textContainer.style.left}`,
-                                    text_value: item.value,
-                                };
-                                productDetails.push(productDetailData);
-                            });
-                
-                            imageData.forEach((item) => {
-                                const imgbox = document.getElementById(`imgbox${item.id}`)
-                                const productDetailData = {
-                                    Product_id: null,
-                                    Font_size: 0,
-                                    Font_family: '',
-                                    Font_color: '',
-                                    location_img: `${imgbox.style.top};${imgbox.style.left}`,
-                                    img_width: item.width,
-                                    img: item.imagename,
-                                    location_text: '',
-                                    text_value: '',
-                                };
-                                productDetails.push(productDetailData);
-                            });
-                            axios
-                                .post('http://localhost:8080/saveproduct', { productData, productDetails })
-                                .then((response) => {
-                                    if (response.status==200) {
-                                        setProductId(response.data.insertId)
-
-                                    }
-                                })
-                            .catch((error) => {
-
-                            });
-                        })
-                    .catch((error) => {
-                        
-                    });
-                }, 'image/png');
+            const canvas = await html2canvas(container);
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(resolve, 'image/png');
             });
+            const formData = new FormData();
+            const fileName = `${session.user_id}_${Date.now()}.png`;
+            formData.append('image', blob, fileName);
+
+            try {
+                const response = await axios.post(`${apihost}/saveimage`, formData);
+                const imageDescriptions = imageData.map(image => image.imagename.replace(/\.png$/, '')).join(' ');
+                const productData = {
+                    User_id: session.user_id,
+                    Description: imageDescriptions,
+                    product_image: response.data,
+                    status: "enable"
+                };
+
+                const productDetails = [];
+                textData.forEach(item => {
+                    const textContainer = document.getElementById(`textcontainer${item.id}`);
+                    const productDetailData = {
+                        Product_id: null,
+                        Font_size: parseInt(item.fontSize),
+                        Font_family: item.fontFamily,
+                        Font_color: item.fontColor,
+                        location_img: '',
+                        img_width: '',
+                        img: '',
+                        location_text: `${textContainer.style.top};${textContainer.style.left}`,
+                        text_value: item.value,
+                    };
+                    productDetails.push(productDetailData);
+                });
+
+                imageData.forEach(item => {
+                    const imgbox = document.getElementById(`imgbox${item.id}`);
+                    const productDetailData = {
+                        Product_id: null,
+                        Font_size: 0,
+                        Font_family: '',
+                        Font_color: '',
+                        location_img: `${imgbox.style.top};${imgbox.style.left}`,
+                        img_width: item.width,
+                        img: item.imagename,
+                        location_text: '',
+                        text_value: '',
+                    };
+                    productDetails.push(productDetailData);
+                });
+
+                const productResponse = await axios.post(`${apihost}/saveproduct`, { productData, productDetails });
+
+                if (productResponse.status === 200) {
+                    setProductId(productResponse.data.insertId);
+                    Swal.fire('Design saved', '', 'success');
+                    return true
+                }
+                return false
+            }
+            catch (error) {
+                Swal.fire('error'+error, '', 'error');
+                return false
+            }
         }
     };
 
-    const handlePayment = () => {
+    const handleSaveClick = async () => {
+        const results = await Swal.fire({
+            title: 'Do you want to save ?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            denyButtonText: `Don't save`,
+        });
+        if (results.isConfirmed) {
+            const result = await saveDesign();
+            if (result===true) {
+                navigate("/profile");
+            }
+        }else if (results.isDenied) {
+            Swal.fire('Design not saved', '', 'warning');
+        }
+    }
+
+    const handlePayment = async () => {
         if (!session) {
+            Swal.fire('You must log in before proceeding with the payment.', '', 'warning');
+            sessionStorage.setItem('textData', JSON.stringify(textData));
+            sessionStorage.setItem('imageData', JSON.stringify(imageData));
             navigate('/signin');
         } else {
-            handleSaveDesign()
-            setOpenQr(true)
-            setTimeLeft(180)
+            const result = await saveDesign();
+            setOpenQr(true);
+            setTimeLeft(180);
             setPaymentTimer(
                 setInterval(() => {
                     setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
@@ -591,19 +622,17 @@ const Design = () => {
                 Amount: totalPrice,
                 status: "ยังไม่ชำระเงิน",
             }
-            axios
-                .post('http://localhost:8080/createpayment', { paymentData })
-                .then((response) => {
-                    if(response.status==200) {
-                        setPaymentId(response.data.insertId)
-                    } else {
-
-                    }
-                    
-                })
-                .catch((error) => {
-
-                });
+            try {
+                const response = await axios.post(`${apihost}/createpayment`, { paymentData });
+    
+                if (response.status === 200) {
+                    setPaymentId(response.data.insertId);
+                } else {
+                    setPaymentId(null);
+                }
+            } catch (error) {
+                
+            }
         }
     }
 
@@ -619,36 +648,35 @@ const Design = () => {
         }
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (paymentId) {
             const formData = new FormData();
             const fileInput = uploadedReceiptFile;
             const fileName = `${session.user_id}_receipt_${Date.now()}.png`;
             formData.append('image', fileInput, fileName);
     
-            axios
-                .post('http://localhost:8080/savereceipt', formData)
-                .then((response) => {
+            try {
+                const response = await axios.post(`${apihost}/savereceipt`, formData);
+                if (response.status === 200) {
                     const orderData = {
                         Product_id: productId,
                         Payment_id: paymentId,
                         Color: tshirtcolor,
                         Size: tshirtsize,
                         Total_item: totalItem
+                    };
+                    const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
+        
+                    if (orderResponse.status === 200) {
+                        Swal.fire('Receipt uploaded', '', 'success');
+                        navigate("/profile");
                     }
-                    axios
-                        .post('http://localhost:8080/createorder', { orderData })
-                        .then((response) => {
-                            if(response.status===200) {
-                                navigate("/profile")
-                            }
-                        })
-                        .catch((error) => {});
-                })
-                .catch((error)=>{});
+                }
+            } catch (error) {
+                Swal.fire('Receipt not uploaded', '', 'error');
+            }
         }
     }
-
 
     const handleSearch = (query) => {
         const lowerQuery = query.toLowerCase();
@@ -664,18 +692,18 @@ const Design = () => {
             <div className="grid-container-1">
                 <OptionTab
                     textData={textData}
-                    setTextData={setTextData}
                     imageData={imageData}
-                    setImageData={setImageData}
                     isSelected={isSelected}
-                    setIsSelected={setIsSelected}
                     isImageSelected={isImageSelected}
                     fonts={fonts}
                     tshirtcolor={tshirtcolor}
-                    setTshirtColor={setTshirtColor}
                     tshirtsize={tshirtsize}
-                    setTshirtSize={setTshirtSize}
                     filteredImages={filteredImages}
+                    setTextData={setTextData}
+                    setImageData={setImageData}
+                    setIsSelected={setIsSelected}
+                    setTshirtColor={setTshirtColor}
+                    setTshirtSize={setTshirtSize}
                     handleFontChange={handleFontChange}
                     handleSizeChange={handleSizeChange}
                     handleColorChange={handleColorChange}
@@ -694,7 +722,7 @@ const Design = () => {
                     setIsSelected={setIsSelected}
                     setIsImageSelected={setIsImageSelected}
                     setIsCheckoutPopupOpen={setIsCheckoutPopupOpen}
-                    handleSaveDesign={handleSaveDesign}
+                    handleSaveClick={handleSaveClick}
                     handleCheckoutClick={handleCheckoutClick}
                     findNewWidth={findNewWidth}
                 />
@@ -711,13 +739,13 @@ const Design = () => {
                         textPrice={textPrice}
                         imagePrice={imagePrice}
                         designPrice={textData.length * textPrice + imageData.length * imagePrice}
-                        setTotalItem={setTotalItem}
                         totalItem={totalItem}
                         totalPrice={totalPrice}
                         uploadedReceipt={uploadedReceipt}
                         openQr={openQr}
                         openUploadBtn={openUploadBtn}
                         timeLeft={timeLeft}
+                        setTotalItem={setTotalItem}
                         closePopup={closeCheckoutPopup}
                         handlePayment={handlePayment}
                         handleUpload={handleUpload}
@@ -725,6 +753,7 @@ const Design = () => {
                     />
                 </>
             )}
+            
         </>
     )
 }
