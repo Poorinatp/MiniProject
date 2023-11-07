@@ -342,7 +342,6 @@ const Design = ({apihost}) => {
     const [isSelected, setIsSelected] = useState(Array(textData.length).fill(false));
     const [isImageSelected, setIsImageSelected] = useState(false);
 
-    const { product_id } = useParams();
     const session =  JSON.parse(sessionStorage.getItem('userData'));
     const navigate = useNavigate();
 
@@ -388,6 +387,9 @@ const Design = ({apihost}) => {
         document.body.removeChild(span);
         return newWidth;
     }
+
+
+    const { product_id } = useParams();
 
     useEffect(() => {
         if (product_id) {

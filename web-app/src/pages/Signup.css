@@ -33,7 +33,7 @@ header h1 {
   margin: 90px auto;
   padding: 20px;
   border-radius: 30px;
-  background-color:#00000031;
+  background-color:#0000005e;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.521);
 }
 
@@ -47,7 +47,7 @@ textarea {
   padding: 10px;
   border: 1px solid #333;
   border-radius: 5px;
-  margin-bottom: 15px;
+  margin: 15px 0px;
   background-color:white;
 }
 
@@ -73,12 +73,32 @@ textarea {
   color: #fff;
   margin: 10px;
   padding: 10px;
-  font-weight: lighter;
   font-size: 1rem;
   display: flex;
   justify-content: center;
   text-decoration: underline;
 }
+
+.input p {
+  font-size: 0.7rem;
+}
+
+.input .input-requirements{
+  color: red;
+}
+
+.Signup input:invalid,
+.Signup textarea:invalid {
+  border: 1px solid red;
+  outline: none;
+}
+
+.Signup input:valid,
+.Signup textarea:valid {
+  border: 1px solid green;
+  outline: none;
+}
+
 @media screen and (min-width:401px) and  (max-width: 800px) {
   .Signup{
     max-width: 380px;
