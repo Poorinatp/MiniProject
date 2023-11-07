@@ -18,9 +18,9 @@ const Signup = ({apihost}) => {
 	const [Zipcode, setZipcode] = useState('');
 	const navigate = useNavigate();
   
-	  function loadUserDataFromCookie() {
+	function loadUserDataFromCookie() {
 		if(!getCookie('signup')){
-		}else {
+		} else {
 		const userDataCookie = getCookie('signup');
 		if (userDataCookie) {
 		  const userData = JSON.parse(userDataCookie);
@@ -32,31 +32,32 @@ const Signup = ({apihost}) => {
 		  setCity(userData.City);
 		  setCountry(userData.Country);
 		  setZipcode(userData.Zipcode);
-		  // ไม่ต้องกำหนดค่าใน Input ของรหัสผ่านที่นี่
-		  // ตั้งค่าค่าใน Input อื่น ๆ ตามที่ต้องการ
 		}
 	  }
 	}
-	  useEffect(() => {
+
+	useEffect(() => {
 		loadUserDataFromCookie();
-	  }, []);
-	
-	  function getCookie(name) {
+	}, []);
+
+	function getCookie(name) {
 		const cookies = document.cookie.split(';');
 		for (let i = 0; i < cookies.length; i++) {
-		  const cookie = cookies[i].trim();
-		  if (cookie.startsWith(`${name}=`)) {
-			return decodeURIComponent(cookie.substring(name.length + 1)); // +1 เพื่อข้ามเครื่องหมาย '='
-		  }
+			const cookie = cookies[i].trim();
+			if (cookie.startsWith(`${name}=`)) {
+			return decodeURIComponent(cookie.substring(name.length + 1));
+			}
 		}
 		return null;
-	  }
-	  function createCookie(name, value, days) {
+	}
+
+	function createCookie(name, value, days) {
 		const expires = new Date();
 		expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
 		const cookie = `${name}=${value};expires=${expires.toUTCString()}`;
 		document.cookie = cookie;
-	  }
+	}
+
 	const handleSubmit = (e) => {
 	  e.preventDefault();
 	  const userData = {
@@ -106,10 +107,6 @@ const Signup = ({apihost}) => {
 		});
 	};
 
-	  
-	  
-	  
-	  
 	const handleTelDisplay = () => {
 		const rawText = [...Telephone.split('-').join('')]
         const telephoneNumber = []

@@ -25,8 +25,6 @@ const Signin = ({ apihost }) => {
     if (userDataCookie) {
       const userData = JSON.parse(userDataCookie);
       setEmail(userData.email);
-      // ไม่ต้องกำหนดค่าใน Input ของรหัสผ่านที่นี่
-      // ตั้งค่าค่าใน Input อื่น ๆ ตามที่ต้องการ
     }
   }
 }
@@ -87,19 +85,6 @@ const Signin = ({ apihost }) => {
       });
   }
 
-        /*  createCookie('userData', JSON.stringify(userData), 30);
-          Swal.fire('Login successful.', '', 'success');
-          navigate('/design');
-        } else {
-          Swal.fire('Your email or password is incorrect.', '', 'error');
-        }
-      })
-      .catch(error => {
-        Swal.fire('Your email or password is incorrect.', '', 'error');
-      });
-  } */
- 
-
   return (
     <>
      <NavBar/> 
@@ -118,17 +103,17 @@ const Signin = ({ apihost }) => {
         />
         <br />
         
-          <input
-              type="password"
-              id="password"
-              placeholder="Your password"
-              pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
-              value={password}
-              onChange={e => { setPassword(e.target.value) }}
-              required 
-              maxLength="10"
-          />
-          <br />
+        <input
+            type="password"
+            id="password"
+            placeholder="Your password"
+            pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
+            value={password}
+            onChange={e => { setPassword(e.target.value) }}
+            required 
+            maxLength="10"
+        />
+        <br />
 
         <button className="btn-signin" type="submit">Submit</button>
         <Link className="backto-signup" to="/signup">Sing Up</Link>
