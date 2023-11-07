@@ -19,16 +19,17 @@ const Signin = ({ apihost }) => {
   }
 
   function loadUserDataFromCookie() {
-    const userDataCookie = getCookie('userData');
+    if(!getCookie('signin')){
+    }else {
+    const userDataCookie = getCookie('signin');
     if (userDataCookie) {
       const userData = JSON.parse(userDataCookie);
       setEmail(userData.email);
-      setPassword(userData.password);
       // ไม่ต้องกำหนดค่าใน Input ของรหัสผ่านที่นี่
       // ตั้งค่าค่าใน Input อื่น ๆ ตามที่ต้องการ
     }
   }
-
+}
   useEffect(() => {
     loadUserDataFromCookie();
   }, []);
@@ -51,7 +52,11 @@ const Signin = ({ apihost }) => {
       email,
       password,
     };
-
+    const signin = {
+      email
+    
+    };
+    createCookie('signin', JSON.stringify(signin), 30);
     console.log(userData);
     Axios.post(`${apihost}/signin`, userData)
       .then(response => {
@@ -63,8 +68,15 @@ const Signin = ({ apihost }) => {
             user_id: response.data.result[0].User_id,
             status: "success"
           };
-          createCookie('userData', JSON.stringify(userData), 30);
-          Swal.fire('Login successful.', '', 'success');
+
+          sessionStorage.setItem('userData', JSON.stringify(userData));
+          Swal.fire({
+            position: "bottom-end",
+            title: 'Login successful.',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1500
+          });
           navigate('/design');
         } else {
           Swal.fire('Your email or password is incorrect.', '', 'error');
@@ -75,6 +87,18 @@ const Signin = ({ apihost }) => {
       });
   }
 
+        /*  createCookie('userData', JSON.stringify(userData), 30);
+          Swal.fire('Login successful.', '', 'success');
+          navigate('/design');
+        } else {
+          Swal.fire('Your email or password is incorrect.', '', 'error');
+        }
+      })
+      .catch(error => {
+        Swal.fire('Your email or password is incorrect.', '', 'error');
+      });
+  } */
+ 
 
   return (
     <>

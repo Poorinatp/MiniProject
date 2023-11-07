@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect  } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import  "./Signup.css";
 import NavBar from '../components/NavBar';
@@ -18,21 +18,45 @@ const Signup = ({apihost}) => {
 	const [Zipcode, setZipcode] = useState('');
 	const navigate = useNavigate();
   
-	const setFormDataInCookie = (userData, addressData) => {
-		// ไม่รวมรหัสผ่านในข้อมูลผู้ใช้
-		const { Password, ...userDataWithoutPassword } = userData;
-	  
-		// รวมข้อมูลที่เกี่ยวข้องกับที่อยู่ของผู้ใช้
-		const userDataWithAddress = { ...userDataWithoutPassword, addressData };
-	  
-		// แปลงข้อมูลเป็น JSON string
-		const userDataJSON = JSON.stringify(userDataWithAddress);
-	  
-		// เซ็ตค่าข้อมูลในคุกกี้เฉพาะ
-		document.cookie = `userData=${userDataJSON}`;
+	  function loadUserDataFromCookie() {
+		if(!getCookie('signup')){
+		}else {
+		const userDataCookie = getCookie('signup');
+		if (userDataCookie) {
+		  const userData = JSON.parse(userDataCookie);
+		  setEmail(userData.Email);
+		  setFirstname(userData.Firstname);
+		  setLastname(userData.Lastname);
+		  setTel(userData.Telephone);
+		  setAddress(userData.Address);
+		  setCity(userData.City);
+		  setCountry(userData.Country);
+		  setZipcode(userData.Zipcode);
+		  // ไม่ต้องกำหนดค่าใน Input ของรหัสผ่านที่นี่
+		  // ตั้งค่าค่าใน Input อื่น ๆ ตามที่ต้องการ
+		}
 	  }
-	  
-	  
+	}
+	  useEffect(() => {
+		loadUserDataFromCookie();
+	  }, []);
+	
+	  function getCookie(name) {
+		const cookies = document.cookie.split(';');
+		for (let i = 0; i < cookies.length; i++) {
+		  const cookie = cookies[i].trim();
+		  if (cookie.startsWith(`${name}=`)) {
+			return decodeURIComponent(cookie.substring(name.length + 1)); // +1 เพื่อข้ามเครื่องหมาย '='
+		  }
+		}
+		return null;
+	  }
+	  function createCookie(name, value, days) {
+		const expires = new Date();
+		expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+		const cookie = `${name}=${value};expires=${expires.toUTCString()}`;
+		document.cookie = cookie;
+	  }
 	const handleSubmit = (e) => {
 	  e.preventDefault();
 	  const userData = {
@@ -48,13 +72,24 @@ const Signup = ({apihost}) => {
 		Country,
 		Zipcode,
 	  };
+	  
+	  const signup = {
+		Firstname,
+		Lastname,
+		Telephone:Telephone.split('-').join(''),
+		Email,
+		Address,
+		City,
+		Country,
+		Zipcode,
+	  
+	  };
+	  createCookie('signup', JSON.stringify(signup), 30);
   
 	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 	  .then((response) => {
 		if (response.status === 200) {
 		  Swal.fire('Signup success. Please login.', '', 'error');
-		  // เซ็ตข้อมูลในคุกกี้เฉพาะหลังจากลงทะเบียนสำเร็จ
-		  setFormDataInCookie(userData, addressData);
 		  navigate('/signin');
 		} else {
 		  Swal.fire('Signup failed. Please try again.', '', 'error');
@@ -67,20 +102,8 @@ const Signup = ({apihost}) => {
 	
 	};
 
-	const getFormDataFromCookie = () => {
-		const cookies = document.cookie;
-		const cookieArray = cookies.split(';');
-		let userData = {};
 	  
-		cookieArray.forEach((cookie) => {
-		  const [name, value] = cookie.trim().split('=');
-		  if (name === 'userData') {
-			userData = JSON.parse(value);
-		  }
-		});
 	  
-		return userData;
-	  }
 	  
 	  
 	const handleTelDisplay = () => {
@@ -104,6 +127,7 @@ const Signup = ({apihost}) => {
 				<input 
 					type="text"  
 					id="Firstname" autoFocus
+					value={Firstname}
 					placeholder="First Name"
 					pattern="[a-zA-Z^ก-๏]+"
 					onChange={e =>{setFirstname(e.target.value)}}
@@ -114,6 +138,7 @@ const Signup = ({apihost}) => {
 				<input 
 					type="text" 
 					id="Lastname"
+					value={Lastname}
 					placeholder="Last Name"
 					pattern="[a-zA-Z^ก-๏]+"
 					onChange={e =>{setLastname(e.target.value)}}
@@ -140,6 +165,7 @@ const Signup = ({apihost}) => {
 					<input 
 						type="Email" 
 						id="Email"
+						value={Email}
 						placeholder="Your Email"
 						pattern="^[a-zA-Z0-9.]+@(hotmail\.com|gmail\.com)$"
 						onChange={e =>{setEmail(e.target.value)}}
@@ -171,6 +197,7 @@ const Signup = ({apihost}) => {
                 <textarea
 					type="text" 
 					id="Address"
+					value={Address}
 					placeholder="Your Adderss"
 					pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
 					onChange={e =>{setAddress(e.target.value)}}
@@ -180,6 +207,7 @@ const Signup = ({apihost}) => {
 				<input 
 					type="text" 
 					id="City"
+					value={City}
 					placeholder="City"
 					pattern="[a-zA-Zก-๏.]+"
 					onChange={e =>{setCity(e.target.value)}}
@@ -189,6 +217,7 @@ const Signup = ({apihost}) => {
 				<input 
 					type="text" 
 					id="Country"
+					value={Country}
 					placeholder="Country"
 					pattern="[a-zA-Zก-๏]+"
 					onChange={e =>{setCountry(e.target.value)}}
@@ -198,6 +227,7 @@ const Signup = ({apihost}) => {
 				<input 
 					type="text" 
 					id="Zipcode"
+					value={Zipcode}
 					placeholder="Zip-code"
 					pattern="[0-9]{5}"
 					onChange={e =>{setZipcode(e.target.value)}}
