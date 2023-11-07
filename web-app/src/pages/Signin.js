@@ -11,36 +11,37 @@ const Signin = ({ apihost }) => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  function createCookie(name, value, days) {
-    const expires = new Date();
-    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-    const cookie = `${name}=${value};expires=${expires.toUTCString()}`;
-    document.cookie = cookie;
-  }
-
-  function loadUserDataFromCookie() {
-    if(!getCookie('signin')){
-    }else {
-    const userDataCookie = getCookie('signin');
-    if (userDataCookie) {
-      const userData = JSON.parse(userDataCookie);
-      setEmail(userData.email);
-    }
-  }
-}
-  useEffect(() => {
-    loadUserDataFromCookie();
-  }, []);
-
   function getCookie(name) {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
       const cookie = cookies[i].trim();
       if (cookie.startsWith(`${name}=`)) {
-        return decodeURIComponent(cookie.substring(name.length + 1)); // +1 เพื่อข้ามเครื่องหมาย '='
+        return decodeURIComponent(cookie.substring(name.length + 1));
       }
     }
     return null;
+  }
+
+  function loadUserDataFromCookie() {
+    if(!getCookie('signin')){
+    }else {
+      const userDataCookie = getCookie('signin');
+      if (userDataCookie) {
+        const userData = JSON.parse(userDataCookie);
+        setEmail(userData.email);
+      }
+    }
+  }
+
+  useEffect(() => {
+    loadUserDataFromCookie();
+  }, []);
+
+  function createCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    const cookie = `${name}=${value};expires=${expires.toUTCString()}`;
+    document.cookie = cookie;
   }
 
   function handleSubmit(e) {
@@ -52,15 +53,11 @@ const Signin = ({ apihost }) => {
     };
     const signin = {
       email
-    
     };
     createCookie('signin', JSON.stringify(signin), 30);
-    console.log(userData);
     Axios.post(`${apihost}/signin`, userData)
       .then(response => {
-        console.log(response);
         if (response.status === 200) {
-          console.log(response.data);
           const userData = {
             email: response.data.result[0].Email,
             user_id: response.data.result[0].User_id,

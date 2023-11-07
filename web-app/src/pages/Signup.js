@@ -17,7 +17,18 @@ const Signup = ({apihost}) => {
 	const [Country, setCountry] = useState('');
 	const [Zipcode, setZipcode] = useState('');
 	const navigate = useNavigate();
-  
+
+	function getCookie(name) {
+		const cookies = document.cookie.split(';');
+		for (let i = 0; i < cookies.length; i++) {
+			const cookie = cookies[i].trim();
+			if (cookie.startsWith(`${name}=`)) {
+			return decodeURIComponent(cookie.substring(name.length + 1));
+			}
+		}
+		return null;
+	}
+
 	function loadUserDataFromCookie() {
 		if(!getCookie('signup')){
 		} else {
@@ -39,17 +50,6 @@ const Signup = ({apihost}) => {
 	useEffect(() => {
 		loadUserDataFromCookie();
 	}, []);
-
-	function getCookie(name) {
-		const cookies = document.cookie.split(';');
-		for (let i = 0; i < cookies.length; i++) {
-			const cookie = cookies[i].trim();
-			if (cookie.startsWith(`${name}=`)) {
-			return decodeURIComponent(cookie.substring(name.length + 1));
-			}
-		}
-		return null;
-	}
 
 	function createCookie(name, value, days) {
 		const expires = new Date();
