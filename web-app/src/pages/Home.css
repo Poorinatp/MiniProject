@@ -49,7 +49,7 @@ section>h1{
   font-weight: 400;
   text-align: center;
   text-transform: uppercase;
-  margin-top: 50px;
+  margin-top: 3rem;
   padding: 20px;
   width: 100%;
   overflow: hidden;
@@ -58,7 +58,7 @@ section>h1{
 
 section>p{
   color: #ffff;
-  font-size: 6vw;
+  font-size: 1.4rem;
   text-align: center;
   text-shadow: 10px 10px 20px #333;
   background-color: rgba(211, 211, 211, 0.392);
@@ -71,7 +71,7 @@ section>p{
   text-align: center;
   font-size: 18px;
   width: 250px;
-  margin: 80px;
+  margin: 4rem;
   padding: 15px 32px;
   font-size: 1rem;
   border-radius: 4px;
@@ -94,7 +94,7 @@ section>p{
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin: 10rem 0;
+  margin: 1rem 0;
   background: linear-gradient(90deg, #ffffff50, #00000050);
   padding: 3rem 0;
   position: relative;
@@ -142,12 +142,12 @@ section>p{
 
 .card-body-img img {
   width: 100%;
-  border-radius: 10px 50px;
+  border-radius: 2rem;
   transform: rotateY(-30deg);
 }
 
 .card-body-detail h1{
-  font-size: calc(60% + 1.3vw);
+  font-size: calc(60% + 1vw);
   color: white;
   font-family:Georgia, 'Times New Roman', Times, serif;
   font-style: italic;
@@ -164,6 +164,11 @@ section>p{
   outline: none;
   border-radius: 2rem 1rem;
   padding: 1rem;
+  cursor: pointer;
+}
+
+.home nav {
+  background-color: transparent;
 }
 
 @media screen and (min-width:1301px) {
