@@ -206,10 +206,15 @@ section>p{
   margin: 0.5rem 0.5rem;
   max-width: 10rem;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.652);
+  transition: 1s;
 }
 
 .card-body-item img {
   width: 100%;
+}
+
+.card-body-item:hover {
+  transform: scale(1.2);
 }
 
 @media screen and (min-width:1301px) {

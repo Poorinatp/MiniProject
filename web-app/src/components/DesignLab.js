@@ -28,6 +28,8 @@ const DesignLab = ({
     lastY: 0
   });
 
+  const borderColor = tshirtcolor==="black"?"white":"black"
+
   useEffect(() => {
     if (isSelected.every(value => !value)) return;
   
