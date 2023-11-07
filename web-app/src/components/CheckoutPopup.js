@@ -83,7 +83,6 @@ const CheckoutPopup = ({
                     </label>
                 </div>
 
-                {/* Display the uploaded receipt */}
                 {uploadedReceipt && (
                     <div className="uploaded-receipt-container">
                     <h1 className="input-warn">Uploaded receipt</h1>
