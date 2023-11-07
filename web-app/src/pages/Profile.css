@@ -145,6 +145,25 @@
     margin-top: 5px;
 }
 
+.pagination {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .pagination button {
+    margin: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+  }
+  
+  .pagination button.active {
+    background-color: #2aa483;
+    color: #fff;
+  }
+  
+
 @media screen and (min-width: 767px) {
     .card-contents {
         grid-template-columns: repeat(3, 1fr);
