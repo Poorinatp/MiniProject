@@ -80,11 +80,13 @@ const Profile = ({apihost}) => {
     }).then((result) => {
       if (result.isConfirmed) {
         setmyDesignList((prevList) => prevList.filter((item) => item.Product_id !== product_id));
-        Swal.fire(
-          'Deleted!',
-          'Your file has been deleted.',
-          'success'
-        )
+        Swal.fire({
+          position: "bottom-end",
+          title: 'Your file has been deleted.',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500
+        });
       }
     })
       .catch((error) => {
@@ -107,7 +109,13 @@ const Profile = ({apihost}) => {
     }).then((result) => {
       if (result.isConfirmed) {
         setEditMode(false);
-        Swal.fire('Saved!', '', 'success')
+        Swal.fire({
+          position: "bottom-end",
+          title: 'Your edited has been saved.',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500
+        });
       } else if (result.isDenied) {
         Swal.fire('Changes are not saved', '', 'info')
       }

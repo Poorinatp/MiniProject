@@ -251,7 +251,13 @@ const Design = ({apihost}) => {
 
                 if (productResponse.status === 200) {
                     setProductId(productResponse.data.insertId);
-                    Swal.fire('Design saved', '', 'success');
+                    Swal.fire({
+                        position: "bottom-end",
+                        title: 'Design saved',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
                     return true
                 }
                 return false
@@ -348,7 +354,13 @@ const Design = ({apihost}) => {
                     const orderResponse = await axios.post(`${apihost}/createorder`, { orderData });
         
                     if (orderResponse.status === 200) {
-                        Swal.fire('Receipt uploaded', '', 'success');
+                        Swal.fire({
+                            position: "bottom-end",
+                            title: 'Receipt uploaded',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
                         navigate("/profile");
                     }
                 }

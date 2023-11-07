@@ -37,7 +37,13 @@ const Signup = ({apihost}) => {
 	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
 		.then((response) => {
 		  if (response.status === 200) {
-			Swal.fire('Signup success. Please login.', '', 'success');
+			Swal.fire({
+				position: "bottom-end",
+				title: 'Signup success. Please login.',
+				icon: 'success',
+				showConfirmButton: false,
+				timer: 1500
+			  });
 			navigate('/signin');
 		  } else {
 			Swal.fire('Signup failed. Please try again.', '', 'error');
