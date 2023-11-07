@@ -18,6 +18,21 @@ const Signup = ({apihost}) => {
 	const [Zipcode, setZipcode] = useState('');
 	const navigate = useNavigate();
   
+	const setFormDataInCookie = (userData, addressData) => {
+		// ไม่รวมรหัสผ่านในข้อมูลผู้ใช้
+		const { Password, ...userDataWithoutPassword } = userData;
+	  
+		// รวมข้อมูลที่เกี่ยวข้องกับที่อยู่ของผู้ใช้
+		const userDataWithAddress = { ...userDataWithoutPassword, addressData };
+	  
+		// แปลงข้อมูลเป็น JSON string
+		const userDataJSON = JSON.stringify(userDataWithAddress);
+	  
+		// เซ็ตค่าข้อมูลในคุกกี้เฉพาะ
+		document.cookie = `userData=${userDataJSON}`;
+	  }
+	  
+	  
 	const handleSubmit = (e) => {
 	  e.preventDefault();
 	  const userData = {
@@ -35,19 +50,39 @@ const Signup = ({apihost}) => {
 	  };
   
 	  Axios.post(`${apihost}/signup`, { user: userData, address: addressData })
-		.then((response) => {
-		  if (response.status === 200) {
-			Swal.fire('Signup success. Please login.', '', 'error');
-			navigate('/signin');
-		  } else {
-			Swal.fire('Signup failed. Please try again.', '', 'error');
-		  }
-		})
-		.catch((error) => {
-			Swal.fire('Signup failed. Please try again.', '', 'error');
-		});
+	  .then((response) => {
+		if (response.status === 200) {
+		  Swal.fire('Signup success. Please login.', '', 'error');
+		  // เซ็ตข้อมูลในคุกกี้เฉพาะหลังจากลงทะเบียนสำเร็จ
+		  setFormDataInCookie(userData, addressData);
+		  navigate('/signin');
+		} else {
+		  Swal.fire('Signup failed. Please try again.', '', 'error');
+		}
+	  })
+	  .catch((error) => {
+		Swal.fire('Signup failed. Please try again.', '', 'error');
+	  });
+	
+	
 	};
 
+	const getFormDataFromCookie = () => {
+		const cookies = document.cookie;
+		const cookieArray = cookies.split(';');
+		let userData = {};
+	  
+		cookieArray.forEach((cookie) => {
+		  const [name, value] = cookie.trim().split('=');
+		  if (name === 'userData') {
+			userData = JSON.parse(value);
+		  }
+		});
+	  
+		return userData;
+	  }
+	  
+	  
 	const handleTelDisplay = () => {
 		const rawText = [...Telephone.split('-').join('')]
         const telephoneNumber = []
@@ -85,38 +120,53 @@ const Signup = ({apihost}) => {
                     required/> 
 					<br/>
                    
-				<input 
-					type="text" 
-					id="Telephone"
-					placeholder="+66XX-XXX-XXXX"
-					value={handleTelDisplay()}
-					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
-					onChange={e =>{setTel(e.target.value)}}
-                    required
-					maxLength="12"
-				/> 
-					<br/>
+				<div className="input">
+					<input 
+						type="text" 
+						id="Telephone"
+						placeholder="+66XX-XXX-XXXX"
+						value={handleTelDisplay()}
+						pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
+						onChange={e =>{setTel(e.target.value)}}
+						required
+						maxLength="12"
+					/>
+					<p className="input-requirements">
+					* Please enter a valid telephone number in the format 011-111-1111.
+					</p>
+				</div>
 
-				<input 
-					type="Email" 
-					id="Email"
-					placeholder="Your Email"
-					pattern="^[a-zA-Z0-9]+@(hotmail\.com|gmail\.com)$"
-					onChange={e =>{setEmail(e.target.value)}}
-                    required/> 
-					<br/>
+				<div className="input">
+					<input 
+						type="Email" 
+						id="Email"
+						placeholder="Your Email"
+						pattern="^[a-zA-Z0-9.]+@(hotmail\.com|gmail\.com)$"
+						onChange={e =>{setEmail(e.target.value)}}
+						required
+					/> 
+					<p className="input-requirements">
+					* Enter a valid email address ending with @hotmail.com or @gmail.com.
+					</p>
+				</div>
 
-				<input
-					type="Password"
+				<div className="input">
+					<input
+					type="password"
 					id="Password"
-					placeholder="must have A-Z,a-z and 0-9"
-					pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
+					placeholder="Your Password"
+					pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10,}$"
 					value={Password}
-					onChange={e => { setPassword(e.target.value) }}
-					required 
+					onChange={(e) => {
+						setPassword(e.target.value);
+					}}
+					required
 					maxLength="10"
 					/>
-					<br />
+					<p className="input-requirements">
+					* Password must be 10 characters long and consist of at least 1 letter of A-Z, a-z, and a number.
+					</p>
+				</div>
 							
                 <textarea
 					type="text" 
@@ -152,7 +202,7 @@ const Signup = ({apihost}) => {
 					pattern="[0-9]{5}"
 					onChange={e =>{setZipcode(e.target.value)}}
 					maxLength={5}
-                    required/> 
+                    required/>
 					<br/>
 
 				<button className="btn-signup" type="submit">Sign up</button>
