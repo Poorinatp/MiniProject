@@ -85,38 +85,53 @@ const Signup = ({apihost}) => {
                     required/> 
 					<br/>
                    
-				<input 
-					type="text" 
-					id="Telephone"
-					placeholder="+66XX-XXX-XXXX"
-					value={handleTelDisplay()}
-					pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
-					onChange={e =>{setTel(e.target.value)}}
-                    required
-					maxLength="12"
-				/> 
-					<br/>
+				<div className="input">
+					<input 
+						type="text" 
+						id="Telephone"
+						placeholder="+66XX-XXX-XXXX"
+						value={handleTelDisplay()}
+						pattern="[0]{1}[0-9]{2}-[0-9]{3}-[0-9]{4}"
+						onChange={e =>{setTel(e.target.value)}}
+						required
+						maxLength="12"
+					/>
+					<p className="input-requirements">
+					* Please enter a valid telephone number in the format 011-111-1111.
+					</p>
+				</div>
 
-				<input 
-					type="Email" 
-					id="Email"
-					placeholder="Your Email"
-					pattern="^[a-zA-Z0-9.]+@(hotmail\.com|gmail\.com)$"
-					onChange={e =>{setEmail(e.target.value)}}
-                    required/> 
-					<br/>
+				<div className="input">
+					<input 
+						type="Email" 
+						id="Email"
+						placeholder="Your Email"
+						pattern="^[a-zA-Z0-9.]+@(hotmail\.com|gmail\.com)$"
+						onChange={e =>{setEmail(e.target.value)}}
+						required
+					/> 
+					<p className="input-requirements">
+					* Enter a valid email address ending with @hotmail.com or @gmail.com.
+					</p>
+				</div>
 
-				<input
-					type="Password"
+				<div className="input">
+					<input
+					type="password"
 					id="Password"
 					placeholder="Your Password"
-					pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10}"
+					pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{10,}$"
 					value={Password}
-					onChange={e => { setPassword(e.target.value) }}
-					required 
+					onChange={(e) => {
+						setPassword(e.target.value);
+					}}
+					required
 					maxLength="10"
 					/>
-					<br />
+					<p className="input-requirements">
+					* Password must be 10 characters long and consist of at least 1 letter of A-Z, a-z, and a number.
+					</p>
+				</div>
 							
                 <textarea
 					type="text" 
@@ -151,7 +166,8 @@ const Signup = ({apihost}) => {
 					placeholder="Zip-code"
 					pattern="[0-9]{5}"
 					onChange={e =>{setZipcode(e.target.value)}}
-                    required/> 
+					maxLength={5}
+                    required/>
 					<br/>
 
 				<button className="btn-signup" type="submit">Sign up</button>

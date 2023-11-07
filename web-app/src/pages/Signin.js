@@ -12,7 +12,7 @@ const Signin = ({apihost}) => {
   const navigate = useNavigate();
 
   function handleSubmit(e) {
-    e.preventDefault(); // ป้องกันการกระทำค่าเริ่มต้นของการส่งฟอร์ม
+    e.preventDefault();
 
     const userData = {
       email,
@@ -50,7 +50,7 @@ const Signin = ({apihost}) => {
           type="email"
           id="email" autoFocus
           placeholder="Your Email"
-          pattern="^[a-zA-Z0-9]+@(hotmail\.com|gmail\.com)$"
+          pattern="^[a-zA-Z0-9.]+@(hotmail\.com|gmail\.com)$"
           value={email}
           onChange={e => { setEmail(e.target.value) }}
           required

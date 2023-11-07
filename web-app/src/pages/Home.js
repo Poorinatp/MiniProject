@@ -27,7 +27,7 @@ const Home = ({apihost}) => {
 	},[])
 	return (
 		<>
-		<main >
+		<main className="home">
 			<NavBar/>
 			<div className="container1">
 				{/* <SlideShow/> */}

@@ -56,7 +56,7 @@ nav {
   background-color: #00000070;
   flex-direction: column;
   align-items: flex-end;
-  width: 50%;
+  width: 20rem;
   height: 100%;
   z-index: 1000;
   animation: slideToLeft 0.5s;

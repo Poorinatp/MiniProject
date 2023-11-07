@@ -69,11 +69,29 @@ textarea {
   color: #fff;
   margin: 10px;
   padding: 10px;
-  font-weight: lighter;
   font-size: 1rem;
   display: flex;
   justify-content: center;
   text-decoration: underline;
+}
+
+
+.input p {
+  font-size: 0.7rem;
+}
+
+.input .input-requirements{
+  color: red;
+}
+
+.Signin input:invalid {
+  border: 1px solid red;
+  outline: none;
+}
+
+.Signin input:valid {
+  border: 1px solid green;
+  outline: none;
 }
 
 @media screen and (min-width:401px) and  (max-width: 800px) {

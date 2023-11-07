@@ -30,16 +30,6 @@ const port = 8090;
 //Create a PostgreSQL connection pool
 
 const pool = new Pool({
-  user: 'phimniyom_db_user',
-  host: 'dpg-ckfvv5oeksbs73ddisrg-a.singapore-postgres.render.com',
-  database: 'phimniyom_db',
-  password: 'E6AZT9MBO7S1Gd3Z1QGNdOo9Wtlte9Zh',
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
-  },
-});
-/* const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
@@ -48,7 +38,7 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
   },
-}); */
+});
 
 const shirtDesignStorage = multer.diskStorage({
   destination: (req, file, cb) => {
