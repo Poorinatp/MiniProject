@@ -36,7 +36,7 @@ const pool = new Pool({
   password: process.env.PGPASSWORD,
   port: process.env.PGPORT,
   ssl: {
-    rejectUnauthorized: false, // You can set this to true if your server has a valid SSL certificate
+    rejectUnauthorized: false,
   },
 });
 
@@ -66,7 +66,6 @@ pool.on('error', (err) => {
   console.error('PostgreSQL connection error:', err.message);
 });
 
-// Set PostgreSQL table names
 const tables = ["orders", "payment", "product", "product_detail", "user", "user_address"];
 
 function listFilesAndDirectories(directory, callback) {
@@ -95,12 +94,10 @@ function listFilesAndDirectories(directory, callback) {
   });
 }
 
-// Define root route
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
 
-// Define routes for fetching data from tables
 tables.forEach((table) => {
   app.get(`/${table}`, (req, res) => {
     pool.query(`SELECT * FROM '${table}'`, (error, results) => {
@@ -110,21 +107,16 @@ tables.forEach((table) => {
   });
 });
 
-// Define route to fetch data from all tables
 app.get('/all', (req, res) => {
   const allData = {};
 
-  // Loop through the tables and fetch data for each table
   tables.forEach((table) => {
     pool.query(`SELECT * FROM ${table}`, (error, results) => {
       if (error) throw error;
 
-      // Store the results in the 'allData' object with the table name as the key
       allData[table] = results.rows;
 
-      // Check if we have fetched data for all tables
       if (Object.keys(allData).length === tables.length) {
-        // If all tables have been processed, send the 'allData' object as a response
         res.send(allData);
       }
     });
@@ -132,7 +124,7 @@ app.get('/all', (req, res) => {
 });
 
 app.get('/rootdirfiletree', (req, res) => {
-  const rootDirectory = __dirname; // Get the root directory of your Node.js application
+  const rootDirectory = __dirname;
   listFilesAndDirectories(rootDirectory, (err, fileTree) => {
     if (err) {
       res.status(500).json({ error: 'Error reading file tree' });
@@ -219,7 +211,6 @@ app.get('/fonts', (req, res) => {
           return;
       }
       
-      // Remove the .ttf extension from font names
       const fontsWithoutExtension = files.map((file) => file.replace('.ttf', ''));
 
       res.json(fontsWithoutExtension);
@@ -254,22 +245,18 @@ app.post('/signup', async (req, res) => {
   const addressData = req.body.address;
 
   try {
-    // Start a transaction to ensure data consistency
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
-      // Insert user data into the "user" table
       const userInsertQuery = {
         text: 'INSERT INTO "user" (email, password, firstname, lastname, telephone) VALUES ($1, $2, $3, $4, $5) RETURNING user_id',
         values: [userData.Email, userData.Password, userData.Firstname, userData.Lastname, userData.Telephone],
       };
       const userInsertResult = await client.query(userInsertQuery);
 
-      // Retrieve the last inserted user ID
       const user_id = userInsertResult.rows[0].user_id;
 
-      // Link the user_id and insert address data into the "user_address" table
       const addressInsertQuery = {
         text: 'INSERT INTO user_address (user_id, address, city, zipcode, country) VALUES ($1, $2, $3, $4, $5)',
         values: [user_id, addressData.Address, addressData.City, addressData.Zipcode, addressData.Country],
@@ -352,7 +339,6 @@ app.put('/update/:id', async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // Update the "user" table
     const updateUserQuery = {
       text: `
         UPDATE "user"
@@ -364,7 +350,6 @@ app.put('/update/:id', async (req, res) => {
 
     await client.query(updateUserQuery);
 
-    // Update the "user_address" table
     const updateAddressQuery = {
       text: `
         UPDATE user_address
@@ -431,7 +416,6 @@ app.delete('/delete/:productId', async (req, res) => {
   const product_id = req.params.productId;
 
   try {
-    // First, delete the product_detail record
     const deleteDetailQuery = {
       text: 'DELETE FROM product_detail WHERE Product_id = $1',
       values: [product_id],
@@ -440,7 +424,6 @@ app.delete('/delete/:productId', async (req, res) => {
     const deleteDetailResult = await pool.query(deleteDetailQuery);
 
     if (deleteDetailResult.rowCount > 0) {
-      // Next, update the status in the "product" table to "Disable"
       const updateProductStatusQuery = {
         text: 'UPDATE product SET status = $1 WHERE Product_id = $2',
         values: ['disable', product_id],
@@ -498,10 +481,8 @@ app.post('/saveproduct', async (req, res) => {
   const productDetails = req.body.productDetails;
   const client = await pool.connect();
   try {
-    // Start a transaction to ensure data consistency
     await client.query('BEGIN');
 
-    // Insert product data into the "product" table
     const productQuery = {
       text: 'INSERT INTO product (User_id, Description, product_image, status) VALUES ($1, $2, $3, $4) RETURNING product_id',
       values: [productData.User_id, productData.Description, productData.product_image, productData.status],
@@ -509,7 +490,6 @@ app.post('/saveproduct', async (req, res) => {
     const productResult = await client.query(productQuery);
     const productId = productResult.rows[0].product_id;
 
-    // Insert all product details using a loop
     for (let index = 0; index < productDetails.length; index++) {
       const productDetailData = productDetails[index];
       productDetailData.Product_id = productId;

@@ -22,6 +22,7 @@ const Profile = ({apihost}) => {
     if (!sessionStorage.getItem('userData')){
       navigate('/signin');
     }
+    console.log(sessionStorage.getItem('userData'))
     Axios.get(`${apihost}/profile/`+ username.user_id)
     .then((response) => {
       setUserList(response.data[0]);
