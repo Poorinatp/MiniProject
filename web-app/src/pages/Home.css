@@ -101,6 +101,12 @@ section>p{
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   color: white;
 }
+.title {
+  text-align: center;
+  font-size: 2rem;
+  margin: 3rem auto;
+  text-shadow: 2px 2px 2px #00000089;
+}
 
 .example-card {
   display: grid;
@@ -143,10 +149,9 @@ section>p{
 .card-body-img img {
   width: 100%;
   border-radius: 2rem;
-  transform: rotateY(-30deg);
 }
 
-.card-body-detail h1{
+.card-body-detail h2{
   font-size: calc(60% + 1vw);
   color: white;
   font-family:Georgia, 'Times New Roman', Times, serif;
@@ -169,6 +174,42 @@ section>p{
 
 .home nav {
   background-color: transparent;
+}
+
+
+.example-img-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0;
+  margin: 1rem 0;
+  background: linear-gradient(90deg, #ffffff50, #00000050);
+  padding: 3rem 0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.652);
+  color: white;
+}
+
+.example-img-container-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  margin: 1rem auto;
+  width: 80%;
+}
+
+.card-body-item {
+  justify-self: center;
+  background-color: white;
+  border-radius: 1rem;
+  margin: 0.5rem 0.5rem;
+  max-width: 10rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.652);
+}
+
+.card-body-item img {
+  width: 100%;
 }
 
 @media screen and (min-width:1301px) {

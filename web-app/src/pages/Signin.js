@@ -31,7 +31,13 @@ const Signin = ({apihost}) => {
             status: "success"
           }
           sessionStorage.setItem('userData', JSON.stringify(userData));
-          Swal.fire('Login successful.', '', 'success');
+          Swal.fire({
+            position: "bottom-end",
+            title: 'Login successful.',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1500
+          });
           navigate('/design');
         } else {
           Swal.fire('Your email or password is incorrect.', '', 'error');

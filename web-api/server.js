@@ -42,7 +42,7 @@ const shirtDesignStorage = multer.diskStorage({
 
 const receiptStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '../web-app/public/receipts-uncheck'); // Set the destination folder for receipts
+    cb(null, '../web-app/public/receipts-uncheck');
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);

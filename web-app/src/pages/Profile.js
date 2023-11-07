@@ -6,6 +6,7 @@ import NavBar from '../components/NavBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash,faPen } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
+import Footer from '../components/Footer';
 const Profile = ({apihost}) => {
   const [userList, setUserList] = useState([]);
   const [myDesignList, setmyDesignList] = useState([]);
@@ -80,11 +81,13 @@ const Profile = ({apihost}) => {
     }).then((result) => {
       if (result.isConfirmed) {
         setmyDesignList((prevList) => prevList.filter((item) => item.Product_id !== product_id));
-        Swal.fire(
-          'Deleted!',
-          'Your file has been deleted.',
-          'success'
-        )
+        Swal.fire({
+          position: "bottom-end",
+          title: 'Your file has been deleted.',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500
+        });
       }
     })
       .catch((error) => {
@@ -107,7 +110,13 @@ const Profile = ({apihost}) => {
     }).then((result) => {
       if (result.isConfirmed) {
         setEditMode(false);
-        Swal.fire('Saved!', '', 'success')
+        Swal.fire({
+          position: "bottom-end",
+          title: 'Your edited has been saved.',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500
+        });
       } else if (result.isDenied) {
         Swal.fire('Changes are not saved', '', 'info')
       }
@@ -186,25 +195,25 @@ const Profile = ({apihost}) => {
         <section className="contents">
           {activeTab === 'mydesign' && (
             <article className="card-contents" >
-              {myDesignList.map((myDesignList, key) => {
-                const createdDate = myDesignList.Created_at.split("T")[0]; 
+              {myDesignList.map((design, key) => {
+                const createdDate = design.Created_at.split("T")[0]; 
                 return (
                   <section className="card-body" key={key}>
-                    <img src={myDesignList.product_image} alt="myDesign" />
+                    <img src={design.product_image} alt="myDesign" />
                     <p>Created_at: {createdDate}</p>
-                    <p>Product_id: {myDesignList.Product_id}</p>
+                    <p>Product_id: {design.Product_id}</p>
                     <article className='btn-group'>
                       <FontAwesomeIcon
                         className='icon-btn'
                         size='2xs'
                         icon={faPen}
-                        onClick={() => handleEditProduct(myDesignList.Product_id)}
+                        onClick={() => handleEditProduct(design.Product_id)}
                       />
                       <FontAwesomeIcon
                       className='icon-btn'
                       size='2xs'
                       icon={faTrash}
-                      onClick={() => handleDelete(myDesignList.Product_id)}
+                      onClick={() => handleDelete(design.Product_id)}
                       />
                     </article>
                   </section>
@@ -215,20 +224,20 @@ const Profile = ({apihost}) => {
 
           {activeTab === 'myhistory' && (
             <article className="card-contents" >
-              {myHistory.map((myHistory, key) => {
+              {myHistory.map((history, key) => {
                 return (
                   <section className="card-body" key={key}>
-                    <img src={myHistory.product_image} alt='img-his'/>
-                    <p>Order_id: {myHistory.Order_id}</p>
-                    <p>Detail: {myHistory.Description}</p>
+                    <img src={history.product_image} alt='img-his'/>
+                    <p>Order_id: {history.Order_id}</p>
+                    <p>Detail: {history.Description}</p>
                     <p>
-                      Color: {myHistory.Color}
+                      Color: {history.Color}
                       <br />
-                      Size: {myHistory.Size}
+                      Size: {history.Size}
                       <br />
-                      Total: {myHistory.Total_Item}
+                      Total: {history.Total_Item}
                       <br />
-                      Price: {myHistory.Amount} บาท
+                      Price: {history.Amount} บาท
                     </p>
                   </section>
                 );
@@ -238,6 +247,7 @@ const Profile = ({apihost}) => {
         </section>
       </section>
     </main>
+    <Footer/>
     </>
   );
 }
