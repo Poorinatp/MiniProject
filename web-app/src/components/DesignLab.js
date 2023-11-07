@@ -168,7 +168,7 @@ const DesignLab = ({
         }
       }}
       >
-        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt" alt="tshirt"/>
+        <img src={`../image/tshirt${tshirtcolor}.png`} className="tshirt"  alt="t-shirt"/>
         <div style={{width:"18px",height:"13px",position:"absolute",top:"98px",left:"213px",textAlign:"center",fontSize:"10px",color:"#FFFFFF"}}>{tshirtsize}</div>
         <div
           className="canvas"
@@ -212,7 +212,7 @@ const DesignLab = ({
               style={{
                 width: text.width,
                 padding: ( isSelected[index]&& !isImageSelected )? "4px":"6px",
-                border: ( isSelected[index]&& !isImageSelected )? "2px dashed black": "none", 
+                border: ( isSelected[index]&& !isImageSelected )? `2px dashed ${borderColor}`: "none", 
                 fontFamily: text.fontFamily,
                 fontSize: text.fontSize,
                 color: text.fontColor,
@@ -226,7 +226,7 @@ const DesignLab = ({
                 setIsImageSelected(false);
               }}
               onMouseEnter={(e) => {
-                e.target.style.border = "2px dashed black";
+                e.target.style.border = `2px dashed ${borderColor}`;
                 e.target.style.padding = "4px";
               }}
               onMouseLeave={(e) => {
@@ -296,7 +296,7 @@ const DesignLab = ({
                 style={{ 
                   width: image.width,
                   padding: (isSelected[index]&&isImageSelected )? "4px":"6px",
-                  border: (isSelected[index]&&isImageSelected )? "2px dashed black": "none", 
+                  border: (isSelected[index]&&isImageSelected )? `2px dashed ${borderColor}`: "none", 
                  }}
                 draggable="false"
                 onClick={(e) => {
@@ -304,7 +304,7 @@ const DesignLab = ({
                   setIsImageSelected(true)
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.border = "2px dashed black";
+                  e.target.style.border = `2px dashed ${borderColor}`;
                   e.target.style.padding = "4px";
                 }}
                 onMouseLeave={(e) => {

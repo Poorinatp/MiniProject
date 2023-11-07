@@ -6,6 +6,7 @@ import NavBar from '../components/NavBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash,faPen } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
+import Footer from '../components/Footer';
 const Profile = ({apihost}) => {
   const [userList, setUserList] = useState([]);
   const [myDesignList, setmyDesignList] = useState([]);
@@ -239,6 +240,7 @@ const Profile = ({apihost}) => {
         </section>
       </section>
     </main>
+    <Footer/>
     </>
   );
 }

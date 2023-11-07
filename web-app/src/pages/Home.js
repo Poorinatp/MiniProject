@@ -9,7 +9,9 @@ import Axios from 'axios';
 const Home = ({apihost}) => {
 	const navigate = useNavigate();
 	const [exDesignList, setexDesignList] = useState([]);
-	
+
+    const [imgname, setImgname] = useState([]);
+
 	const navigateToDesign =()=>{
 		navigate('/design')
 	}
@@ -24,7 +26,13 @@ const Home = ({apihost}) => {
 			.catch((error) => {
 				console.error('Error fetching user data:', error);
 			});
-	},[])
+		Axios
+		.get(`${apihost}/picture`)
+		.then((response) => {
+			setImgname(response.data)
+		})
+		.catch((error) => {});
+	},[apihost])
 	return (
 		<>
 		<main className="home">
@@ -41,6 +49,7 @@ const Home = ({apihost}) => {
 				<button className="btn-home" onClick={navigateToDesign}>start Do it!</button>
 			</div>
 			<div className="example-container" >
+				<p className="title">Have an example design</p>
               {exDesignList.map((example, index) => {
                 return (
                   <div className="example-card" key={`example-card-${index}`}>
@@ -59,7 +68,7 @@ const Home = ({apihost}) => {
 							gridRow: "1/1"
 						}}
 						key={`card-detail-${index}`}>
-						<h1 key={`card-detail-title-${index}`}>
+						<h2 key={`card-detail-title-${index}`}>
 							This is an example of designs that we suggest you.<br/>Come and create your own creatively designed <br/> T-shirts and show the world who you are.
 						</h1>
 						<button key={`card-detail-btn-${index}`} onClick={() => handleEditProduct(example.product_id)}>
@@ -70,6 +79,18 @@ const Home = ({apihost}) => {
                 );
               })}
             </div>
+			<div className="example-img-container">
+				<p className="title">Many example images</p>
+				<div className="example-img-container-grid">
+					{imgname.slice(0, 20).map((src, index) => {
+						return(
+							<div key={`card-body-${index}`} className="card-body-item">
+								<img className="img" key={index} src={`picture/${src}`} alt={`example-${index + 1}`} />
+							</div>
+						)
+					})}
+				</div>
+			</div>
 		</main>
 		<Footer/>
 		</>
