@@ -46,41 +46,56 @@ const Signin = ({ apihost }) => {
 
   function handleSubmit(e) {
     e.preventDefault();
-
+  
     const userData = {
       email,
       password,
     };
-    const signin = {
-      email
-    };
-    createCookie('signin', JSON.stringify(signin), 30);
     Axios.post(`${apihost}/signin`, userData)
-      .then(response => {
+      .then((response) => {
+        console.log(response);
         if (response.status === 200) {
-          const userData = {
-            email: response.data.result[0].Email,
-            user_id: response.data.result[0].User_id,
-            status: "success"
-          };
-
-          sessionStorage.setItem('userData', JSON.stringify(userData));
-          Swal.fire({
-            position: "bottom-end",
-            title: 'Login successful.',
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 1500
-          });
-          navigate('/design');
+          console.log(response.data);
+          if (userData.email === 'admin@gmail.com') {
+            const userData = {
+              email: response.data.result[0].Email,
+              user_id: response.data.result[0].User_id,
+              status: 'success',
+            };
+            sessionStorage.setItem('userData', JSON.stringify(userData));
+            Swal.fire({
+              position: 'bottom-end',
+              title: 'Login successful.',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            navigate('/admin');
+          } else {
+            const userData = {
+              email: response.data.result[0].Email,
+              user_id: response.data.result[0].User_id,
+              status: 'success',
+            };
+            sessionStorage.setItem('userData', JSON.stringify(userData));
+            Swal.fire({
+              position: 'bottom-end',
+              title: 'Login successful.',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            navigate('/design');
+          }
         } else {
           Swal.fire('Your email or password is incorrect.', '', 'error');
         }
       })
-      .catch(error => {
+      .catch((error) => {
         Swal.fire('Your email or password is incorrect.', '', 'error');
       });
   }
+  
 
   return (
     <>
