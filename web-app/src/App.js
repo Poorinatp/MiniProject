@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import Design from './pages/Design';
 import Profile from './pages/Profile';
 import TestUpload from './pages/TestUpload';
+import Ordermange from './back-end/Ordermange';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/design" element={<Design apihost={apihost}/>} />
         <Route path="/profile" element={<Profile apihost={apihost}/>}/>
         <Route path="/test" element={<TestUpload apihost={apihost}/>}/>
+        <Route path="/admin" element={<Ordermange apihost={apihost}/>}/>
       </Routes>
     </BrowserRouter>
   
