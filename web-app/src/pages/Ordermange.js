@@ -34,6 +34,11 @@ const Ordermange = ({ apihost }) => {
     setCurrentDesignPage,
     Math.ceil(myDesignList.length / itemsPerPage)
   );
+  const renderPaymentPageNumbers = renderPageNumbers(
+    currentDesignPage,
+    setCurrentDesignPage,
+    Math.ceil(myDesignList.length / itemsPerPage)
+  );
 
   useEffect(() => {
     if (!sessionStorage.getItem('userData')) {
@@ -174,7 +179,7 @@ const Ordermange = ({ apihost }) => {
             )}
           </section>
           <div className="pagination">
-            {activeTab === 'mydesign' ? renderDesignPageNumbers : ''}
+            {activeTab === 'mydesign' ? renderDesignPageNumbers : renderPaymentPageNumbers}
           </div>
         </section>
       </main>
