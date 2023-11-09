@@ -223,23 +223,6 @@ app.get('/product/admin', function(req, res) {
   });
 });
 
-app.get('/user/order/admin', function(req, res) {
-  const userId = parseInt(req.params.id);
-  const sqlQuery = `SELECT user.User_id, orders.Order_id, payment.Amount FROM user 
-  INNER JOIN payment ON user.User_id = payment.User_id 
-  INNER JOIN orders ON orders.Payment_id = payment.Payment_id;
-  `;
-
-  connection.query(sqlQuery, [userId], function(error, results) {
-      if (error) {
-          res.status(500).send({ error: 'Error querying table' });
-      } else {
-          res.send(results);
-      }
-  });
-});
-
-
 // update customer data from mysql database by id
 app.put('/update/:id', function(req, res) {
   const user_id = parseInt(req.params.id);
@@ -467,8 +450,37 @@ app.post('/createorder', async (req, res) => {
   }
 });
 
-app.get('/allorders', function (req, res) {
-  connection.query('SELECT Order_id, Total_Item FROM orders WHERE Total_Item NOT BETWEEN 1 AND 5', function (error, results, fields) {
+app.post('/user/order/admin', function(req, res) {
+  const status = req.body.status;
+  const sqlQuery = `SELECT user.User_id, orders.Order_id, payment.Amount, payment.status FROM user 
+  INNER JOIN payment ON user.User_id = payment.User_id 
+  INNER JOIN orders ON orders.Payment_id = payment.Payment_id
+  WHERE payment.status = ?;
+  `;
+
+  connection.query(sqlQuery, [ status ], function(error, results) {
+      if (error) {
+          res.status(500).send({ error: 'Error querying table' });
+      } else {
+          res.send(results);
+      }
+  });
+});
+
+app.post('/allorders', function (req, res) {
+  const { firstNumber, secondNumber } = req.body.numberItem
+  connection.query('SELECT Order_id, Total_Item FROM orders WHERE Total_Item BETWEEN ? AND ?', [firstNumber, secondNumber], function (error, results, fields) {
+      if (error) throw error;
+      if (results.length > 0) {
+          res.status(200).send(results);
+      } else {
+          res.status(400).send({ message: 'No matching orders found!' });
+      }
+  });
+});
+
+app.get('/allorderssize', function (req, res) {
+  connection.query('SELECT Size, SUM(Total_Item) AS COUNT_Size FROM orders group by Size', function (error, results, fields) {
       if (error) throw error;
       if (results.length > 0) {
           res.status(200).send(results);

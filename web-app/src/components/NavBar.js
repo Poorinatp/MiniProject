@@ -21,8 +21,6 @@ const NavBar = () => {
     const userIsLoggedIn = JSON.parse(sessionStorage.getItem('userData'));
     if (userIsLoggedIn) {
       setIsLogin(true);
-      console.log(userIsLoggedIn.email);
-      console.log(userIsLoggedIn.email==='admin@gmail.com');
       if(userIsLoggedIn.email ==='admin@gmail.com'){
         setIsAdmin(true);
       }
