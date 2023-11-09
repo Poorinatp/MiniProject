@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavBarAdmin from "../components/NavbarAdmin";
+import NavBar from "../components/NavBar";
 import { useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,11 +11,16 @@ const Ordermange = ({ apihost }) => {
   const [myDesignList, setMyDesignList] = useState([]);
   const [activeTab, setActiveTab] = useState('mydesign');
   const [currentDesignPage, setCurrentDesignPage] = useState(1);
+  const [paymentList, setPaymentList] = useState([]);
 
   const isMobile = window.innerWidth < 767;
   const itemsPerPage = isMobile ? 4 : 8;
 
   const displayedDesignItems = myDesignList.slice(
+    (currentDesignPage - 1) * itemsPerPage,
+    currentDesignPage * itemsPerPage
+  );
+  const displayedPayment = paymentList.slice(
     (currentDesignPage - 1) * itemsPerPage,
     currentDesignPage * itemsPerPage
   );
@@ -33,17 +38,26 @@ const Ordermange = ({ apihost }) => {
   useEffect(() => {
     if (!sessionStorage.getItem('userData')) {
       navigate('/signin');
-    } 
+    }
     console.log(username)
     Axios.get(`${apihost}/user/product/` + username.user_id)
-        .then((response) => {
-          setMyDesignList(response.data);
-          console.log(response.data)
-        })
-        .catch((error) => {
-          console.error('Error fetching user data:', error);
-        });
+      .then((response) => {
+        setMyDesignList(response.data);
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
+    Axios.get(`${apihost}/user/order/admin`)
+      .then((response) => {
+        setPaymentList(response.data);
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
   }, [apihost, username.user_id, navigate]);
+
 
   const handleEditProduct = (product_id) => {
     navigate(`/design/${product_id}`);
@@ -68,29 +82,29 @@ const Ordermange = ({ apihost }) => {
         Swal.fire('An error occurred while deleting the product.', '', 'error');
       });
   };
-    function renderPageNumbers(
-        currentPage,
-        setCurrentPage,
-        totalPages
-    ) {
-        const pageNumbers = [];
-        for (let i = 1; i <= totalPages; i++) {
-            pageNumbers.push(i);
-        }
-        return pageNumbers.map((number) => (
-            <button
-                key={number}
-                className={currentPage === number ? 'active' : ''}
-                onClick={() => setCurrentPage(number)}
-            >
-                {number}
-            </button>
-        ));
+  function renderPageNumbers(
+    currentPage,
+    setCurrentPage,
+    totalPages
+  ) {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
     }
+    return pageNumbers.map((number) => (
+      <button
+        key={number}
+        className={currentPage === number ? 'active' : ''}
+        onClick={() => setCurrentPage(number)}
+      >
+        {number}
+      </button>
+    ));
+  }
 
   return (
     <>
-      <NavBarAdmin />
+      <NavBar />
       <main>
         <section className='design-container'>
           <nav className="design-menu">
@@ -110,7 +124,7 @@ const Ordermange = ({ apihost }) => {
                 backgroundColor: activeTab !== 'mydesign' && "white"
               }}
               className='design-menu-option'
-              onClick={() => handleTabClick('myhistory')}
+              onClick={() => handleTabClick('paymentOrder')}
             >
               Order
             </p>
@@ -139,6 +153,20 @@ const Ordermange = ({ apihost }) => {
                           onClick={() => handleDelete(design.Product_id)}
                         />
                       </article>
+                    </section>
+                  );
+                })}
+              </article>
+            )}
+
+            {activeTab === 'paymentOrder' && (
+              <article className="card-contents">
+                {displayedPayment.map((payment, key) => {
+                  return (
+                    <section className="card-body" key={key}>
+                      <p>User_id: {payment.User_id}</p>
+                      <p>Order_id: {payment.Order_id}</p>
+                      <p>Amount: {payment.Amount}</p>
                     </section>
                   );
                 })}
