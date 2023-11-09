@@ -6,7 +6,7 @@ import Signup from './pages/Signup';
 import Design from './pages/Design';
 import Profile from './pages/Profile';
 import TestUpload from './pages/TestUpload';
-import Ordermange from './back-end/Ordermange';
+import Ordermange from './pages/Ordermange';
 
 
 function App() {

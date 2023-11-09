@@ -1,21 +1,31 @@
 import React, { useEffect, useState } from "react";
-import NavBarAdmin from "../components/NavbarAdmin";
 import { useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPen } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
+import NavBar from "../components/NavBar";
 
+
+  
 const Ordermange = ({ apihost }) => {
   const username = JSON.parse(sessionStorage.getItem('userData'));
   const [myDesignList, setMyDesignList] = useState([]);
   const [activeTab, setActiveTab] = useState('mydesign');
   const [currentDesignPage, setCurrentDesignPage] = useState(1);
-
+  const [myOrders,setmyOrders] = useState([]);
+  
+  
   const isMobile = window.innerWidth < 767;
   const itemsPerPage = isMobile ? 4 : 8;
 
   const displayedDesignItems = myDesignList.slice(
+
+    (currentDesignPage - 1) * itemsPerPage,
+    currentDesignPage * itemsPerPage
+  );
+  const displayedOrders= myOrders.slice(
+
     (currentDesignPage - 1) * itemsPerPage,
     currentDesignPage * itemsPerPage
   );
@@ -43,7 +53,16 @@ const Ordermange = ({ apihost }) => {
         .catch((error) => {
           console.error('Error fetching user data:', error);
         });
+        Axios.get(`${apihost}/allorders`)
+        .then((response) => {
+          setmyOrders(response.data);
+        })
+        .catch((error) => {
+          console.error('Error fetching user data:', error);
+        }); 
+        
   }, [apihost, username.user_id, navigate]);
+
 
   const handleEditProduct = (product_id) => {
     navigate(`/design/${product_id}`);
@@ -87,10 +106,13 @@ const Ordermange = ({ apihost }) => {
             </button>
         ));
     }
+  
+
+
 
   return (
     <>
-      <NavBarAdmin />
+      <NavBar />
       <main>
         <section className='design-container'>
           <nav className="design-menu">
@@ -105,12 +127,13 @@ const Ordermange = ({ apihost }) => {
               Design
             </p>
             <p
+              className='design-menu-option'
               style={{
-                color: activeTab === 'mydesign' ? "black" : "rgb(56, 158, 136)",
+                color: activeTab !== 'mydesign' ? "rgb(56, 158, 136)" : "black",
                 backgroundColor: activeTab !== 'mydesign' && "white"
               }}
-              className='design-menu-option'
-              onClick={() => handleTabClick('myhistory')}
+              onClick={() => handleTabClick('myOrders')}
+          
             >
               Order
             </p>
@@ -139,6 +162,20 @@ const Ordermange = ({ apihost }) => {
                           onClick={() => handleDelete(design.Product_id)}
                         />
                       </article>
+                    </section>
+                  );
+                })}
+              </article>
+            )}
+            {activeTab === 'myOrders' && (
+              <article className="card-contents">
+                {displayedOrders.map((order, key) => {
+  
+                  return (
+                    <section className="card-body" key={key}>
+                      <p>Order_id: {order.Order_id}</p>
+                      <p>Total_Item: {order.Total_Item}</p>
+                        
                     </section>
                   );
                 })}
