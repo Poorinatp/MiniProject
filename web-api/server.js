@@ -467,6 +467,16 @@ app.post('/createorder', async (req, res) => {
   }
 });
 
+app.get('/allorders', function (req, res) {
+  connection.query('SELECT Order_id, Total_Item FROM orders WHERE Total_Item NOT BETWEEN 1 AND 5', function (error, results, fields) {
+      if (error) throw error;
+      if (results.length > 0) {
+          res.status(200).send(results);
+      } else {
+          res.status(400).send({ message: 'No matching orders found!' });
+      }
+  });
+});
 // listen to port
 app.listen(port, function () {
     console.log('Node app is running on port ' + port);
