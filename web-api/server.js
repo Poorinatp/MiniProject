@@ -223,6 +223,21 @@ app.get('/product/admin', function(req, res) {
   });
 });
 
+app.get('/user/order/admin', function(req, res) {
+  const userId = parseInt(req.params.id);
+  const sqlQuery = `SELECT user.User_id, orders.Order_id, payment.Amount FROM user 
+  INNER JOIN payment ON user.User_id = payment.User_id 
+  INNER JOIN orders ON orders.Payment_id = payment.Payment_id;
+  `;
+
+  connection.query(sqlQuery, [userId], function(error, results) {
+      if (error) {
+          res.status(500).send({ error: 'Error querying table' });
+      } else {
+          res.send(results);
+      }
+  });
+});
 
 
 // update customer data from mysql database by id

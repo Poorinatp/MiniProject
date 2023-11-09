@@ -7,6 +7,7 @@ import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
 const NavBar = () => {
   let activeClassName = "nav-active";
   const [isLogin, setIsLogin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const [openHamMenu, setOpenHamMenu] = useState(false);
   const location = useLocation();
@@ -17,11 +18,17 @@ const NavBar = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const userIsLoggedIn = sessionStorage.getItem('userData');
+    const userIsLoggedIn = JSON.parse(sessionStorage.getItem('userData'));
     if (userIsLoggedIn) {
       setIsLogin(true);
+      console.log(userIsLoggedIn.email);
+      console.log(userIsLoggedIn.email==='admin@gmail.com');
+      if(userIsLoggedIn.email ==='admin@gmail.com'){
+        setIsAdmin(true);
+      }
     } else {
       setIsLogin(false);
+      setIsAdmin(false);
     }
   }, []);
 
@@ -43,7 +50,7 @@ const NavBar = () => {
         {isLogin ? (
           <div className="menu">
             <NavLink
-              to="/profile"
+              to={isAdmin ? "/admin" : "/profile"}
               className={({ isActive }) => (isActive ? activeClassName : undefined)}
             >
               Profile
